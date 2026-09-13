@@ -1,16 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BASIC_PROGRAM, blankEntries, sequence } from "../program/basic";
 import type { Day, Entry, Level, Position, WorkoutRecord } from "../program/types";
-import { sleep, store } from "../storage";
-
-const keyOf = (level: Level, w: number, d: number) => `yayog:${level}:w${w}:d${d}`;
-
-const INDEX_KEY = "yayog:index";
-const DRAFT_KEY = "yayog:draft";
-
-interface Index {
-  done: string[];
-}
+import { store } from "../storage";
+import { useDraftPersistence } from "./useDraftPersistence";
+import { DRAFT_KEY, keyOf, useWorkoutLog } from "./useWorkoutLog";
 
 interface Draft {
   w: number;
@@ -30,8 +23,8 @@ export function useTracker(level: Level) {
   const seq = useMemo(() => sequence(), []);
   const dayAt = (p: Position): Day => program.weeks[p.w]![p.d]!;
 
-  const [done, setDone] = useState<string[] | null>(null);
-  const [logs, setLogs] = useState<Record<string, WorkoutRecord>>({});
+  const log = useWorkoutLog(level);
+
   const [pos, setPos] = useState<Position | null>(null);
   const [form, setForm] = useState<Form>({ entries: [], notes: "" });
   const [ready, setReady] = useState(false);
@@ -45,72 +38,30 @@ export function useTracker(level: Level) {
     return seq.slice(i + 1).find(({ w, d }) => !doneList.includes(keyOf(level, w, d))) || null;
   };
 
+  // Once the log has loaded, pick up an in-progress draft or continue after
+  // the last completed workout.
   useEffect(() => {
+    if (!log.loaded || ready) return;
     (async () => {
-      const idx = ((await store.get(INDEX_KEY)) as Index | null) || { done: [] };
-      const logMap: Record<string, WorkoutRecord> = {};
-      await Promise.all(
-        idx.done.map(async (k) => {
-          const v = await store.get(k);
-          if (v) logMap[k] = v as WorkoutRecord;
-        }),
-      );
-      setDone(idx.done);
-      setLogs(logMap);
-
       const draft = (await store.get(DRAFT_KEY)) as Draft | null;
       if (draft && program.weeks[draft.w]?.[draft.d]) {
         setPos({ w: draft.w, d: draft.d });
         setForm({ entries: draft.entries, notes: draft.notes || "" });
       } else {
-        const lastKey = idx.done.length ? idx.done[idx.done.length - 1] : undefined;
-        const last = lastKey ? logMap[lastKey] : null;
-        const start = last ? nextAfter(last, idx.done) || last : seq[0]!;
+        const lastKey = log.done.length ? log.done[log.done.length - 1] : undefined;
+        const last = lastKey ? log.logs[lastKey] : null;
+        const start = last ? nextAfter(last, log.done) || last : seq[0]!;
         setPos({ w: start.w, d: start.d });
-        setForm(formFor(start, logMap));
+        setForm(formFor(start, log.logs));
       }
       setReady(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level]);
+  }, [log.loaded]);
 
-  // Draft persistence. Primary trigger: the page being hidden (phone
-  // locked, app backgrounded). Fallback: 5 s of inactivity. Never during
-  // a save, and only if something changed.
-  const lastDraft = useRef("");
-  const savingRef = useRef(false);
-  const draftRef = useRef<Draft | null>(null);
-  draftRef.current = ready && pos ? { w: pos.w, d: pos.d, ...form } : null;
+  const draft = useDraftPersistence({ ready, pos, entries: form.entries, notes: form.notes });
 
-  const writeDraft = () => {
-    if (!draftRef.current || savingRef.current) return;
-    const payload = JSON.stringify(draftRef.current);
-    if (payload === lastDraft.current) return;
-    lastDraft.current = payload;
-    store.set(DRAFT_KEY, { ...draftRef.current, at: Date.now() });
-  };
-
-  useEffect(() => {
-    const onHide = () => {
-      if (document.visibilityState === "hidden") writeDraft();
-    };
-    document.addEventListener("visibilitychange", onHide);
-    window.addEventListener("pagehide", onHide);
-    return () => {
-      document.removeEventListener("visibilitychange", onHide);
-      window.removeEventListener("pagehide", onHide);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!ready || !pos) return;
-    const t = setTimeout(() => writeDraft(), 5000);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, pos, form]);
-
-  const goTo = (p: Position, logMap: Record<string, WorkoutRecord> = logs) => {
+  const goTo = (p: Position, logMap: Record<string, WorkoutRecord> = log.logs) => {
     setForm(formFor(p, logMap));
     setPos(p);
   };
@@ -123,8 +74,8 @@ export function useTracker(level: Level) {
 
   // Resolves to null on success or an error string.
   const save = async (): Promise<string | null> => {
-    if (!pos || !done) return "not ready";
-    savingRef.current = true;
+    if (!pos) return "not ready";
+    draft.setSaving(true);
     try {
       const key = keyOf(level, pos.w, pos.d);
       const rec: WorkoutRecord = {
@@ -134,76 +85,27 @@ export function useTracker(level: Level) {
         date: new Date().toISOString().slice(0, 10),
         ...form,
       };
-      const e1 = await store.set(key, rec);
-      if (e1) return e1;
-      const newDone = done.includes(key) ? done : [...done, key];
-      const e2 = await store.set(INDEX_KEY, { done: newDone });
-      if (e2) return e2;
-      await store.del(DRAFT_KEY);
-      const newLogs = { ...logs, [key]: rec };
-      setDone(newDone);
-      setLogs(newLogs);
+      const { error, done: newDone } = await log.saveRecord(rec);
+      if (error) return error;
       const next = nextAfter(pos, newDone);
-      if (next) goTo(next, newLogs);
-      lastDraft.current = ""; // next form change may write a fresh draft
+      if (next) goTo(next, { ...log.logs, [key]: rec });
+      draft.markSaved();
       return null;
     } finally {
-      savingRef.current = false;
+      draft.setSaving(false);
     }
   };
 
   const resetAll = async () => {
-    if (!done) return;
-    await Promise.all(done.map((k) => store.del(k)));
-    await store.del(INDEX_KEY);
-    await store.del(DRAFT_KEY);
-    setDone([]);
-    setLogs({});
+    await log.resetAll();
     goTo(seq[0]!, {});
-  };
-
-  // Everything under yayog:* as one JSON blob (for moving between artifact versions).
-  const exportAll = async (): Promise<string> => {
-    const keys = (await store.keys("yayog:")) || [...(done || []), INDEX_KEY, DRAFT_KEY];
-    const out: Record<string, unknown> = {};
-    for (const k of keys) {
-      const v = await store.get(k);
-      if (v) out[k] = v;
-    }
-    return JSON.stringify(out);
-  };
-
-  const importAll = async (text: string): Promise<string | null> => {
-    let data: Record<string, unknown>;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      return "Not valid JSON";
-    }
-    const keys = Object.keys(data).filter((k) => k.startsWith("yayog:") && k !== INDEX_KEY);
-    for (const k of keys) {
-      const e = await store.set(k, data[k]);
-      if (e) return `Failed on ${k}: ${e}`;
-      await sleep(250);
-    }
-    const imported = keys.filter((k) => k !== DRAFT_KEY && (data[k] as WorkoutRecord | undefined)?.w);
-    const newDone = [...new Set([...(done || []), ...imported])];
-    const e = await store.set(INDEX_KEY, { done: newDone });
-    if (e) return e;
-    const newLogs = { ...logs };
-    imported.forEach((k) => {
-      newLogs[k] = data[k] as WorkoutRecord;
-    });
-    setDone(newDone);
-    setLogs(newLogs);
-    return null;
   };
 
   return {
     program,
     seq,
-    done: done || [],
-    logs,
+    done: log.done,
+    logs: log.logs,
     pos,
     form,
     ready,
@@ -213,8 +115,8 @@ export function useTracker(level: Level) {
     setNotes,
     save,
     resetAll,
-    exportAll,
-    importAll,
-    isDone: (p: Position) => !!done && done.includes(keyOf(level, p.w, p.d)),
+    exportAll: log.exportAll,
+    importAll: log.importAll,
+    isDone: (p: Position) => log.done.includes(keyOf(level, p.w, p.d)),
   };
 }
