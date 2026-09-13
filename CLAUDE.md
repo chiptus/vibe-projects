@@ -23,3 +23,11 @@ Then:
 5. Run it with `pnpm --filter <name> dev`.
 
 Every project must be runnable with `pnpm --filter <name> dev` — keep the `name` field in each project's `package.json` matching its folder name.
+
+## Building everything together
+
+Each project keeps its own build tooling and framework — nothing ties them together at the bundler level. `pnpm build` at the root (`scripts/build.mjs`) runs every project's own `build` script, then stitches their `dist/` output into one root `dist/` for a single static deploy: `hub`'s build lands at the root, every other project lands at `dist/<project-name>/`, matching the paths in `projects/hub/src/projects.ts`.
+
+Every project must therefore:
+- Build with `pnpm --filter <name> build`, producing a `dist/` folder.
+- Be deployable from a subpath (`/<project-name>/`) — don't assume it's served from `/`.
