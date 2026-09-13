@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node
 // Builds every project and stitches their `dist/` output into one root
 // `dist/` for a single static deploy: hub's build lands at the root, every
 // other project lands at `dist/<project-name>/` (matching the paths in
@@ -26,7 +26,7 @@ for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
     continue;
   }
 
-  const { name } = JSON.parse(readFileSync(join(projectDir, "package.json"), "utf8"));
+  const { name } = JSON.parse(readFileSync(join(projectDir, "package.json"), "utf8")) as { name: string };
   const dest = name === "hub" ? outDir : join(outDir, name);
 
   cpSync(projectDist, dest, { recursive: true });
