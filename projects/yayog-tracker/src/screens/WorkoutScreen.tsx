@@ -1,4 +1,4 @@
-import { CARD_FOR } from "../components/cards";
+import { getCard } from "../components/cards";
 import { RULES, TYPE_LABEL } from "../program/basic";
 import type { Day, Entry } from "../program/types";
 
@@ -11,7 +11,7 @@ interface WorkoutScreenProps {
 }
 
 export function WorkoutScreen({ day, form, loggedOn, onEntry, onNotes }: WorkoutScreenProps) {
-  const CardComp = CARD_FOR[day.type];
+  const CardComp = getCard(day.type);
   const exercises = "exercises" in day ? day.exercises : [];
   return (
     <>
