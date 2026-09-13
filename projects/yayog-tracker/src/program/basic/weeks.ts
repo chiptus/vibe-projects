@@ -10,7 +10,7 @@ const STAPPERS_BASIC: StappersDay = {
 };
 
 // Weeks 1-2
-const WEEKS_1_2: { [day: number]: Day } = {
+const W1_2: { [day: number]: Day } = {
   1: {
     type: "ladder",
     focus: "Push/Pull",
@@ -49,7 +49,7 @@ const WEEKS_1_2: { [day: number]: Day } = {
 };
 
 // Weeks 3-4
-const WEEKS_3_4: { [day: number]: Day } = {
+const W3_4: { [day: number]: Day } = {
   1: {
     type: "interval",
     focus: "Push",
@@ -83,7 +83,7 @@ const WEEKS_3_4: { [day: number]: Day } = {
 };
 
 // Weeks 5-6
-const WEEKS_5_6: { [day: number]: Day } = {
+const W5_6: { [day: number]: Day } = {
   1: {
     type: "superset",
     focus: "Push",
@@ -268,12 +268,12 @@ const W10: { [day: number]: Day } = {
 
 // Week -> day map, in week-number order.
 export const WEEKS: { [week: number]: { [day: number]: Day } } = {
-  1: WEEKS_1_2,
-  2: WEEKS_1_2,
-  3: WEEKS_3_4,
-  4: WEEKS_3_4,
-  5: WEEKS_5_6,
-  6: WEEKS_5_6,
+  1: W1_2,
+  2: W1_2,
+  3: W3_4,
+  4: W3_4,
+  5: W5_6,
+  6: W5_6,
   7: W7,
   8: W8,
   9: W9,
