@@ -1,5 +1,7 @@
-import { BLOCK_NAME } from "../program/basic";
 import type { Day, Position, Program } from "../program/types";
+import { DayPicker } from "./DayPicker";
+import { HeaderTitle } from "./HeaderTitle";
+import { WeekSelect } from "./WeekSelect";
 
 interface HeaderProps {
   pos: Position;
@@ -15,41 +17,10 @@ export function Header({ pos, day, program, seq, isDone, onPick }: HeaderProps) 
   return (
     <>
       <div className="yg-top">
-        <h1 className="yg-h1">
-          Week {pos.w}, Day {pos.d}
-          <small>
-            {program.name} · {BLOCK_NAME(pos.w)} block · {day.focus}
-          </small>
-        </h1>
-        <select
-          className="yg-sel"
-          value={pos.w}
-          onChange={(e) => onPick({ w: Number(e.target.value), d: 1 })}
-        >
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((w) => {
-            const ws = seq.filter((p) => p.w === w);
-            const n = ws.filter(isDone).length;
-            return (
-              <option key={w} value={w}>
-                Week {w}
-                {n ? ` · ${n}/${ws.length}` : ""}
-              </option>
-            );
-          })}
-        </select>
+        <HeaderTitle pos={pos} day={day} program={program} />
+        <WeekSelect week={pos.w} seq={seq} isDone={isDone} onPick={(w) => onPick({ w, d: 1 })} />
       </div>
-      <div className="yg-days">
-        {daysInWeek.map((p) => (
-          <button
-            key={p.d}
-            className={`yg-day ${p.d === pos.d ? "on" : ""} ${isDone(p) ? "done" : ""}`}
-            onClick={() => onPick(p)}
-          >
-            Day {p.d}
-            <small>{program.weeks[p.w]![p.d]!.focus}</small>
-          </button>
-        ))}
-      </div>
+      <DayPicker pos={pos} program={program} daysInWeek={daysInWeek} isDone={isDone} onPick={onPick} />
     </>
   );
 }
