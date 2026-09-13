@@ -1,4 +1,6 @@
 export interface Store {
+  /** True when data is persisted outside this browser (the claude.ai artifact backend). */
+  readonly isRemote: boolean;
   get(k: string): Promise<unknown | null>;
   /** Resolves to null on success, or an error string. */
   set(k: string, v: unknown): Promise<string | null>;
@@ -23,6 +25,7 @@ declare global {
 
 // Wraps window.storage, available only inside a published claude.ai artifact.
 export const artifactStore: Store = {
+  isRemote: true,
   async get(k) {
     try {
       const r = await window.storage!.get(k, false);
@@ -88,6 +91,7 @@ async function withStore<T>(mode: IDBTransactionMode, fn: (store: IDBObjectStore
 }
 
 export const localStore: Store = {
+  isRemote: false,
   async get(k) {
     try {
       const v = await withStore("readonly", (s) => s.get(k));

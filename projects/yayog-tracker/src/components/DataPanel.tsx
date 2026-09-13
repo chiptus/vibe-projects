@@ -13,8 +13,8 @@ export function DataPanel({ t }: DataPanelProps) {
 
   useEffect(() => {
     (async () => {
-      if (!window.storage) {
-        setStatus("window.storage is not available — using local (IndexedDB) storage");
+      if (!store.isRemote) {
+        setStatus("Using local (IndexedDB) storage — not inside a claude.ai artifact");
         return;
       }
       const keys = await store.keys("yayog:");
