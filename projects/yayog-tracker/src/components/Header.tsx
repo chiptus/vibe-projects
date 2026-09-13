@@ -20,7 +20,7 @@ export function Header({ pos, day, program, seq, isDone, onPick }: HeaderProps) 
         <HeaderTitle pos={pos} day={day} program={program} />
         <WeekSelect week={pos.w} seq={seq} isDone={isDone} onPick={(w) => onPick({ w, d: 1 })} />
       </div>
-      <DayPicker pos={pos} program={program} daysInWeek={daysInWeek} isDone={isDone} onPick={onPick} />
+      <DayPicker value={pos} program={program} daysInWeek={daysInWeek} isDone={isDone} onChange={onPick} />
     </>
   );
 }
