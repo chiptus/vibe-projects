@@ -6,21 +6,25 @@ interface DataPanelProps {
   t: ReturnType<typeof useTracker>;
 }
 
+type RemoteKeys = "loading" | "error" | string[];
+
 export function DataPanel({ t }: DataPanelProps) {
-  const [status, setStatus] = useState<string | null>(null);
+  const [remoteKeys, setRemoteKeys] = useState<RemoteKeys>("loading");
   const [text, setText] = useState("");
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    (async () => {
-      if (!store.isRemote) {
-        setStatus("Using local (IndexedDB) storage — not inside a claude.ai artifact");
-        return;
-      }
-      const keys = await store.keys("yayog:");
-      setStatus(keys === null ? "storage.list failed" : `${keys.length} keys: ${keys.map((k) => k.replace("yayog:", "")).join(", ") || "none"}`);
-    })();
+    if (!store.isRemote) return;
+    store.keys("yayog:").then((keys) => setRemoteKeys(keys === null ? "error" : keys));
   }, [t.done]);
+
+  const status = !store.isRemote
+    ? "Using local (IndexedDB) storage — not inside a claude.ai artifact"
+    : remoteKeys === "loading"
+      ? "Checking storage…"
+      : remoteKeys === "error"
+        ? "storage.list failed"
+        : `${remoteKeys.length} keys: ${remoteKeys.map((k) => k.replace("yayog:", "")).join(", ") || "none"}`;
 
   const doExport = async () => {
     setText(await t.exportAll());
@@ -33,7 +37,7 @@ export function DataPanel({ t }: DataPanelProps) {
 
   return (
     <div className="yg-data">
-      <p className="yg-small">{status || "Checking storage…"}</p>
+      <p className="yg-small">{status}</p>
       <div className="yg-row">
         <button className="yg-danger" onClick={doExport}>
           Export JSON
