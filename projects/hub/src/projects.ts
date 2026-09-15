@@ -14,4 +14,10 @@ export const PROJECTS: ProjectLink[] = [
     description: "Mobile-first workout tracker for the YAYOG \"Basic\" program.",
     href: "/yayog-tracker/",
   },
+  {
+    name: "trilled-r-trainer",
+    title: "Trilled R Trainer",
+    description: "Interval-timer trainer for the Spanish rolled R (RR).",
+    href: "/trilled-r-trainer/",
+  },
 ];
