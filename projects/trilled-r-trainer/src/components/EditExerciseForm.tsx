@@ -12,14 +12,6 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
   const [duration, setDuration] = useState(String(exercise.duration));
   const [instruction, setInstruction] = useState(exercise.instruction);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const parsedDuration = parseInt(duration, 10);
-    if (name && parsedDuration >= 5 && instruction) {
-      onSave({ name, duration: parsedDuration, instruction });
-    }
-  };
-
   return (
     <form className="edit-form" onSubmit={handleSubmit}>
       <label>
@@ -49,4 +41,12 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
       </div>
     </form>
   );
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const parsedDuration = parseInt(duration, 10);
+    if (name && parsedDuration >= 5 && instruction) {
+      onSave({ name, duration: parsedDuration, instruction });
+    }
+  }
 }

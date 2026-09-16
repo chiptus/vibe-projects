@@ -1,6 +1,11 @@
+// Reused across calls instead of creating a new AudioContext per beep —
+// browsers cap how many can be alive at once, and a fresh one each exercise
+// transition would eventually hit that limit over a long session.
+let sharedContext: AudioContext | null = null;
+
 export function playBeep(): void {
   try {
-    const audioContext = new AudioContext();
+    const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -18,4 +23,11 @@ export function playBeep(): void {
   } catch {
     // Web Audio unsupported or blocked — silently skip the beep.
   }
+}
+
+function getAudioContext(): AudioContext {
+  if (!sharedContext) {
+    sharedContext = new AudioContext();
+  }
+  return sharedContext;
 }

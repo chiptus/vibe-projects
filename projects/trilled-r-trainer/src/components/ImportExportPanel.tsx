@@ -9,12 +9,6 @@ export function ImportExportPanel({ onExport, onImport }: ImportExportPanelProps
   const [importText, setImportText] = useState('');
   const [newPresetKey, setNewPresetKey] = useState('');
 
-  const handleImport = () => {
-    onImport(newPresetKey, importText);
-    setImportText('');
-    setNewPresetKey('');
-  };
-
   return (
     <div className="panel">
       <h3>Import/Export Preset</h3>
@@ -47,4 +41,10 @@ export function ImportExportPanel({ onExport, onImport }: ImportExportPanelProps
       </div>
     </div>
   );
+
+  function handleImport() {
+    onImport(newPresetKey, importText);
+    setImportText('');
+    setNewPresetKey('');
+  }
 }

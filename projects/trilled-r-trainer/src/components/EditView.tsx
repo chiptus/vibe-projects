@@ -41,27 +41,13 @@ export function EditView({
             <button className="btn" onClick={() => setShowImportExport((v) => !v)}>
               Import/Export
             </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                setEditingIndex(null);
-                onDone();
-              }}
-            >
+            <button className="btn btn-primary" onClick={handleDone}>
               Done
             </button>
           </div>
         </div>
 
-        {showImportExport && (
-          <ImportExportPanel
-            onExport={onExport}
-            onImport={(key, json) => {
-              onImport(key, json);
-              setShowImportExport(false);
-            }}
-          />
-        )}
+        {showImportExport && <ImportExportPanel onExport={onExport} onImport={handleImport} />}
 
         <p className="total-time">Total: {formatTime(totalTime)}</p>
 
@@ -71,10 +57,7 @@ export function EditView({
               {editingIndex === i ? (
                 <EditExerciseForm
                   exercise={ex}
-                  onSave={(updated) => {
-                    onSaveExercise(i, updated);
-                    setEditingIndex(null);
-                  }}
+                  onSave={(updated) => handleSaveExercise(i, updated)}
                   onCancel={() => setEditingIndex(null)}
                 />
               ) : (
@@ -88,7 +71,7 @@ export function EditView({
                       <button className="btn" onClick={() => setEditingIndex(i)}>
                         Edit
                       </button>
-                      <button className="btn btn-danger" onClick={() => onDeleteExercise(i)}>
+                      <button className="btn btn-danger" onClick={() => handleDeleteExercise(i)}>
                         Delete
                       </button>
                     </div>
@@ -101,26 +84,51 @@ export function EditView({
         </div>
 
         <div className="button-row">
-          <button
-            className="btn btn-save flex-1"
-            onClick={() => {
-              onAddExercise();
-              setEditingIndex(exercises.length);
-            }}
-          >
+          <button className="btn btn-save flex-1" onClick={handleAddExercise}>
             + Add Exercise
           </button>
-          <button
-            className="btn btn-danger"
-            onClick={() => {
-              onResetToDefault();
-              setEditingIndex(null);
-            }}
-          >
+          <button className="btn btn-danger" onClick={handleResetToDefault}>
             Reset to Default
           </button>
         </div>
       </div>
     </div>
   );
+
+  function handleDone() {
+    setEditingIndex(null);
+    onDone();
+  }
+
+  function handleImport(key: string, json: string) {
+    onImport(key, json);
+    setShowImportExport(false);
+  }
+
+  function handleSaveExercise(index: number, updated: Exercise) {
+    onSaveExercise(index, updated);
+    setEditingIndex(null);
+  }
+
+  // Rows are keyed by index, so deleting one shifts every later row's
+  // identity. Without this, an open edit form for a later row would keep
+  // its stale local state but silently start saving into a different
+  // exercise once the array shifts underneath it.
+  function handleDeleteExercise(index: number) {
+    onDeleteExercise(index);
+    setEditingIndex((current) => {
+      if (current === null || current === index) return null;
+      return current > index ? current - 1 : current;
+    });
+  }
+
+  function handleAddExercise() {
+    onAddExercise();
+    setEditingIndex(exercises.length);
+  }
+
+  function handleResetToDefault() {
+    onResetToDefault();
+    setEditingIndex(null);
+  }
 }

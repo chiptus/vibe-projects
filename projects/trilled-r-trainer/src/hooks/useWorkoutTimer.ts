@@ -10,9 +10,10 @@ import type { Exercise } from '../types';
  *
  * The caller passes the current exercise list on every render (so it always
  * ticks against up-to-date durations), but structural changes — switching
- * presets, resetting to default, deleting an exercise — are applied
- * explicitly via `reset`/`clampIndex` rather than inferred from prop
- * changes, since those need a specific target array or length.
+ * presets, resetting to default, editing or deleting an exercise — are
+ * applied explicitly via `reset`/`syncEditedExercise`/`syncAfterDelete`
+ * rather than inferred from prop changes, since those need a specific
+ * target array, index, or length.
  */
 export function useWorkoutTimer(exercises: Exercise[]) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,34 +40,73 @@ export function useWorkoutTimer(exercises: Exercise[]) {
     return () => clearInterval(interval);
   }, [isRunning, timeLeft, currentIndex, exercises]);
 
-  const startPause = () => setIsRunning((r) => !r);
+  return {
+    currentIndex,
+    timeLeft,
+    isRunning,
+    isComplete,
+    pause,
+    startPause,
+    reset,
+    skip,
+    prev,
+    syncEditedExercise,
+    syncAfterDelete,
+  };
+
+  function pause() {
+    setIsRunning(false);
+  }
+
+  function startPause() {
+    setIsRunning((r) => !r);
+  }
 
   /** Resets to the first exercise. Pass the target list explicitly when it differs from `exercises` (e.g. a just-switched preset). */
-  const reset = (targetExercises: Exercise[] = exercises) => {
+  function reset(targetExercises: Exercise[] = exercises) {
     setIsRunning(false);
     setCurrentIndex(0);
     setTimeLeft(targetExercises[0]!.duration);
     setIsComplete(false);
-  };
+  }
 
-  const skip = () => {
+  function skip() {
     if (currentIndex < exercises.length - 1) {
       setCurrentIndex((i) => i + 1);
       setTimeLeft(exercises[currentIndex + 1]!.duration);
     }
-  };
+  }
 
-  const prev = () => {
+  function prev() {
     if (currentIndex > 0) {
       setCurrentIndex((i) => i - 1);
       setTimeLeft(exercises[currentIndex - 1]!.duration);
     }
-  };
+  }
 
-  /** Keeps the current index in range after an exercise is deleted. */
-  const clampIndex = (newLength: number) => {
-    setCurrentIndex((i) => Math.min(i, Math.max(0, newLength - 1)));
-  };
+  /**
+   * Called after saving an edit to `nextExercises[index]`. If that's the
+   * exercise currently being timed, its stale `timeLeft` (from before the
+   * edit) could be negative or overshoot 100% against the new duration —
+   * restart its countdown at the new duration instead.
+   */
+  function syncEditedExercise(index: number, nextExercises: Exercise[]) {
+    if (index !== currentIndex) return;
+    setIsRunning(false);
+    setTimeLeft(nextExercises[index]!.duration);
+  }
 
-  return { currentIndex, timeLeft, isRunning, isComplete, startPause, reset, skip, prev, clampIndex };
+  /**
+   * Called after an exercise is deleted. The current index may now point at
+   * a different exercise (or be out of range), so clamp it and restart that
+   * exercise's countdown at its own duration.
+   */
+  function syncAfterDelete(nextExercises: Exercise[]) {
+    setIsRunning(false);
+    setCurrentIndex((i) => {
+      const clamped = Math.min(i, Math.max(0, nextExercises.length - 1));
+      setTimeLeft(nextExercises[clamped]!.duration);
+      return clamped;
+    });
+  }
 }

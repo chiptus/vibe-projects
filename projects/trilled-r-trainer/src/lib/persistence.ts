@@ -36,12 +36,22 @@ export function loadPresets(): PresetMap {
 }
 
 function parseStoredPresets(raw: string): PresetMap {
-  const parsed = JSON.parse(raw);
-  // Old format: a bare `{ [key]: Preset }` map with no version envelope.
-  if (parsed && typeof parsed === 'object' && !('version' in parsed) && !('presets' in parsed)) {
-    return parsed as PresetMap;
+  const parsed: unknown = JSON.parse(raw);
+  // Old format: a bare `{ [key]: Preset }` map with no version envelope. A
+  // key literally named "version" or "presets" is a valid (if confusing)
+  // preset id, so detecting the envelope has to check its value shapes, not
+  // just key presence — otherwise a legacy map with such a key would be
+  // misread as the new format and that preset silently dropped.
+  if (isStoredEnvelope(parsed)) {
+    return parsed.presets;
   }
-  return (parsed as StoredPresets).presets ?? {};
+  return (parsed as PresetMap) ?? {};
+}
+
+function isStoredEnvelope(value: unknown): value is StoredPresets {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Record<string, unknown>;
+  return typeof candidate.version === 'number' && typeof candidate.presets === 'object' && candidate.presets !== null;
 }
 
 export function savePresets(presets: PresetMap): void {

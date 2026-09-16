@@ -31,7 +31,6 @@ export const DEFAULT_PRESETS: PresetMap = {
       { name: 'RELAX - Slug Exercise', duration: 30, instruction: 'Move tongue VERY slowly in and out. Like a slug. Make it soft and relaxed.' },
       { name: 'Brushing Movement', duration: 60, instruction: 'Brush upper front teeth with tongue. Back and forth, left and right. Open mouth wider to increase stretch.' },
       { name: 'RELAX - Slug Exercise', duration: 30, instruction: 'Super slow, relaxed tongue movements. Calm your tongue down completely.' },
-      { name: 'Q-tip Exercise', duration: 90, instruction: "Q-tip on middle/bottom of tongue. Say 'D-D-D-D' quickly. Vibrate Q-tip in one spot. Listen for Rolling R!" },
       { name: "Double Taps 'tta-tta-tta'", duration: 90, instruction: "American 'butter' style. As fast as you can. Push for longer - you're building muscle memory!" },
       { name: 'Trill + Vowels', duration: 90, instruction: "Practice: rrrra, rrrre, rrrri, rrrro, rrrru. Start with trill, THEN flow into vowel. Don't stop between!" },
       { name: 'Perro', duration: 60, instruction: "Practice saying 'perro' (dog). Focus on the double RR in the middle." },
@@ -45,7 +44,6 @@ export const DEFAULT_PRESETS: PresetMap = {
     description: 'Quick 5-minute focused practice',
     exercises: [
       { name: 'RELAX - Slug Exercise', duration: 30, instruction: 'Move tongue VERY slowly in and out. Quick warm-up only.' },
-      { name: 'Q-tip Exercise', duration: 60, instruction: 'Q-tip on middle/bottom of tongue. Quick reset - feel the vibration!' },
       { name: "Double Taps 'tta-tta-tta'", duration: 60, instruction: "American 'butter' style. As fast as you can!" },
       { name: 'Trill + Vowels', duration: 60, instruction: 'Practice: rrrra, rrrre, rrrri, rrrro, rrrru. Flow from trill to vowel!' },
       { name: 'Perro', duration: 45, instruction: "Practice saying 'perro' (dog). Focus on the double RR." },

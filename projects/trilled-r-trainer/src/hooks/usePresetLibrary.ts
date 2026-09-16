@@ -10,34 +10,6 @@ export function usePresetLibrary() {
 
   const currentPreset = presets[currentPresetKey]!;
 
-  const persist = (newPresets: PresetMap) => {
-    setPresets(newPresets);
-    savePresets(newPresets);
-  };
-
-  const selectPreset = (key: string) => {
-    setCurrentPresetKey(key);
-    saveSelectedPreset(key);
-  };
-
-  const updateExercises = (exercises: Exercise[]) => {
-    persist({ ...presets, [currentPresetKey]: { ...currentPreset, exercises } });
-  };
-
-  /** Resets the current preset to its shipped default. Returns the default, or null if there isn't one. */
-  const resetToDefault = (): Preset | null => {
-    const defaultPreset = DEFAULT_PRESETS[currentPresetKey];
-    if (!defaultPreset) return null;
-    persist({ ...presets, [currentPresetKey]: defaultPreset });
-    return defaultPreset;
-  };
-
-  /** Imports a preset under a new key and selects it. */
-  const importPreset = (key: string, preset: Preset) => {
-    persist({ ...presets, [key]: preset });
-    selectPreset(key);
-  };
-
   return {
     presets,
     currentPresetKey,
@@ -47,4 +19,32 @@ export function usePresetLibrary() {
     resetToDefault,
     importPreset,
   };
+
+  function persist(newPresets: PresetMap) {
+    setPresets(newPresets);
+    savePresets(newPresets);
+  }
+
+  function selectPreset(key: string) {
+    setCurrentPresetKey(key);
+    saveSelectedPreset(key);
+  }
+
+  function updateExercises(exercises: Exercise[]) {
+    persist({ ...presets, [currentPresetKey]: { ...currentPreset, exercises } });
+  }
+
+  /** Resets the current preset to its shipped default. Returns the default, or null if there isn't one. */
+  function resetToDefault(): Preset | null {
+    const defaultPreset = DEFAULT_PRESETS[currentPresetKey];
+    if (!defaultPreset) return null;
+    persist({ ...presets, [currentPresetKey]: defaultPreset });
+    return defaultPreset;
+  }
+
+  /** Imports a preset under a new key and selects it. */
+  function importPreset(key: string, preset: Preset) {
+    persist({ ...presets, [key]: preset });
+    selectPreset(key);
+  }
 }
