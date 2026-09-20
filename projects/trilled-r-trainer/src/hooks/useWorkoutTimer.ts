@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { playBeep, startKeepAlive, stopKeepAlive } from '../lib/audio';
+import { playBeep } from '../lib/audio';
 import type { Exercise } from '../types';
 
 /**
@@ -20,15 +20,6 @@ export function useWorkoutTimer(exercises: Exercise[]) {
   const [timeLeft, setTimeLeft] = useState(exercises[0]!.duration);
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    if (!isRunning) {
-      stopKeepAlive();
-      return;
-    }
-    startKeepAlive();
-    return stopKeepAlive;
-  }, [isRunning]);
 
   useEffect(() => {
     if (!isRunning) return;

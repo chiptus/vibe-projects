@@ -1,86 +1,32 @@
-// Reused across calls instead of creating a new AudioContext per beep —
-// browsers cap how many can be alive at once, and a fresh one each exercise
-// transition would eventually hit that limit over a long session.
-let sharedContext: AudioContext | null = null;
-
-// Browsers throttle timers in background tabs (Chrome clamps setInterval to
-// once a second, then to once a minute after several minutes hidden) to save
-// power — but exempt tabs that are actively producing audio, since throttling
-// those would cause audible glitches. Playing this near-silent, continuous
-// tone while a workout is running keeps the tab "audible" so the countdown
-// (and its beep) keeps firing on schedule even when it's not the focused tab.
-let keepAliveOscillator: OscillatorNode | null = null;
-
-export function startKeepAlive(): void {
-  if (keepAliveOscillator) return;
+// Like the original prototype, each beep gets its own fresh AudioContext —
+// a shared, reused context tends to get auto-suspended by the browser once
+// it's mostly idle (which a workout timer's context is, between 0.5s beeps),
+// especially while the tab is backgrounded, causing the beep to go silent.
+// A fresh context starts "running" as long as the page already has audio
+// permission from an earlier user gesture. Unlike the original, we close
+// each context once its beep finishes instead of leaving it dangling, so a
+// long session doesn't accumulate contexts toward the browser's limit.
+export function playBeep(): void {
   try {
-    const audioContext = getAudioContext();
-    if (audioContext.state === 'suspended') {
-      void audioContext.resume();
-    }
-
+    const AudioContextCtor =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const audioContext = new AudioContextCtor();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
+
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
-    oscillator.frequency.value = 20;
-    gainNode.gain.value = 0.0001;
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
 
-    oscillator.start();
-    keepAliveOscillator = oscillator;
-  } catch {
-    // Web Audio unsupported or blocked — background throttling may apply.
-  }
-}
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
 
-export function stopKeepAlive(): void {
-  if (!keepAliveOscillator) return;
-  try {
-    keepAliveOscillator.stop();
-  } catch {
-    // Already stopped.
-  }
-  keepAliveOscillator = null;
-}
-
-export function playBeep(): void {
-  try {
-    const audioContext = getAudioContext();
-    // Browsers suspend the context when the tab is backgrounded (and it
-    // starts "suspended" until a user gesture resumes it), so a beep fired
-    // while unfocused would otherwise be silent unless we resume first and
-    // wait for it, rather than scheduling nodes against a frozen clock.
-    if (audioContext.state === 'suspended') {
-      audioContext.resume().then(() => emitBeep(audioContext)).catch(() => {});
-      return;
-    }
-    emitBeep(audioContext);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+    oscillator.onended = () => void audioContext.close();
   } catch {
     // Web Audio unsupported or blocked — silently skip the beep.
   }
-}
-
-function emitBeep(audioContext: AudioContext): void {
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-
-  oscillator.frequency.value = 800;
-  oscillator.type = 'sine';
-
-  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-  oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + 0.5);
-}
-
-function getAudioContext(): AudioContext {
-  if (!sharedContext) {
-    sharedContext = new AudioContext();
-  }
-  return sharedContext;
 }
