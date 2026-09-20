@@ -1,18 +1,8 @@
 import { DEFAULT_PRESETS } from '../data/presets';
 import type { PresetMap } from '../types';
 
-// Bumped whenever DEFAULT_PRESETS changes shape in a way older stored blobs
-// need migrating for. Not currently used for migrations, but kept so a
-// future change has somewhere to hook in.
-const STORAGE_VERSION = 1;
-
 const PRESETS_KEY = 'trilledRPresets';
 const SELECTED_KEY = 'trilledRPreset';
-
-interface StoredPresets {
-  version: number;
-  presets: PresetMap;
-}
 
 /**
  * Loads saved presets merged with the code defaults, keyed by preset id.
@@ -28,35 +18,15 @@ export function loadPresets(): PresetMap {
   if (!raw) return DEFAULT_PRESETS;
 
   try {
-    const saved = parseStoredPresets(raw);
+    const saved = JSON.parse(raw) as PresetMap;
     return { ...DEFAULT_PRESETS, ...saved };
   } catch {
     return DEFAULT_PRESETS;
   }
 }
 
-function parseStoredPresets(raw: string): PresetMap {
-  const parsed: unknown = JSON.parse(raw);
-  // Old format: a bare `{ [key]: Preset }` map with no version envelope. A
-  // key literally named "version" or "presets" is a valid (if confusing)
-  // preset id, so detecting the envelope has to check its value shapes, not
-  // just key presence — otherwise a legacy map with such a key would be
-  // misread as the new format and that preset silently dropped.
-  if (isStoredEnvelope(parsed)) {
-    return parsed.presets;
-  }
-  return (parsed as PresetMap) ?? {};
-}
-
-function isStoredEnvelope(value: unknown): value is StoredPresets {
-  if (!value || typeof value !== 'object') return false;
-  const candidate = value as Record<string, unknown>;
-  return typeof candidate.version === 'number' && typeof candidate.presets === 'object' && candidate.presets !== null;
-}
-
 export function savePresets(presets: PresetMap): void {
-  const blob: StoredPresets = { version: STORAGE_VERSION, presets };
-  localStorage.setItem(PRESETS_KEY, JSON.stringify(blob));
+  localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
 }
 
 export function loadSelectedPreset(presets: PresetMap): string {
