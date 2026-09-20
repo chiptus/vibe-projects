@@ -26,7 +26,7 @@ export function playBeep(): void {
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
     oscillator.onended = () => void audioContext.close();
-  } catch {
-    // Web Audio unsupported or blocked — silently skip the beep.
+  } catch (error) {
+    console.warn('Trilled R Trainer: could not play the beep', error);
   }
 }
