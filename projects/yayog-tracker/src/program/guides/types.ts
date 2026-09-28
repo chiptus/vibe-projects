@@ -1,7 +1,6 @@
 // How-to notes for every exercise the Basic program uses. Written in our own
 // words from "You Are Your Own Gym" — `page` is the book page to look up for
-// the photos (the PDF of the exercise chapter starts at book p. 53, so PDF
-// page = book page − 52).
+// the photos.
 
 export interface ExerciseGuide {
   title: string;

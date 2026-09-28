@@ -47,7 +47,7 @@ export function ExerciseName({ name }: ExerciseNameProps) {
             </>
           )}
           <p className="yg-small">
-            Photos: <i>You Are Your Own Gym</i>, p. {guide.page} (PDF p. {guide.page - 52})
+            Photos: <i>You Are Your Own Gym</i>, p. {guide.page}
           </p>
         </div>
       </dialog>
