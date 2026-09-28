@@ -1,4 +1,5 @@
 import { Card } from "../Card";
+import { ExerciseName } from "../exercise/ExerciseName";
 import { CountRow } from "../CountRow";
 import type { IntervalEntry } from "../../program/types";
 
@@ -11,7 +12,7 @@ export function IntervalCard({ entry, onChange }: IntervalCardProps) {
   const setAt = (k: number, v: number) =>
     onChange({ sets: entry.sets.map((x, j) => (j === k ? v : x)) as IntervalEntry["sets"] });
   return (
-    <Card title={entry.name}>
+    <Card title={<ExerciseName name={entry.name} />}>
       {entry.sets.map((s, k) => (
         <CountRow key={k} label={`Set ${k + 1}`} value={s} onChange={(v) => setAt(k, v)} />
       ))}

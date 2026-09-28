@@ -2,6 +2,8 @@
 
 A mobile-first workout tracker for the YAYOG "Basic" program. Log each workout's reps/sets, see your history, and pick up where you left off across sessions.
 
+Tap an exercise name on the Workout tab to see how to do it: the muscles worked, step-by-step instructions, notes on the variation the program asks for (hands elevated, pause at bottom, …) and the page in *You Are Your Own Gym* that has the photos. The instructions are written in our own words, in `src/program/guides/`; the book's photos are not included.
+
 ## Run
 
 ```
