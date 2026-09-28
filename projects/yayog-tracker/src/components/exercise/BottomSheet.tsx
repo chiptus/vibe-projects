@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 interface BottomSheetProps {
   open: boolean;
@@ -11,6 +11,7 @@ interface BottomSheetProps {
 // or a tap on the backdrop.
 export function BottomSheet({ open, title, onClose, children }: BottomSheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -23,13 +24,14 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
     <dialog
       ref={ref}
       className="yg-sheet"
+      aria-labelledby={titleId}
       onClose={onClose}
       // The backdrop is the dialog element itself, outside its content.
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="yg-sheet-body">
         <div className="yg-sheet-head">
-          <h2>{title}</h2>
+          <h2 id={titleId}>{title}</h2>
           <button type="button" className="yg-x" aria-label="Close" onClick={onClose}>
             ×
           </button>
