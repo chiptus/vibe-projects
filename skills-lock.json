@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "skills": {
+    "code-review": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/code-review/SKILL.md",
+      "computedHash": "caa9a086baaf9e0f7cd71f64edfa83da6821c05e826b083221f3d02e3d6a1905"
+    },
+    "create-pr": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/chiptus/create-pr/SKILL.md",
+      "computedHash": "682f0aaf487157410f64047501989a66867e62ca35179b106960d959c9daa623"
+    },
+    "domain-modeling": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/domain-modeling/SKILL.md",
+      "computedHash": "2e85d819178a2c36f697b55ea51b2cffe587178cfd5cc5f2a710fbec81aa61a8"
+    },
+    "implement": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/implement/SKILL.md",
+      "computedHash": "2139cfedf24791adbc839aaab6019cff158af1e28bfead020ec6e0ce01b3e74d"
+    },
+    "pr-review-fixer": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/chiptus/pr-review-fixer/SKILL.md",
+      "computedHash": "288837ff74538498a1e0e85d69e5d50a06dc65fae395363c03e27e31fe3a0d4e"
+    },
+    "setup-chiptus-env": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/chiptus/setup-chiptus-env/SKILL.md",
+      "computedHash": "82a3ae44e5af9f09deb3225994ec565d3322eb938c5bc1e63a81d44f3c33c657"
+    },
+    "setup-matt-pocock-skills": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
+      "computedHash": "b1b55efaed98957b257c027484585c858cfa89a266718cfedfcd7654ea6080e0"
+    },
+    "triage": {
+      "source": "chiptus/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/triage/SKILL.md",
+      "computedHash": "b954d74c219c805bf353d6642251a713c9b2e9cfdb11babfe588bcfe7dfd16d5"
+    }
+  }
+}

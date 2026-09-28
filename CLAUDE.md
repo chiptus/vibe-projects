@@ -31,3 +31,17 @@ Each project keeps its own build tooling and framework — nothing ties them tog
 Every project must therefore:
 - Build with `pnpm --filter <name> build`, producing a `dist/` folder.
 - Be deployable from a subpath (`/<project-name>/`) — don't assume it's served from `/`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub Issues in this repo, using the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
