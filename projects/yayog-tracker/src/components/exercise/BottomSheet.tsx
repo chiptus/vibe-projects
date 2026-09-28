@@ -1,28 +1,21 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 interface BottomSheetProps {
-  open: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
 }
 
-// Modal <dialog> anchored to the bottom of the screen. Closes on ✕, Escape,
-// or a tap on the backdrop.
-export function BottomSheet({ open, title, onClose, children }: BottomSheetProps) {
-  const ref = useRef<HTMLDialogElement>(null);
+// Modal <dialog> anchored to the bottom of the screen, shown as soon as it
+// mounts — render it conditionally to open/close it. Calls onClose on ✕,
+// Escape, or a tap on the backdrop.
+export function BottomSheet({ title, onClose, children }: BottomSheetProps) {
   const titleId = useId();
-
-  useEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
-  }, [open]);
-
   return (
     <dialog
-      ref={ref}
+      // The `open` attribute alone would give a non-modal dialog (no backdrop,
+      // no Escape, page still interactive); showModal() is what makes it modal.
+      ref={(el) => el?.showModal()}
       className="yg-sheet"
       aria-labelledby={titleId}
       onClose={onClose}

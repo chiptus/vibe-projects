@@ -18,9 +18,11 @@ export function ExerciseName({ name }: ExerciseNameProps) {
       <button type="button" className="yg-ex" onClick={() => setOpen(true)}>
         {name}
       </button>
-      <BottomSheet open={open} title={guide.title} onClose={() => setOpen(false)}>
-        <GuideDetails guide={guide} name={name} />
-      </BottomSheet>
+      {open && (
+        <BottomSheet title={guide.title} onClose={() => setOpen(false)}>
+          <GuideDetails guide={guide} name={name} />
+        </BottomSheet>
+      )}
     </>
   );
 }
