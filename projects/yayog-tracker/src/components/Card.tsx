@@ -8,7 +8,7 @@ interface CardProps {
 export function Card({ title, children }: CardProps) {
   return (
     <div className="yg-card">
-      <p className="yg-name">{title}</p>
+      <div className="yg-name">{title}</div>
       {children}
     </div>
   );

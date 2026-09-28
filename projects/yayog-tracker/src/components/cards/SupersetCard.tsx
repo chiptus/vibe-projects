@@ -1,4 +1,5 @@
 import { Card } from "../Card";
+import { ExerciseName } from "../ExerciseName";
 import { CountRow } from "../CountRow";
 import type { SupersetEntry } from "../../program/types";
 
@@ -16,7 +17,7 @@ export function SupersetCard({ entry, onChange }: SupersetCardProps) {
     <Card
       title={
         <>
-          {entry.a} <span className="yg-sub">then</span> {entry.b}
+          <ExerciseName name={entry.a} /> <span className="yg-sub">then</span> <ExerciseName name={entry.b} />
         </>
       }
     >

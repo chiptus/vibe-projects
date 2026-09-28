@@ -1,4 +1,5 @@
 import { Card } from "../Card";
+import { ExerciseName } from "../ExerciseName";
 import { CountRow } from "../CountRow";
 import type { LadderEntry } from "../../program/types";
 
@@ -9,7 +10,7 @@ interface LadderCardProps {
 
 export function LadderCard({ entry, onChange }: LadderCardProps) {
   return (
-    <Card title={entry.name}>
+    <Card title={<ExerciseName name={entry.name} />}>
       <CountRow label="Top of ladder" value={entry.top} onChange={(top) => onChange({ top })} />
     </Card>
   );
