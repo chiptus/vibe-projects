@@ -1,6 +1,5 @@
-import { Fragment } from "react";
 import { Card } from "../Card";
-import { ExerciseName } from "../ExerciseName";
+import { ExerciseNameList } from "../exercise/ExerciseNameList";
 import { CountRow } from "../CountRow";
 import type { StappersEntry } from "../../program/types";
 
@@ -12,14 +11,7 @@ interface StappersCardProps {
 
 export function StappersCard({ entry, exercises, onChange }: StappersCardProps) {
   return (
-    <Card
-      title={exercises.map((name, i) => (
-        <Fragment key={name}>
-          {i > 0 && " · "}
-          <ExerciseName name={name} />
-        </Fragment>
-      ))}
-    >
+    <Card title={<ExerciseNameList names={exercises} />}>
       <CountRow label="Rounds in 20 min" value={entry.rounds} onChange={(rounds) => onChange({ rounds })} />
     </Card>
   );

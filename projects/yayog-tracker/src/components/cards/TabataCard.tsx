@@ -1,5 +1,5 @@
 import { Card } from "../Card";
-import { ExerciseName } from "../ExerciseName";
+import { ExerciseName } from "../exercise/ExerciseName";
 import { CountRow } from "../CountRow";
 import type { TabataEntry } from "../../program/types";
 
