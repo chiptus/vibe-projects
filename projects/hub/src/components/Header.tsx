@@ -1,8 +1,8 @@
 export function Header() {
   return (
     <>
-      <h1 className="mb-1.5 text-[34px] font-extrabold tracking-[-0.01em]">vibe-projects</h1>
-      <p className="mb-8 text-[15px] text-mu">Small personal apps, built quickly with AI.</p>
+      <h1 className="mb-1.5 text-3xl font-extrabold tracking-tight">vibe-projects</h1>
+      <p className="mb-8 text-base text-mu">Small personal apps, built quickly with AI.</p>
     </>
   );
 }
