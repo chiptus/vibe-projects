@@ -10,11 +10,11 @@ export default function App() {
         {PROJECTS.map((p) => (
           <a
             key={p.name}
-            className="block rounded-[10px] border border-ln bg-sf px-[18px] py-4 text-inherit no-underline transition-[border-color] duration-150 ease-in-out hover:border-ac focus-visible:border-ac"
+            className="block rounded-[10px] border border-ln bg-sf px-[18px] py-4 text-inherit no-underline transition-[border-color] duration-150 ease-[ease] hover:border-ac focus-visible:border-ac"
             href={p.href}
           >
-            <p className="mb-1 text-lg font-bold">{p.title}</p>
-            <p className="text-sm text-mu">{p.description}</p>
+            <p className="mb-1 text-[18px] font-bold">{p.title}</p>
+            <p className="text-[14px] text-mu">{p.description}</p>
           </a>
         ))}
       </div>

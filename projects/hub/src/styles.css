@@ -16,6 +16,6 @@
   }
 
   body {
-    @apply bg-bg text-tx font-sans;
+    @apply bg-bg text-tx font-sans leading-[normal];
   }
 }
