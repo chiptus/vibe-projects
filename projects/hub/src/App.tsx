@@ -2,15 +2,19 @@ import { PROJECTS } from "./projects";
 
 export default function App() {
   return (
-    <div className="hub-wrap">
-      <h1 className="hub-h1">vibe-projects</h1>
-      <p className="hub-sub">Small personal apps, built quickly with AI.</p>
-      <div className="hub-list">
-        {PROJECTS.length === 0 && <p className="hub-empty">No projects yet.</p>}
+    <div className="mx-auto max-w-[640px] px-5 pt-12 pb-16">
+      <h1 className="mb-1.5 text-[34px] font-extrabold tracking-[-0.01em]">vibe-projects</h1>
+      <p className="mb-8 text-[15px] text-mu">Small personal apps, built quickly with AI.</p>
+      <div className="flex flex-col gap-2.5">
+        {PROJECTS.length === 0 && <p className="text-[15px] text-mu">No projects yet.</p>}
         {PROJECTS.map((p) => (
-          <a key={p.name} className="hub-card" href={p.href}>
-            <p className="hub-card-title">{p.title}</p>
-            <p className="hub-card-desc">{p.description}</p>
+          <a
+            key={p.name}
+            className="block rounded-[10px] border border-ln bg-sf px-[18px] py-4 text-inherit no-underline transition-[border-color] duration-150 ease-in-out hover:border-ac focus-visible:border-ac"
+            href={p.href}
+          >
+            <p className="mb-1 text-lg font-bold">{p.title}</p>
+            <p className="text-sm text-mu">{p.description}</p>
           </a>
         ))}
       </div>
