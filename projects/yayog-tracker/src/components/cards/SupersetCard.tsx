@@ -17,7 +17,7 @@ export function SupersetCard({ entry, onChange }: SupersetCardProps) {
     <Card
       title={
         <>
-          <ExerciseName name={entry.a} /> <span className="yg-sub">then</span> <ExerciseName name={entry.b} />
+          <ExerciseName name={entry.a} /> <span className="font-medium text-mu">then</span> <ExerciseName name={entry.b} />
         </>
       }
     >

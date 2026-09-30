@@ -1,3 +1,5 @@
+import { ToggleButton } from "./ui/ToggleButton";
+
 interface TabsProps<T extends string> {
   value: T;
   onChange: (value: T) => void;
@@ -6,11 +8,11 @@ interface TabsProps<T extends string> {
 
 export function Tabs<T extends string>({ value, onChange, items }: TabsProps<T>) {
   return (
-    <div className="yg-tabs">
+    <div className="mt-4 mb-3.5 flex gap-1.5">
       {items.map(([id, label]) => (
-        <button key={id} className={`yg-tab ${value === id ? "on" : ""}`} onClick={() => onChange(id)}>
+        <ToggleButton key={id} selected={value === id} className="py-2.5 text-base" onClick={() => onChange(id)}>
           {label}
-        </button>
+        </ToggleButton>
       ))}
     </div>
   );

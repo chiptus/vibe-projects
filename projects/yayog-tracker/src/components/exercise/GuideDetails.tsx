@@ -9,8 +9,8 @@ interface GuideDetailsProps {
 export function GuideDetails({ guide, name }: GuideDetailsProps) {
   return (
     <>
-      <p className="yg-sheet-muscles">{guide.muscles}</p>
-      {name !== guide.title && <p className="yg-sheet-today">Today: {name}</p>}
+      <p className="mt-1 text-mu italic">{guide.muscles}</p>
+      {name !== guide.title && <p className="mt-2.5 rounded-r-md border-l-3 border-ac bg-sf2 px-2.5 py-1.5">Today: {name}</p>}
       <Steps steps={guide.steps} />
       {guide.variations && <Variations variations={guide.variations} />}
       <BookPage page={guide.page} />
@@ -20,7 +20,7 @@ export function GuideDetails({ guide, name }: GuideDetailsProps) {
 
 function Steps({ steps }: { steps: string[] }) {
   return (
-    <ol>
+    <ol className="mt-3 list-decimal space-y-1.5 pl-5">
       {steps.map((s, i) => (
         <li key={i}>{s}</li>
       ))}
@@ -31,8 +31,8 @@ function Steps({ steps }: { steps: string[] }) {
 function Variations({ variations }: { variations: string[] }) {
   return (
     <>
-      <h3>Variations</h3>
-      <ul>
+      <h3 className="mt-4 mb-1 text-base font-bold text-ac">Variations</h3>
+      <ul className="list-disc space-y-1.5 pl-5 text-mu">
         {variations.map((v, i) => (
           <li key={i}>{v}</li>
         ))}
@@ -43,7 +43,7 @@ function Variations({ variations }: { variations: string[] }) {
 
 function BookPage({ page }: { page: number }) {
   return (
-    <p className="yg-small">
+    <p className="mt-4 text-xs text-mu">
       Photos: <i>You Are Your Own Gym</i>, p. {page}
     </p>
   );
