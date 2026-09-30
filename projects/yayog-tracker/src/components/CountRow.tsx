@@ -8,8 +8,8 @@ interface CountRowProps {
 
 export function CountRow({ label, value, onChange }: CountRowProps) {
   return (
-    <div className="yg-row">
-      <span className="yg-lab">{label}</span>
+    <div className="flex items-center justify-between gap-2 [&+&]:mt-1.5">
+      <span className="text-sm text-mu">{label}</span>
       <Stepper value={value} onChange={onChange} />
     </div>
   );

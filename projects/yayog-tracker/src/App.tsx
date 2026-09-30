@@ -23,9 +23,9 @@ export default function App() {
 
   if (!t.ready || !t.pos) {
     return (
-      <div className="yg">
-        <div className="yg-wrap yg-empty">Loading…</div>
-      </div>
+      <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
+        <p className="py-6 text-center text-base text-mu">Loading…</p>
+      </main>
     );
   }
 
@@ -46,8 +46,8 @@ export default function App() {
   };
 
   return (
-    <div className="yg">
-      <div className="yg-wrap">
+    <>
+      <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
         <Header pos={t.pos} day={day} program={t.program} seq={t.seq} isDone={t.isDone} onPick={open} />
         <Tabs
           value={tab}
@@ -62,10 +62,10 @@ export default function App() {
         ) : (
           <HistoryScreen t={t} onOpen={open} onReset={onReset} />
         )}
-      </div>
+      </main>
       {tab === "today" && (
         <SaveBar label={toast || (logged ? "Update workout" : "Log workout")} disabled={saving} onClick={onSave} />
       )}
-    </div>
+    </>
   );
 }

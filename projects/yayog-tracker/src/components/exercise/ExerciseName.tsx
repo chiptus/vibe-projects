@@ -15,7 +15,7 @@ export function ExerciseName({ name }: ExerciseNameProps) {
   if (!guide) return <>{name}</>;
   return (
     <>
-      <button type="button" className="yg-ex" onClick={() => setOpen(true)}>
+      <button type="button" className="cursor-pointer text-left underline decoration-mu decoration-dotted underline-offset-4" onClick={() => setOpen(true)}>
         {name}
       </button>
       {open && (
