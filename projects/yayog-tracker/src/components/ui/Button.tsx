@@ -13,5 +13,5 @@ interface ButtonProps extends ComponentProps<"button"> {
 }
 
 export function Button({ variant = "primary", className, ...props }: ButtonProps) {
-  return <button className={cx("cursor-pointer disabled:opacity-50", VARIANT[variant], className)} {...props} />;
+  return <button type="button" className={cx("cursor-pointer disabled:opacity-50", VARIANT[variant], className)} {...props} />;
 }
