@@ -8,6 +8,7 @@ Tap an exercise name on the Workout tab to see how to do it: the muscles worked,
 
 ```
 pnpm --filter yayog-tracker dev
+pnpm --filter yayog-tracker test   # unit tests (vitest)
 ```
 
 ## Data
