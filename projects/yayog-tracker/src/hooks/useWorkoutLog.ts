@@ -22,7 +22,8 @@ interface SaveResult {
 }
 
 export const REMOTE_KEYS_QUERY = ["yayog", "remote-keys"] as const;
-const logQuery = (level: Level) => ["yayog", "log", level] as const;
+// The index lives under one shared key, so the cache is not split by level.
+const LOG_QUERY = ["yayog", "log"] as const;
 const EMPTY: LogData = { done: [], logs: {} };
 
 async function loadLog(): Promise<LogData> {
@@ -37,39 +38,42 @@ async function loadLog(): Promise<LogData> {
   return { done: idx.done, logs };
 }
 
-// Owns the persisted set of completed workouts: loading them on mount and
-// every read/write against storage. Knows nothing about the current
+// Owns the persisted set of completed workouts: a cached query for loading
+// them and mutations for every write against storage. Knows nothing about the current
 // position or in-progress form.
 export function useWorkoutLog(level: Level) {
   const qc = useQueryClient();
-  const query = useQuery({ queryKey: logQuery(level), queryFn: loadLog, staleTime: Infinity });
+  const query = useQuery({ queryKey: LOG_QUERY, queryFn: loadLog, staleTime: Infinity });
   const data = query.data ?? EMPTY;
-  const { done, logs } = data;
+  const { done } = data;
+  // Mutations read the cache at run time, not the render closure, so back-to-back writes don't clobber each other.
+  const current = (): LogData => qc.getQueryData<LogData>(LOG_QUERY) ?? EMPTY;
 
-  // Local storage is the source of truth, so after a write we update the
-  // cache directly rather than refetching everything.
+  // After a write, show the new data immediately, then refetch from storage.
   const commit = (next: LogData) => {
-    qc.setQueryData(logQuery(level), next);
+    qc.setQueryData(LOG_QUERY, next);
+    qc.invalidateQueries({ queryKey: LOG_QUERY });
     qc.invalidateQueries({ queryKey: REMOTE_KEYS_QUERY });
   };
 
   const save = useMutation({
     mutationFn: async (rec: WorkoutRecord): Promise<SaveResult> => {
       const key = keyOf(level, rec.w, rec.d);
+      const before = current();
       const e1 = await store.set(key, rec);
-      if (e1) return { error: e1, done };
-      const newDone = done.includes(key) ? done : [...done, key];
+      if (e1) return { error: e1, done: before.done };
+      const newDone = before.done.includes(key) ? before.done : [...before.done, key];
       const e2 = await store.set(INDEX_KEY, { done: newDone });
-      if (e2) return { error: e2, done };
+      if (e2) return { error: e2, done: before.done };
       await store.del(DRAFT_KEY);
-      commit({ done: newDone, logs: { ...logs, [key]: rec } });
+      commit({ done: newDone, logs: { ...current().logs, [key]: rec } });
       return { error: null, done: newDone };
     },
   });
 
   const reset = useMutation({
     mutationFn: async () => {
-      await Promise.all(done.map((k) => store.del(k)));
+      await Promise.all(current().done.map((k) => store.del(k)));
       await store.del(INDEX_KEY);
       await store.del(DRAFT_KEY);
       commit(EMPTY);
@@ -91,10 +95,10 @@ export function useWorkoutLog(level: Level) {
         await sleep(250);
       }
       const imported = keys.filter((k) => k !== DRAFT_KEY && (parsed[k] as WorkoutRecord | undefined)?.w);
-      const newDone = [...new Set([...done, ...imported])];
+      const newDone = [...new Set([...current().done, ...imported])];
       const e = await store.set(INDEX_KEY, { done: newDone });
       if (e) return e;
-      const nextLogs = { ...logs };
+      const nextLogs = { ...current().logs };
       imported.forEach((k) => {
         nextLogs[k] = parsed[k] as WorkoutRecord;
       });
@@ -116,7 +120,7 @@ export function useWorkoutLog(level: Level) {
 
   return {
     done,
-    logs,
+    logs: data.logs,
     loaded: query.isSuccess,
     saveRecord: save.mutateAsync,
     resetAll: reset.mutateAsync,
