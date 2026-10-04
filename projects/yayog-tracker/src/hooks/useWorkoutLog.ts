@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Level, WorkoutRecord } from "../program/types";
 import { sleep, store } from "../storage";
 
@@ -10,61 +10,106 @@ interface Index {
   done: string[];
 }
 
+interface LogData {
+  done: string[];
+  logs: Record<string, WorkoutRecord>;
+}
+
 interface SaveResult {
   error: string | null;
   /** The done list after this save (even on success but before any state update lands). */
   done: string[];
 }
 
-// Owns the persisted set of completed workouts: loading them on mount and
-// every read/write against storage. Knows nothing about the current
+export const REMOTE_KEYS_QUERY = ["yayog", "remote-keys"] as const;
+// The index lives under one shared key, so the cache is not split by level.
+const LOG_QUERY = ["yayog", "log"] as const;
+const EMPTY: LogData = { done: [], logs: {} };
+
+async function loadLog(): Promise<LogData> {
+  const idx = ((await store.get(INDEX_KEY)) as Index | null) || { done: [] };
+  const logs: Record<string, WorkoutRecord> = {};
+  await Promise.all(
+    idx.done.map(async (k) => {
+      const v = await store.get(k);
+      if (v) logs[k] = v as WorkoutRecord;
+    }),
+  );
+  return { done: idx.done, logs };
+}
+
+// Owns the persisted set of completed workouts: a cached query for loading
+// them and mutations for every write against storage. Knows nothing about the current
 // position or in-progress form.
 export function useWorkoutLog(level: Level) {
-  const [done, setDone] = useState<string[] | null>(null);
-  const [logs, setLogs] = useState<Record<string, WorkoutRecord>>({});
-  const [loaded, setLoaded] = useState(false);
+  const qc = useQueryClient();
+  const query = useQuery({ queryKey: LOG_QUERY, queryFn: loadLog, staleTime: Infinity });
+  const data = query.data ?? EMPTY;
+  const { done } = data;
+  // Mutations read the cache at run time, not the render closure, so back-to-back writes don't clobber each other.
+  const current = (): LogData => qc.getQueryData<LogData>(LOG_QUERY) ?? EMPTY;
 
-  useEffect(() => {
-    (async () => {
-      const idx = ((await store.get(INDEX_KEY)) as Index | null) || { done: [] };
-      const logMap: Record<string, WorkoutRecord> = {};
-      await Promise.all(
-        idx.done.map(async (k) => {
-          const v = await store.get(k);
-          if (v) logMap[k] = v as WorkoutRecord;
-        }),
-      );
-      setDone(idx.done);
-      setLogs(logMap);
-      setLoaded(true);
-    })();
-  }, [level]);
-
-  const saveRecord = async (rec: WorkoutRecord): Promise<SaveResult> => {
-    const key = keyOf(level, rec.w, rec.d);
-    const e1 = await store.set(key, rec);
-    if (e1) return { error: e1, done: done || [] };
-    const newDone = done && done.includes(key) ? done : [...(done || []), key];
-    const e2 = await store.set(INDEX_KEY, { done: newDone });
-    if (e2) return { error: e2, done: done || [] };
-    await store.del(DRAFT_KEY);
-    setDone(newDone);
-    setLogs((l) => ({ ...l, [key]: rec }));
-    return { error: null, done: newDone };
+  // After a write, show the new data immediately, then refetch from storage.
+  const commit = (next: LogData) => {
+    qc.setQueryData(LOG_QUERY, next);
+    qc.invalidateQueries({ queryKey: LOG_QUERY });
+    qc.invalidateQueries({ queryKey: REMOTE_KEYS_QUERY });
   };
 
-  const resetAll = async () => {
-    if (!done) return;
-    await Promise.all(done.map((k) => store.del(k)));
-    await store.del(INDEX_KEY);
-    await store.del(DRAFT_KEY);
-    setDone([]);
-    setLogs({});
-  };
+  const save = useMutation({
+    mutationFn: async (rec: WorkoutRecord): Promise<SaveResult> => {
+      const key = keyOf(level, rec.w, rec.d);
+      const before = current();
+      const e1 = await store.set(key, rec);
+      if (e1) return { error: e1, done: before.done };
+      const newDone = before.done.includes(key) ? before.done : [...before.done, key];
+      const e2 = await store.set(INDEX_KEY, { done: newDone });
+      if (e2) return { error: e2, done: before.done };
+      await store.del(DRAFT_KEY);
+      commit({ done: newDone, logs: { ...current().logs, [key]: rec } });
+      return { error: null, done: newDone };
+    },
+  });
+
+  const reset = useMutation({
+    mutationFn: async () => {
+      await Promise.all(current().done.map((k) => store.del(k)));
+      await store.del(INDEX_KEY);
+      await store.del(DRAFT_KEY);
+      commit(EMPTY);
+    },
+  });
+
+  const importData = useMutation({
+    mutationFn: async (text: string): Promise<string | null> => {
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        return "Not valid JSON";
+      }
+      const keys = Object.keys(parsed).filter((k) => k.startsWith("yayog:") && k !== INDEX_KEY);
+      for (const k of keys) {
+        const e = await store.set(k, parsed[k]);
+        if (e) return `Failed on ${k}: ${e}`;
+        await sleep(250);
+      }
+      const imported = keys.filter((k) => k !== DRAFT_KEY && (parsed[k] as WorkoutRecord | undefined)?.w);
+      const newDone = [...new Set([...current().done, ...imported])];
+      const e = await store.set(INDEX_KEY, { done: newDone });
+      if (e) return e;
+      const nextLogs = { ...current().logs };
+      imported.forEach((k) => {
+        nextLogs[k] = parsed[k] as WorkoutRecord;
+      });
+      commit({ done: newDone, logs: nextLogs });
+      return null;
+    },
+  });
 
   // Everything under yayog:* as one JSON blob (for moving between artifact versions).
   const exportAll = async (): Promise<string> => {
-    const keys = (await store.keys("yayog:")) || [...(done || []), INDEX_KEY, DRAFT_KEY];
+    const keys = (await store.keys("yayog:")) || [...done, INDEX_KEY, DRAFT_KEY];
     const out: Record<string, unknown> = {};
     for (const k of keys) {
       const v = await store.get(k);
@@ -73,33 +118,13 @@ export function useWorkoutLog(level: Level) {
     return JSON.stringify(out);
   };
 
-  const importAll = async (text: string): Promise<string | null> => {
-    let data: Record<string, unknown>;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      return "Not valid JSON";
-    }
-    const keys = Object.keys(data).filter((k) => k.startsWith("yayog:") && k !== INDEX_KEY);
-    for (const k of keys) {
-      const e = await store.set(k, data[k]);
-      if (e) return `Failed on ${k}: ${e}`;
-      await sleep(250);
-    }
-    const imported = keys.filter((k) => k !== DRAFT_KEY && (data[k] as WorkoutRecord | undefined)?.w);
-    const newDone = [...new Set([...(done || []), ...imported])];
-    const e = await store.set(INDEX_KEY, { done: newDone });
-    if (e) return e;
-    setDone(newDone);
-    setLogs((l) => {
-      const next = { ...l };
-      imported.forEach((k) => {
-        next[k] = data[k] as WorkoutRecord;
-      });
-      return next;
-    });
-    return null;
+  return {
+    done,
+    logs: data.logs,
+    loaded: query.isSuccess,
+    saveRecord: save.mutateAsync,
+    resetAll: reset.mutateAsync,
+    exportAll,
+    importAll: importData.mutateAsync,
   };
-
-  return { done: done || [], logs, loaded, saveRecord, resetAll, exportAll, importAll };
 }

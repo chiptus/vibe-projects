@@ -1,32 +1,32 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Button } from "./ui/Button";
 import { Textarea } from "./ui/Textarea";
 import { store } from "../storage";
+import { REMOTE_KEYS_QUERY } from "../hooks/useWorkoutLog";
 import type { useTracker } from "../hooks/useTracker";
 
 interface DataPanelProps {
   t: ReturnType<typeof useTracker>;
 }
 
-type RemoteKeys = "loading" | "error" | string[];
-
 export function DataPanel({ t }: DataPanelProps) {
-  const [remoteKeys, setRemoteKeys] = useState<RemoteKeys>("loading");
+  const remoteKeys = useQuery({
+    queryKey: REMOTE_KEYS_QUERY,
+    queryFn: () => store.keys("yayog:"),
+    enabled: store.isRemote,
+    staleTime: Infinity,
+  });
   const [text, setText] = useState("");
   const [msg, setMsg] = useState("");
 
-  useEffect(() => {
-    if (!store.isRemote) return;
-    store.keys("yayog:").then((keys) => setRemoteKeys(keys === null ? "error" : keys));
-  }, [t.done]);
-
   const status = !store.isRemote
     ? "Using local (IndexedDB) storage — not inside a claude.ai artifact"
-    : remoteKeys === "loading"
+    : remoteKeys.isPending
       ? "Checking storage…"
-      : remoteKeys === "error"
+      : !remoteKeys.data
         ? "storage.list failed"
-        : `${remoteKeys.length} keys: ${remoteKeys.map((k) => k.replace("yayog:", "")).join(", ") || "none"}`;
+        : `${remoteKeys.data.length} keys: ${remoteKeys.data.map((k) => k.replace("yayog:", "")).join(", ") || "none"}`;
 
   const doExport = async () => {
     setText(await t.exportAll());
