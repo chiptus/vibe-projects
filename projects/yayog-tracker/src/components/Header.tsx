@@ -16,7 +16,7 @@ export function Header({ pos, day, program, seq, isDone, onPick }: HeaderProps) 
   const daysInWeek = seq.filter((p) => p.w === pos.w);
   return (
     <>
-      <div className="yg-top">
+      <div className="flex items-baseline justify-between gap-3">
         <HeaderTitle pos={pos} day={day} program={program} />
         <WeekSelect week={pos.w} seq={seq} isDone={isDone} onPick={(w) => onPick({ w, d: 1 })} />
       </div>

@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from "react";
+import { IconButton } from "../ui/IconButton";
 
 interface BottomSheetProps {
   title: string;
@@ -16,18 +17,18 @@ export function BottomSheet({ title, onClose, children }: BottomSheetProps) {
       // The `open` attribute alone would give a non-modal dialog (no backdrop,
       // no Escape, page still interactive); showModal() is what makes it modal.
       ref={(el) => el?.showModal()}
-      className="yg-sheet"
+      className="mx-auto mt-auto mb-0 max-h-5/6 w-full max-w-lg overflow-y-auto overscroll-contain rounded-t-xl border-0 bg-sf p-0 font-normal text-tx backdrop:bg-black/60"
       aria-labelledby={titleId}
       onClose={onClose}
       // The backdrop is the dialog element itself, outside its content.
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="yg-sheet-body">
-        <div className="yg-sheet-head">
-          <h2 id={titleId}>{title}</h2>
-          <button type="button" className="yg-x" aria-label="Close" onClick={onClose}>
+      <div className="px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+--spacing(5))] text-base leading-snug">
+        <div className="flex items-start justify-between gap-3">
+          <h2 id={titleId} className="text-2xl leading-tight font-extrabold">{title}</h2>
+          <IconButton aria-label="Close" onClick={onClose}>
             ×
-          </button>
+          </IconButton>
         </div>
         {children}
       </div>

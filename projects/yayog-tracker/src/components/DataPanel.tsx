@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Button } from "./ui/Button";
+import { Textarea } from "./ui/Textarea";
 import { store } from "../storage";
 import type { useTracker } from "../hooks/useTracker";
 
@@ -36,23 +38,22 @@ export function DataPanel({ t }: DataPanelProps) {
   };
 
   return (
-    <div className="yg-data">
-      <p className="yg-small">{status}</p>
-      <div className="yg-row">
-        <button className="yg-danger" onClick={doExport}>
+    <div className="mt-6 border-t border-ln pt-3">
+      <p className="mb-2.5 text-xs break-words text-mu">{status}</p>
+      <div className="flex items-center justify-between gap-2">
+        <Button variant="outline" className="flex-1" onClick={doExport}>
           Export JSON
-        </button>
-        <button className="yg-danger" onClick={doImport} disabled={!text.trim()}>
+        </Button>
+        <Button variant="outline" className="flex-1" onClick={doImport} disabled={!text.trim()}>
           Import JSON
-        </button>
+        </Button>
       </div>
-      <textarea
-        className="yg-note"
+      <Textarea
         placeholder="Paste exported JSON here to import"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      {msg && <p className="yg-small">{msg}</p>}
+      {msg && <p className="mb-2.5 text-xs break-words text-mu">{msg}</p>}
     </div>
   );
 }

@@ -9,9 +9,9 @@ interface HeaderTitleProps {
 
 export function HeaderTitle({ pos, day, program }: HeaderTitleProps) {
   return (
-    <h1 className="yg-h1">
+    <h1 className="text-3xl leading-none font-extrabold tracking-tight">
       Week {pos.w}, Day {pos.d}
-      <small>
+      <small className="mt-1.5 block text-sm font-medium tracking-wide text-mu">
         {program.name} · {BLOCK_NAME(pos.w)} block · {day.focus}
       </small>
     </h1>
