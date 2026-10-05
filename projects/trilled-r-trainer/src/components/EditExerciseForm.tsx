@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useForm } from '@tanstack/react-form';
 import type { Exercise } from '../types';
 
 interface EditExerciseFormProps {
@@ -7,30 +7,91 @@ interface EditExerciseFormProps {
   onCancel: () => void;
 }
 
+const MIN_DURATION = 5;
+
 export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFormProps) {
-  const [name, setName] = useState(exercise.name);
-  const [duration, setDuration] = useState(String(exercise.duration));
-  const [instruction, setInstruction] = useState(exercise.instruction);
+  const form = useForm({
+    defaultValues: {
+      name: exercise.name,
+      duration: String(exercise.duration),
+      instruction: exercise.instruction,
+    },
+    onSubmit: ({ value }) => {
+      onSave({
+        name: value.name,
+        duration: parseInt(value.duration, 10),
+        instruction: value.instruction,
+      });
+    },
+  });
 
   return (
-    <form className="edit-form" onSubmit={handleSubmit}>
-      <label>
-        Name
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-      </label>
-      <label>
-        Duration (seconds)
-        <input
-          type="number"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          min={5}
-        />
-      </label>
-      <label>
-        Instructions
-        <textarea value={instruction} onChange={(e) => setInstruction(e.target.value)} rows={3} />
-      </label>
+    <form
+      className="edit-form"
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        void form.handleSubmit();
+      }}
+    >
+      <form.Field
+        name="name"
+        validators={{ onSubmit: ({ value }) => (value ? undefined : 'Name is required') }}
+      >
+        {(field) => (
+          <label>
+            Name
+            <input
+              type="text"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+            />
+            <FieldError errors={field.state.meta.errors} />
+          </label>
+        )}
+      </form.Field>
+      <form.Field
+        name="duration"
+        validators={{
+          onSubmit: ({ value }) =>
+            parseInt(value, 10) >= MIN_DURATION
+              ? undefined
+              : `Duration must be at least ${MIN_DURATION} seconds`,
+        }}
+      >
+        {(field) => (
+          <label>
+            Duration (seconds)
+            <input
+              type="number"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              min={MIN_DURATION}
+            />
+            <FieldError errors={field.state.meta.errors} />
+          </label>
+        )}
+      </form.Field>
+      <form.Field
+        name="instruction"
+        validators={{ onSubmit: ({ value }) => (value ? undefined : 'Instructions are required') }}
+      >
+        {(field) => (
+          <label>
+            Instructions
+            <textarea
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              rows={3}
+            />
+            <FieldError errors={field.state.meta.errors} />
+          </label>
+        )}
+      </form.Field>
       <div className="edit-form-actions">
         <button type="submit" className="btn btn-save">
           Save
@@ -41,12 +102,9 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
       </div>
     </form>
   );
+}
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const parsedDuration = parseInt(duration, 10);
-    if (name && parsedDuration >= 5 && instruction) {
-      onSave({ name, duration: parsedDuration, instruction });
-    }
-  }
+function FieldError({ errors }: { errors: unknown[] }) {
+  const message = errors.find((error): error is string => typeof error === 'string');
+  return message ? <span role="alert">{message}</span> : null;
 }
