@@ -9,6 +9,11 @@ interface EditExerciseFormProps {
 
 const MIN_DURATION = 5;
 
+function parseDuration(value: string): number | null {
+  const parsed = Number(value);
+  return value.trim() !== '' && Number.isInteger(parsed) && parsed >= MIN_DURATION ? parsed : null;
+}
+
 export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFormProps) {
   const form = useForm({
     defaultValues: {
@@ -19,7 +24,7 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
     onSubmit: ({ value }) => {
       onSave({
         name: value.name,
-        duration: parseInt(value.duration, 10),
+        duration: parseDuration(value.duration) ?? MIN_DURATION,
         instruction: value.instruction,
       });
     },
@@ -56,9 +61,9 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
         name="duration"
         validators={{
           onSubmit: ({ value }) =>
-            parseInt(value, 10) >= MIN_DURATION
+            parseDuration(value) !== null
               ? undefined
-              : `Duration must be at least ${MIN_DURATION} seconds`,
+              : `Duration must be a whole number of at least ${MIN_DURATION} seconds`,
         }}
       >
         {(field) => (

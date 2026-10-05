@@ -36,7 +36,17 @@ describe('EditExerciseForm', () => {
     await user.clear(duration);
     await user.type(duration, '3');
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    expect((await screen.findByRole('alert')).textContent).toMatch(/at least 5 seconds/);
+    expect((await screen.findByRole('alert')).textContent).toMatch(/whole number of at least 5 seconds/);
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('rejects a fractional duration instead of truncating it', async () => {
+    const { onSave, user } = setup();
+    const duration = screen.getByLabelText('Duration (seconds)');
+    await user.clear(duration);
+    await user.type(duration, '5.9');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect((await screen.findByRole('alert')).textContent).toMatch(/whole number/);
     expect(onSave).not.toHaveBeenCalled();
   });
 
