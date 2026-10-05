@@ -58,7 +58,7 @@ export function EditView({
                 <EditExerciseForm
                   exercise={ex}
                   onSave={(updated) => handleSaveExercise(i, updated)}
-                  onCancel={() => setEditingIndex(null)}
+                  onCancel={() => handleCancelEdit(i)}
                 />
               ) : (
                 <>
@@ -103,6 +103,17 @@ export function EditView({
   function handleImport(key: string, json: string) {
     onImport(key, json);
     setShowImportExport(false);
+  }
+
+  // A newly added exercise is blank and can't be saved blank, so cancelling
+  // its form discards it instead of leaving an empty row behind.
+  function handleCancelEdit(index: number) {
+    const ex = exercises[index];
+    if (ex && !ex.name && !ex.instruction) {
+      handleDeleteExercise(index);
+    } else {
+      setEditingIndex(null);
+    }
   }
 
   function handleSaveExercise(index: number, updated: Exercise) {
