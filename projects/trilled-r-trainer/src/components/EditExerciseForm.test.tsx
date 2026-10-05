@@ -48,6 +48,23 @@ describe('EditExerciseForm', () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
+  it('rejects empty instructions', async () => {
+    const { onSave, user } = setup();
+    await user.clear(screen.getByLabelText('Instructions'));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect((await screen.findByRole('alert')).textContent).toMatch(/Instructions are required/);
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('accepts the 5 second boundary', async () => {
+    const { onSave, user } = setup();
+    const duration = screen.getByLabelText('Duration (seconds)');
+    await user.clear(duration);
+    await user.type(duration, '5');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith({ ...exercise, duration: 5 }));
+  });
+
   it('calls onCancel', async () => {
     const { onCancel, user } = setup();
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
