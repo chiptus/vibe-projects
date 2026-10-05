@@ -64,7 +64,7 @@ export function EditView({
                 <>
                   <div className="exercise-row">
                     <div>
-                      <h3>{ex.name}</h3>
+                      <h3>{ex.name || 'Untitled exercise'}</h3>
                       <p className="muted">{formatTime(ex.duration)}</p>
                     </div>
                     <div className="button-row">

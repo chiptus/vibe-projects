@@ -108,7 +108,7 @@ export default function App() {
   }
 
   function handleAddExercise() {
-    const newExercise: Exercise = { name: 'New Exercise', duration: 30, instruction: 'Add instructions here' };
+    const newExercise: Exercise = { name: '', duration: 30, instruction: '' };
     library.updateExercises([...exercises, newExercise]);
   }
 

@@ -56,6 +56,7 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
             Name
             <input
               type="text"
+              placeholder="e.g. Tongue tap"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -86,6 +87,7 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
           <label>
             Instructions
             <textarea
+              placeholder="Describe how to do this exercise"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -109,5 +111,5 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
 
 function FieldError({ errors }: { errors: unknown[] }) {
   const message = errors.map((error) => (error as { message?: string } | undefined)?.message).find(Boolean);
-  return message ? <span role="alert">{message}</span> : null;
+  return message ? <span role="alert" className="field-error">{message}</span> : null;
 }
