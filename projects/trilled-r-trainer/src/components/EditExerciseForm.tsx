@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form';
+import { z } from 'zod';
 import type { Exercise } from '../types';
 
 interface EditExerciseFormProps {
@@ -9,10 +10,21 @@ interface EditExerciseFormProps {
 
 const MIN_DURATION = 5;
 
-function parseDuration(value: string): number | null {
-  const parsed = Number(value);
-  return value.trim() !== '' && Number.isInteger(parsed) && parsed >= MIN_DURATION ? parsed : null;
-}
+// The duration input holds a string; the schema validates it and parses it to a number.
+const exerciseFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  duration: z
+    .string()
+    .trim()
+    .transform(Number)
+    .pipe(
+      z
+        .number('Duration must be a number')
+        .int('Duration must be a whole number')
+        .min(MIN_DURATION, `Duration must be at least ${MIN_DURATION} seconds`),
+    ),
+  instruction: z.string().min(1, 'Instructions are required'),
+});
 
 export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFormProps) {
   const form = useForm({
@@ -21,12 +33,9 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
       duration: String(exercise.duration),
       instruction: exercise.instruction,
     },
+    validators: { onSubmit: exerciseFormSchema },
     onSubmit: ({ value }) => {
-      onSave({
-        name: value.name,
-        duration: parseDuration(value.duration) ?? MIN_DURATION,
-        instruction: value.instruction,
-      });
+      onSave(exerciseFormSchema.parse(value));
     },
   });
 
@@ -41,9 +50,7 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
       }}
     >
       <form.Field
-        name="name"
-        validators={{ onSubmit: ({ value }) => (value ? undefined : 'Name is required') }}
-      >
+        name="name">
         {(field) => (
           <label>
             Name
@@ -58,14 +65,7 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
         )}
       </form.Field>
       <form.Field
-        name="duration"
-        validators={{
-          onSubmit: ({ value }) =>
-            parseDuration(value) !== null
-              ? undefined
-              : `Duration must be a whole number of at least ${MIN_DURATION} seconds`,
-        }}
-      >
+        name="duration">
         {(field) => (
           <label>
             Duration (seconds)
@@ -81,9 +81,7 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
         )}
       </form.Field>
       <form.Field
-        name="instruction"
-        validators={{ onSubmit: ({ value }) => (value ? undefined : 'Instructions are required') }}
-      >
+        name="instruction">
         {(field) => (
           <label>
             Instructions
@@ -110,6 +108,6 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
 }
 
 function FieldError({ errors }: { errors: unknown[] }) {
-  const message = errors.find((error): error is string => typeof error === 'string');
+  const message = errors.map((error) => (error as { message?: string } | undefined)?.message).find(Boolean);
   return message ? <span role="alert">{message}</span> : null;
 }

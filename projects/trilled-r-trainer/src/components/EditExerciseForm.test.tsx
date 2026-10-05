@@ -36,7 +36,7 @@ describe('EditExerciseForm', () => {
     await user.clear(duration);
     await user.type(duration, '3');
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    expect((await screen.findByRole('alert')).textContent).toMatch(/whole number of at least 5 seconds/);
+    expect((await screen.findByRole('alert')).textContent).toMatch(/at least 5 seconds/);
     expect(onSave).not.toHaveBeenCalled();
   });
 
