@@ -43,4 +43,15 @@ describe('loadPresets', () => {
     );
     expect(loadPresets()).toEqual({ ...DEFAULT_PRESETS, custom });
   });
+
+  it('drops presets with no exercises', () => {
+    localStorage.setItem(KEY, JSON.stringify({ empty: { ...custom, exercises: [] } }));
+    expect(loadPresets()).toEqual(DEFAULT_PRESETS);
+  });
+
+  it.each([0, -1, 0.5])('drops presets with invalid duration %s', (duration) => {
+    const bad = { ...custom, exercises: [{ name: 'Tap', duration, instruction: 'tap' }] };
+    localStorage.setItem(KEY, JSON.stringify({ bad }));
+    expect(loadPresets()).toEqual(DEFAULT_PRESETS);
+  });
 });

@@ -8,13 +8,15 @@ const SELECTED_KEY = 'trilledRPreset';
 const presetSchema = z.object({
   name: z.string(),
   description: z.string(),
-  exercises: z.array(
-    z.object({
-      name: z.string(),
-      duration: z.number(),
-      instruction: z.string(),
-    }),
-  ),
+  exercises: z
+    .array(
+      z.object({
+        name: z.string(),
+        duration: z.number().int().positive(),
+        instruction: z.string(),
+      }),
+    )
+    .min(1),
 });
 
 /**
