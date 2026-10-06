@@ -1,8 +1,21 @@
+import { z } from 'zod';
 import { DEFAULT_PRESETS } from '../data/presets';
 import type { PresetMap } from '../types';
 
 const PRESETS_KEY = 'trilledRPresets';
 const SELECTED_KEY = 'trilledRPreset';
+
+const presetSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  exercises: z.array(
+    z.object({
+      name: z.string(),
+      duration: z.number(),
+      instruction: z.string(),
+    }),
+  ),
+});
 
 /**
  * Loads saved presets merged with the code defaults, keyed by preset id.
@@ -12,13 +25,24 @@ const SELECTED_KEY = 'trilledRPreset';
  * a user who already had something in localStorage. Merging on load means
  * new defaults always show up, while a user's edits to an existing preset
  * (saved under the same key) still win.
+ *
+ * Stored data is validated at runtime: entries that don't match the preset
+ * shape are dropped, and anything that isn't an object of presets is ignored.
  */
 export function loadPresets(): PresetMap {
   const raw = localStorage.getItem(PRESETS_KEY);
   if (!raw) return DEFAULT_PRESETS;
 
   try {
-    const saved = JSON.parse(raw) as PresetMap;
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return DEFAULT_PRESETS;
+    }
+    const saved: PresetMap = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      const result = presetSchema.safeParse(value);
+      if (result.success) saved[key] = result.data;
+    }
     return { ...DEFAULT_PRESETS, ...saved };
   } catch {
     return DEFAULT_PRESETS;
