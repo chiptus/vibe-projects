@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { EditView } from './components/EditView';
 import { OverallProgress } from './components/OverallProgress';
 import { PresetMenu } from './components/PresetMenu';
+import { Button } from './components/ui';
 import { WorkoutView } from './components/WorkoutView';
 import { usePresetLibrary } from './hooks/usePresetLibrary';
 import { useWorkoutTimer } from './hooks/useWorkoutTimer';
 import { parseImportedPreset } from './lib/presetImport';
 import type { Exercise } from './types';
-import './App.css';
 
 export default function App() {
   const library = usePresetLibrary();
@@ -40,17 +40,13 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <div className="container">
-        <div className="header-row">
-          <h1>Trilled R Workout</h1>
-          <div className="button-row">
-            <button className="btn" onClick={enterEditMode}>
-              Edit
-            </button>
-            <button className="btn" onClick={() => setShowPresetMenu((v) => !v)}>
-              {currentPreset.name} ▾
-            </button>
+    <div className="flex min-h-screen flex-col items-center bg-linear-to-b from-page-from to-page-to p-4 text-white">
+      <div className="w-full max-w-lg">
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-xl">Trilled R Workout</h1>
+          <div className="flex gap-2">
+            <Button onClick={enterEditMode}>Edit</Button>
+            <Button onClick={() => setShowPresetMenu((v) => !v)}>{currentPreset.name} ▾</Button>
           </div>
         </div>
 

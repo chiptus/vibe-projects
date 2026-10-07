@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EditExerciseForm } from './EditExerciseForm';
 import { ImportExportPanel } from './ImportExportPanel';
 import { formatTime } from '../lib/format';
+import { Button } from './ui';
 import type { Exercise } from '../types';
 
 interface EditViewProps {
@@ -33,27 +34,25 @@ export function EditView({
   const totalTime = exercises.reduce((sum, ex) => sum + ex.duration, 0);
 
   return (
-    <div className="app edit-mode">
-      <div className="container">
-        <div className="header-row">
-          <h1>Edit {presetName}</h1>
-          <div className="button-row">
-            <button className="btn" onClick={() => setShowImportExport((v) => !v)}>
-              Import/Export
-            </button>
-            <button className="btn btn-primary" onClick={handleDone}>
+    <div className="flex min-h-screen flex-col items-center bg-linear-to-b from-page-from to-page-to p-4 text-white">
+      <div className="w-full max-w-lg">
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-2xl">Edit {presetName}</h1>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowImportExport((v) => !v)}>Import/Export</Button>
+            <Button variant="primary" onClick={handleDone}>
               Done
-            </button>
+            </Button>
           </div>
         </div>
 
         {showImportExport && <ImportExportPanel onExport={onExport} onImport={handleImport} />}
 
-        <p className="total-time">Total: {formatTime(totalTime)}</p>
+        <p className="mb-4 text-sm text-muted">Total: {formatTime(totalTime)}</p>
 
-        <div className="exercise-list">
+        <div className="mb-4 flex flex-col gap-3">
           {exercises.map((ex, i) => (
-            <div className="panel" key={i}>
+            <div className="mb-4 rounded-lg bg-panel p-4" key={i}>
               {editingIndex === i ? (
                 <EditExerciseForm
                   exercise={ex}
@@ -62,34 +61,32 @@ export function EditView({
                 />
               ) : (
                 <>
-                  <div className="exercise-row">
+                  <div className="mb-2 flex items-start justify-between">
                     <div>
-                      <h3>{ex.name || 'Untitled exercise'}</h3>
-                      <p className="muted">{formatTime(ex.duration)}</p>
+                      <h3 className="mb-1 text-lg font-semibold">{ex.name || 'Untitled exercise'}</h3>
+                      <p className="text-sm text-muted">{formatTime(ex.duration)}</p>
                     </div>
-                    <div className="button-row">
-                      <button className="btn" onClick={() => setEditingIndex(i)}>
-                        Edit
-                      </button>
-                      <button className="btn btn-danger" onClick={() => handleDeleteExercise(i)}>
+                    <div className="flex gap-2">
+                      <Button onClick={() => setEditingIndex(i)}>Edit</Button>
+                      <Button variant="danger" onClick={() => handleDeleteExercise(i)}>
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </div>
-                  <p>{ex.instruction}</p>
+                  <p className="text-soft">{ex.instruction}</p>
                 </>
               )}
             </div>
           ))}
         </div>
 
-        <div className="button-row">
-          <button className="btn btn-save flex-1" onClick={handleAddExercise}>
+        <div className="flex gap-2">
+          <Button variant="save" className="flex-1" onClick={handleAddExercise}>
             + Add Exercise
-          </button>
-          <button className="btn btn-danger" onClick={handleResetToDefault}>
+          </Button>
+          <Button variant="danger" onClick={handleResetToDefault}>
             Reset to Default
-          </button>
+          </Button>
         </div>
       </div>
     </div>

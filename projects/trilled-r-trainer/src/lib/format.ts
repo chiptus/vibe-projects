@@ -6,9 +6,9 @@ export function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function exerciseClass(exercise: Exercise): string {
-  if (exercise.name.includes('RELAX') || exercise.name.includes('Cool Down')) return 'exercise-relax';
-  if (exercise.name.includes('Q-tip')) return 'exercise-qtip';
-  if (exercise.name.includes('Brrrr')) return 'exercise-brrrr';
-  return 'exercise-default';
+export function exerciseBackground(exercise: Exercise): string {
+  if (exercise.name.includes('RELAX') || exercise.name.includes('Cool Down')) return 'bg-relax';
+  if (exercise.name.includes('Q-tip')) return 'bg-qtip';
+  if (exercise.name.includes('Brrrr')) return 'bg-brrrr';
+  return 'bg-panel';
 }
