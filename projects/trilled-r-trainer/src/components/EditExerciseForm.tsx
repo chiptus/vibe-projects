@@ -1,6 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 import type { Exercise } from '../types';
+import { Button, inputClass, labelClass } from './ui';
 
 interface EditExerciseFormProps {
   exercise: Exercise;
@@ -41,7 +42,6 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
 
   return (
     <form
-      className="edit-form"
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
@@ -52,9 +52,10 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
       <form.Field
         name="name">
         {(field) => (
-          <label>
+          <label className={labelClass}>
             Name
             <input
+              className={inputClass}
               type="text"
               placeholder="e.g. Tongue tap"
               value={field.state.value}
@@ -68,9 +69,10 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
       <form.Field
         name="duration">
         {(field) => (
-          <label>
+          <label className={labelClass}>
             Duration (seconds)
             <input
+              className={inputClass}
               type="number"
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -84,9 +86,10 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
       <form.Field
         name="instruction">
         {(field) => (
-          <label>
+          <label className={labelClass}>
             Instructions
             <textarea
+              className={inputClass}
               placeholder="Describe how to do this exercise"
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -97,13 +100,13 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
           </label>
         )}
       </form.Field>
-      <div className="edit-form-actions">
-        <button type="submit" className="btn btn-save">
+      <div className="flex gap-2">
+        <Button type="submit" variant="save">
           Save
-        </button>
-        <button type="button" className="btn btn-cancel" onClick={onCancel}>
+        </Button>
+        <Button type="button" variant="cancel" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -111,5 +114,5 @@ export function EditExerciseForm({ exercise, onSave, onCancel }: EditExerciseFor
 
 function FieldError({ errors }: { errors: unknown[] }) {
   const message = errors.map((error) => (error as { message?: string } | undefined)?.message).find(Boolean);
-  return message ? <span role="alert" className="field-error">{message}</span> : null;
+  return message ? <span role="alert" className="mt-1 block text-sm text-error">{message}</span> : null;
 }
