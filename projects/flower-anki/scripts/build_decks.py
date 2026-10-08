@@ -1,13 +1,16 @@
 """Build Anki decks (.apkg) of Israeli wildflowers from data/flowers.json.
 
-Writes two decks to out/:
+Writes one package, out/israeli-wildflowers.apkg, holding a parent deck with
+two subdecks. Every plant is in exactly one of them:
 
-  israeli-wildflowers-all.apkg      - every plant in the data (2,822)
-  israeli-wildflowers-popular.apkg  - the well-known subset (see is_popular)
+  צמחי בר בישראל::פופולריים    - the well-known plants (see is_popular)
+  צמחי בר בישראל::שאר הצמחים   - everything else
 
-Each plant becomes one note with two cards: photo -> name, and name -> photo.
-Photos and pronunciation audio are downloaded from wildflowers.co.il once,
-cached in .media-cache/, shrunk, and embedded in the decks.
+Each plant becomes one note with two cards: photo -> Hebrew name, and Hebrew
+name -> photo. Photos and pronunciation audio (Hebrew, Latin, English) are
+downloaded from wildflowers.co.il once, cached in .media-cache/, shrunk, and
+embedded. The cards only play the Hebrew audio; the Latin and English clips
+sit in their own fields for future card types.
 
 Usage:
   python3 scripts/build_decks.py                  # download media, embed it
@@ -44,8 +47,9 @@ JPEG_QUALITY = 80
 
 # Fixed IDs so re-importing a rebuilt deck updates notes instead of duplicating.
 MODEL_ID = 1_729_384_501
-DECK_ALL_ID = 1_729_384_502
 DECK_POPULAR_ID = 1_729_384_503
+DECK_REST_ID = 1_729_384_504
+PARENT_DECK = "צמחי בר בישראל"
 
 NOT_POPULAR_LIFE_FORMS = {"טחבים", "שרכים"}  # mosses, ferns
 UNKNOWN_VALUES = {"לא יודע", "לא נמסר מידע"}
@@ -99,31 +103,31 @@ FIELDS = [
     "AudioHebrew", "AudioLatin", "AudioEnglish", "Link",
 ]  # fmt: skip
 
-DETAILS_BACK = """
-<div class="names">
-  <div class="hebrew">{{Hebrew}}</div>
+# Collapsed on the back so the Hebrew name and photo stay the focus.
+MORE_DETAILS = """
+<details class="more">
+  <summary>פרטים נוספים</summary>
   <div class="latin">{{Latin}}</div>
   {{#English}}<div class="english">{{English}}</div>{{/English}}
   {{#Arabic}}<div class="arabic">{{Arabic}}</div>{{/Arabic}}
-  <div class="audio">{{AudioHebrew}}{{AudioLatin}}{{AudioEnglish}}</div>
-</div>
-<table class="details">
-  {{#FamilyHebrew}}<tr><th>משפחה</th><td>{{FamilyHebrew}} <span class="latin">{{FamilyLatin}}</span></td></tr>{{/FamilyHebrew}}
-  {{#LifeForm}}<tr><th>צורת חיים</th><td>{{LifeForm}}</td></tr>{{/LifeForm}}
-  {{#Colors}}<tr><th>צבע</th><td>{{Colors}}</td></tr>{{/Colors}}
-  {{#Months}}<tr><th>פריחה</th><td>{{Months}}</td></tr>{{/Months}}
-  {{#Height}}<tr><th>גובה</th><td>{{Height}}</td></tr>{{/Height}}
-  {{#Habitat}}<tr><th>בית גידול</th><td>{{Habitat}}</td></tr>{{/Habitat}}
-  {{#Regions}}<tr><th>תפוצה</th><td>{{Regions}}</td></tr>{{/Regions}}
-  {{#Petals}}<tr><th>עלי כותרת</th><td>{{Petals}}</td></tr>{{/Petals}}
-  {{#LeafShape}}<tr><th>צורת העלה</th><td>{{LeafShape}}</td></tr>{{/LeafShape}}
-  {{#LeafEdge}}<tr><th>שפת העלה</th><td>{{LeafEdge}}</td></tr>{{/LeafEdge}}
-  {{#Stem}}<tr><th>גבעול</th><td>{{Stem}}</td></tr>{{/Stem}}
-  {{#Hairiness}}<tr><th>כסות</th><td>{{Hairiness}}</td></tr>{{/Hairiness}}
-  {{#Status}}<tr><th>מידע נוסף</th><td>{{Status}}</td></tr>{{/Status}}
-</table>
+  <table class="details">
+    {{#FamilyHebrew}}<tr><th>משפחה</th><td>{{FamilyHebrew}} <span class="latin">{{FamilyLatin}}</span></td></tr>{{/FamilyHebrew}}
+    {{#LifeForm}}<tr><th>צורת חיים</th><td>{{LifeForm}}</td></tr>{{/LifeForm}}
+    {{#Colors}}<tr><th>צבע</th><td>{{Colors}}</td></tr>{{/Colors}}
+    {{#Months}}<tr><th>פריחה</th><td>{{Months}}</td></tr>{{/Months}}
+    {{#Height}}<tr><th>גובה</th><td>{{Height}}</td></tr>{{/Height}}
+    {{#Habitat}}<tr><th>בית גידול</th><td>{{Habitat}}</td></tr>{{/Habitat}}
+    {{#Regions}}<tr><th>תפוצה</th><td>{{Regions}}</td></tr>{{/Regions}}
+    {{#Petals}}<tr><th>עלי כותרת</th><td>{{Petals}}</td></tr>{{/Petals}}
+    {{#LeafShape}}<tr><th>צורת העלה</th><td>{{LeafShape}}</td></tr>{{/LeafShape}}
+    {{#LeafEdge}}<tr><th>שפת העלה</th><td>{{LeafEdge}}</td></tr>{{/LeafEdge}}
+    {{#Stem}}<tr><th>גבעול</th><td>{{Stem}}</td></tr>{{/Stem}}
+    {{#Hairiness}}<tr><th>כסות</th><td>{{Hairiness}}</td></tr>{{/Hairiness}}
+    {{#Status}}<tr><th>מידע נוסף</th><td>{{Status}}</td></tr>{{/Status}}
+  </table>
+  <div class="link"><a href="{{Link}}">צמח השדה ↗</a></div>
+</details>
 <div class="credit">{{Credit}}</div>
-<div class="link"><a href="{{Link}}">צמח השדה ↗</a></div>
 """
 
 CSS = """
@@ -134,14 +138,16 @@ CSS = """
 .prompt { font-size: 15px; opacity: .6; margin-bottom: 8px; }
 .hebrew { font-size: 32px; font-weight: 600; }
 .latin { font-style: italic; direction: ltr; unicode-bidi: isolate; }
-.names .latin { font-size: 20px; }
+.more { margin-top: 14px; font-size: 15px; }
+.more summary { cursor: pointer; opacity: .6; }
+.more .latin { font-size: 18px; margin-top: 8px; }
 .english { direction: ltr; opacity: .8; }
 .arabic { opacity: .8; }
-.audio { margin: 6px 0; }
-.details { margin: 12px auto; border-collapse: collapse; font-size: 15px; text-align: right; }
+.details { width: 100%; margin: 12px auto; border-collapse: collapse; font-size: 15px; text-align: right; }
 .details th { font-weight: 500; opacity: .6; padding: 2px 10px; white-space: nowrap; vertical-align: top; }
 .details td { padding: 2px 10px; }
 .credit, .link { font-size: 12px; opacity: .6; margin-top: 6px; }
+.audio-btn { margin-top: 4px; }
 """
 
 MODEL = genanki.Model(
@@ -149,17 +155,19 @@ MODEL = genanki.Model(
     "Israeli Wildflower",
     fields=[{"name": f} for f in FIELDS],
     templates=[
+        # Only the Hebrew audio is placed on a card; AudioLatin/AudioEnglish
+        # are kept in the note for future Latin/English card types.
         {
-            "name": "Photo → Name",
+            "name": "Photo → Hebrew",
             "qfmt": '<div class="prompt">מה שם הצמח?</div><div class="photo">{{Image}}</div>',
-            "afmt": '{{FrontSide}}<hr id="answer">' + DETAILS_BACK,
+            "afmt": '{{FrontSide}}<hr id="answer"><div class="hebrew">{{Hebrew}}</div>'
+            '<div class="audio-btn">{{AudioHebrew}}</div>' + MORE_DETAILS,
         },
         {
-            "name": "Name → Photo",
-            "qfmt": '<div class="prompt">איך נראה הצמח?</div>'
-            '<div class="hebrew">{{Hebrew}}</div><div class="latin">{{Latin}}</div>',
-            "afmt": '{{FrontSide}}<hr id="answer"><div class="photo">{{Image}}</div>'
-            + DETAILS_BACK,
+            "name": "Hebrew → Photo",
+            "qfmt": '<div class="prompt">איך נראה הצמח?</div><div class="hebrew">{{Hebrew}}</div>',
+            "afmt": '{{FrontSide}}<div class="audio-btn">{{AudioHebrew}}</div>'
+            '<hr id="answer"><div class="photo">{{Image}}</div>' + MORE_DETAILS,
         },
     ],
     css=CSS,
@@ -389,17 +397,20 @@ def sort_key(p: Plant):
     return (not is_popular(p.raw), p.fields["FamilyLatin"], p.fields["Hebrew"])
 
 
-def write_deck(plants, deck_id, deck_name, guid_salt, out_path) -> None:
-    deck = genanki.Deck(deck_id, deck_name)
+def write_package(plants: list[Plant], out_path: Path) -> None:
+    decks = {
+        True: genanki.Deck(DECK_POPULAR_ID, f"{PARENT_DECK}::פופולריים"),
+        False: genanki.Deck(DECK_REST_ID, f"{PARENT_DECK}::שאר הצמחים"),
+    }
     media_files = []
     for p in plants:
         if not p.fields["Image"]:
             continue  # a card without its photo is useless
-        deck.add_note(genanki.Note(
+        decks[is_popular(p.raw)].add_note(genanki.Note(
             model=MODEL,
             fields=[p.fields[f] for f in FIELDS],
             tags=p.tags,
-            guid=genanki.guid_for(guid_salt, p.raw["Id"]),
+            guid=genanki.guid_for("wildflower", p.raw["Id"]),
         ))
         media_files += [
             str(CACHE_DIR / m.filename)
@@ -407,9 +418,10 @@ def write_deck(plants, deck_id, deck_name, guid_salt, out_path) -> None:
             if (CACHE_DIR / m.filename).exists()
         ]
     OUT_DIR.mkdir(exist_ok=True)
-    genanki.Package(deck, media_files).write_to_file(out_path)
+    genanki.Package(list(decks.values()), media_files).write_to_file(out_path)
     size = out_path.stat().st_size / 1_000_000
-    print(f"{out_path.relative_to(ROOT)}: {len(deck.notes)} notes, "
+    counts = ", ".join(f"{d.name.split('::')[-1]} {len(d.notes)}" for d in decks.values())
+    print(f"{out_path.relative_to(ROOT)}: {counts} notes, "
           f"{len(media_files)} media files, {size:.1f} MB")
 
 
@@ -433,11 +445,7 @@ def main() -> None:
         download_all(plants, args.workers)
 
     suffix = "-remote" if args.remote_images else ""
-    # Different GUID salts let both decks live in one collection side by side.
-    write_deck(plants, DECK_ALL_ID, "צמחי בר בישראל::כל הצמחים", "all",
-               OUT_DIR / f"israeli-wildflowers-all{suffix}.apkg")
-    write_deck(popular, DECK_POPULAR_ID, "צמחי בר בישראל::פופולריים", "popular",
-               OUT_DIR / f"israeli-wildflowers-popular{suffix}.apkg")
+    write_package(plants, OUT_DIR / f"israeli-wildflowers{suffix}.apkg")
 
 
 if __name__ == "__main__":

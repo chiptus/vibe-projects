@@ -8,20 +8,33 @@ has no `dev` or `build` script, so the root build skips it.
 
 ## Decks
 
-| File | Notes | What's in it |
-|---|---|---|
-| `out/israeli-wildflowers-all.apkg` | 2,822 | Every plant in the data, mosses and ferns included |
-| `out/israeli-wildflowers-popular.apkg` | 981 | Well-known plants: ones with a recorded pronunciation, or protected (no mosses/ferns) |
+`out/israeli-wildflowers.apkg` holds one parent deck with two subdecks. Each plant is in exactly one:
 
-Each note has two cards:
+```
+צמחי בר בישראל
+├── פופולריים     981 plants: ones the site recorded a pronunciation for, or protected (no mosses/ferns)
+└── שאר הצמחים    the other 1,841, mosses and ferns included
+```
 
-- **Photo → name**: the photo on the front. The back shows the Hebrew, Latin, English and Arabic names, the pronunciation audio, and the details (family, life form, colours, flowering months, habitat, regions, leaf traits, status), plus the photo credit.
-- **Name → photo**: the Hebrew and Latin names on the front, the photo and details on the back.
+Study `פופולריים` alone to start, or the parent deck for everything (popular cards come first).
+Each plant has a single learning history, whichever deck you study it from.
 
-Popular plants come first in the "all" deck, then plants are grouped by family.
+Each plant gets two cards for learning its Hebrew name:
 
-The two decks use different note IDs, so you can import both and they stay separate.
-Rebuilding and re-importing a deck updates its notes and keeps your review history.
+- **Photo → Hebrew**: the photo on the front. The back shows the Hebrew name and plays its pronunciation.
+- **Hebrew → photo**: the Hebrew name on the front. The back shows the photo and plays the pronunciation.
+
+On both backs, a collapsed **פרטים נוספים** section holds the Latin, English and Arabic names, the family,
+flowering months, habitat, regions, leaf traits and status. The photo credit is below it.
+
+The Latin and English pronunciations are in the package too, in their own note fields (`AudioLatin`,
+`AudioEnglish`). No card shows them yet, but they're ready for Latin or English card types.
+
+**Recommended Anki setting:** for the parent deck, open Deck options → Burying and turn on
+**Bury new siblings**. Then a plant's Hebrew → photo card arrives a day after its photo card,
+not right behind it. The package can't set deck options itself.
+
+Rebuilding and re-importing updates the notes and keeps your review history.
 
 ### Tags
 
@@ -48,10 +61,11 @@ The first run downloads about 2,800 photos and 2,700 audio clips from wildflower
 have a file it's remembered and skipped; a plant whose photo is missing is left out of the decks.
 Network errors aren't remembered, so re-running retries those files.
 
-`--remote-images` skips the downloads. Cards then load photos from the site, so you need
-internet while studying, and they have no audio. This mode is mainly for a quick preview.
+`--remote-images` skips the downloads and writes `out/israeli-wildflowers-remote.apkg`.
+Cards then load photos from the site, so you need internet while studying, and they have no audio.
+This mode is mainly for a quick preview.
 
-Then in Anki: **File → Import** and pick the `.apkg`.
+Then in Anki: **File → Import** and pick `out/israeli-wildflowers.apkg`.
 
 ## Data
 
