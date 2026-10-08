@@ -67,6 +67,23 @@ This mode is mainly for a quick preview.
 
 Then in Anki: **File → Import** and pick `out/israeli-wildflowers.apkg`.
 
+## Code layout
+
+`scripts/build_decks.py` is the entry point. The rest is in `scripts/flower_anki/`:
+
+| File | What it does |
+|---|---|
+| `config.py` | Paths, the site URL, fixed Anki deck and note-type IDs |
+| `vocab.py` | The source's Hebrew values and the tag names they map to |
+| `plants.py` | Cleans a raw record into note fields; decides what counts as popular |
+| `tags.py` | Builds the `wildflowers::…` tags |
+| `media.py` | Downloads photos and audio into `.media-cache/`, shrinks photos |
+| `note_model.py` | The "Israeli Wildflower" note type: fields and card types |
+| `templates/` | Card HTML (front and back for each card type, shared details) and CSS |
+| `package.py` | Writes the `.apkg` with the two subdecks |
+
+To change how cards look, edit `templates/`; no Python changes needed.
+
 ## Data
 
 - `data/flowers.json`: the plant list (2,822 entries).
