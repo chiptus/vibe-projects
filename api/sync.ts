@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { redisStorage } from "../packages/sync/src/redis";
 import { createSyncHandler } from "../packages/sync/src/server";
 
 // Vercel's Upstash integration injects KV_REST_API_*; a hand-made Upstash DB uses UPSTASH_REDIS_REST_*.
@@ -8,6 +9,6 @@ const redis = new Redis({
   automaticDeserialization: false,
 });
 
-const handle = createSyncHandler({ redis, token: process.env.SYNC_TOKEN ?? "" });
+const handle = createSyncHandler({ storage: redisStorage(redis), token: process.env.SYNC_TOKEN ?? "" });
 
 export default { fetch: handle };
