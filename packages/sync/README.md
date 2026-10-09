@@ -12,7 +12,11 @@ const store = createSyncedStore(localKV, { app: "my-project" });
 
 `localKV` is anything with `get/set/del/keys(prefix)` (see `KV`). The result has the same methods, plus `sync()`, `getStatus()` and `subscribe()`. With no token set it behaves exactly like `localKV`. Add `"@vibe/sync": "workspace:*"` to the project's dependencies. `yayog-tracker` is the reference integration (token field in the History tab → Data panel).
 
-## Server setup (Vercel)
+## Server setup
+
+Two supported hosts: **xhostd** (Postgres; one Node process also serves the site — see [`docs/deploy-xhostd.md`](../../docs/deploy-xhostd.md)) or **Vercel** (below).
+
+### Vercel
 
 `api/sync.ts` at the repo root is a Vercel function; `vercel.json` makes Vercel run `pnpm build` and serve `dist/`.
 
