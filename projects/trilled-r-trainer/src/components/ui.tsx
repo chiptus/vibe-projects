@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
 
 const variants = {
   default: 'bg-brand enabled:hover:bg-brand-hover',
@@ -25,5 +25,26 @@ export function Button({ variant = 'default', large = false, className = '', ...
   );
 }
 
-export const labelClass = 'mb-3 flex flex-col gap-1 text-sm text-muted';
-export const inputClass = 'rounded-md border border-brand bg-field px-3 py-2 text-white';
+const controlClass = 'rounded-md border border-brand bg-field px-3 py-2 text-white';
+
+export function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
+  return (
+    <label className="mb-3 flex flex-col gap-1 text-sm text-muted">
+      {label}
+      {children}
+      {error ? (
+        <span role="alert" className="mt-1 block text-sm text-error">
+          {error}
+        </span>
+      ) : null}
+    </label>
+  );
+}
+
+export function Input({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  return <input className={`${controlClass} ${className}`} {...props} />;
+}
+
+export function Textarea({ className = '', ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea className={`${controlClass} ${className}`} {...props} />;
+}

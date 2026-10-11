@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, inputClass, labelClass } from './ui';
+import { Button, Field, Input, Textarea } from './ui';
 
 interface ImportExportPanelProps {
   onExport: () => void;
@@ -17,26 +17,23 @@ export function ImportExportPanel({ onExport, onImport }: ImportExportPanelProps
         Copy Current Preset to Clipboard
       </Button>
       <div className="mt-3 flex flex-col gap-2 border-t border-brand pt-3">
-        <label className={labelClass}>
-          Preset Key (e.g. "my_custom")
-          <input
-            className={inputClass}
+        <Field label={'Preset Key (e.g. "my_custom")'}>
+          <Input
             type="text"
             value={newPresetKey}
             onChange={(e) => setNewPresetKey(e.target.value)}
             placeholder="my_custom_preset"
           />
-        </label>
-        <label className={labelClass}>
-          Paste JSON to Import
-          <textarea
+        </Field>
+        <Field label="Paste JSON to Import">
+          <Textarea
             value={importText}
             onChange={(e) => setImportText(e.target.value)}
             rows={6}
-            className={`${inputClass} font-mono text-xs`}
+            className="font-mono text-xs"
             placeholder='{"name": "My Preset", "description": "...", "exercises": [...]}'
           />
-        </label>
+        </Field>
         <Button variant="primary" className="w-full" onClick={handleImport} disabled={!importText || !newPresetKey}>
           Import as New Preset
         </Button>
