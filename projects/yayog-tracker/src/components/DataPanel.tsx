@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSyncToken, setSyncToken } from "@vibe/sync";
+import { generateSyncToken, getSyncToken, setSyncToken } from "@vibe/sync";
 import { useState, useSyncExternalStore } from "react";
 import { Button } from "./ui/Button";
 import { Textarea } from "./ui/Textarea";
@@ -21,6 +21,7 @@ export function DataPanel({ t }: DataPanelProps) {
   const [text, setText] = useState("");
   const [msg, setMsg] = useState("");
   const [token, setToken] = useState(getSyncToken() ?? "");
+  const [revealToken, setRevealToken] = useState(false);
   const sync = useSyncExternalStore(
     (cb) => syncedStore?.subscribe(cb) ?? (() => {}),
     () => syncedStore?.getStatus(),
@@ -32,7 +33,7 @@ export function DataPanel({ t }: DataPanelProps) {
   const syncLabel = !sync
     ? null
     : sync.state === "off"
-      ? "Sync off — enter your sync token to sync across devices"
+      ? "Sync off — generate a token (or paste the one from your other device) to sync"
       : sync.state === "syncing"
         ? "Syncing…"
         : sync.state === "error"
@@ -64,8 +65,9 @@ export function DataPanel({ t }: DataPanelProps) {
           <p className="mb-1.5 text-xs break-words text-mu">{syncLabel}</p>
           <div className="flex items-center gap-2">
             <input
-              type="password"
+              type={revealToken ? "text" : "password"}
               autoComplete="off"
+              spellCheck={false}
               placeholder="Sync token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
@@ -75,6 +77,24 @@ export function DataPanel({ t }: DataPanelProps) {
               Save &amp; sync
             </Button>
           </div>
+          <div className="mt-1.5 flex items-center gap-3 text-xs text-mu">
+            <button
+              type="button"
+              className="underline"
+              onClick={() => {
+                setToken(generateSyncToken());
+                setRevealToken(true);
+              }}
+            >
+              Generate token
+            </button>
+            <button type="button" className="underline" onClick={() => setRevealToken((v) => !v)}>
+              {revealToken ? "Hide" : "Show"}
+            </button>
+          </div>
+          <p className="mt-1.5 text-xs text-mu">
+            Your token is your sync account: use the same one on every device and keep it in a password manager. It can't be recovered.
+          </p>
         </div>
       )}
       <div className="flex items-center justify-between gap-2">

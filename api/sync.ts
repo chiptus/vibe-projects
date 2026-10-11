@@ -9,6 +9,6 @@ const redis = new Redis({
   automaticDeserialization: false,
 });
 
-const handle = createSyncHandler({ storage: redisStorage(redis), token: process.env.SYNC_TOKEN ?? "" });
+const handle = createSyncHandler({ storage: redisStorage(redis) });
 
 export default { fetch: handle };
