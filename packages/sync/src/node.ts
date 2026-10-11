@@ -1,6 +1,6 @@
 // Standalone Node entry for hosts that run a long-lived process (xhostd). Serves
 // POST /api/sync from Postgres and, if STATIC_DIR exists, the built static site.
-//   env: DATABASE_URL, SYNC_TOKEN, XHOSTD_HTTP_PORT (or PORT), STATIC_DIR (default ./dist)
+//   env: DATABASE_URL, XHOSTD_HTTP_PORT (or PORT), STATIC_DIR (default ./dist)
 import { existsSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -13,9 +13,26 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const storage = pgStorage(pool);
 await storage.ready();
 
-const handle = createSyncHandler({ storage, token: process.env.SYNC_TOKEN ?? "" });
+const handle = createSyncHandler({ storage });
 const port = Number(process.env.XHOSTD_HTTP_PORT ?? process.env.PORT ?? 3000);
 const staticDir = resolve(process.env.STATIC_DIR ?? "dist");
+
+// Anyone can mint a token, so cap how fast one address can hit the sync endpoint (in-memory, per process).
+const RATE = { windowMs: 60_000, max: 120 };
+const hits = new Map<string, { count: number; reset: number }>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const h = hits.get(ip);
+  if (!h || now > h.reset) {
+    hits.set(ip, { count: 1, reset: now + RATE.windowMs });
+    return false;
+  }
+  return ++h.count > RATE.max;
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, h] of hits) if (now > h.reset) hits.delete(ip);
+}, RATE.windowMs).unref();
 
 const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -49,6 +66,12 @@ createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
 
     if (url.pathname === "/api/sync") {
+      // Behind xhostd's proxy the client address is the first X-Forwarded-For entry.
+      const ip = String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "").split(",")[0]!.trim();
+      if (req.method === "POST" && rateLimited(ip)) {
+        res.writeHead(429, { "content-type": "application/json", "retry-after": "60" }).end('{"error":"rate limited"}');
+        return;
+      }
       const chunks: Buffer[] = [];
       for await (const c of req) chunks.push(c as Buffer);
       const request = new Request(url, {

@@ -8,11 +8,19 @@ The whole repo deploys as one xhostd `app`-template app (`vibe-projects`): one N
 
 ## One-time setup
 
-1. Add xhostd as a git remote (the app's `repo_url` is in the xhostd console, or `get_app`):
-   `git remote add xhostd https://<user>:<token>@git.xhostd.com/<user>/vibe-projects.git` — or register an SSH key and use `git@git.xhostd.com:<user>/vibe-projects.git`. Don't commit the token.
-2. In the xhostd console set the secret `SYNC_TOKEN` (long random string, e.g. `openssl rand -hex 24`). Without it `/api/sync` answers 500.
-3. `git push xhostd main`, then deploy `prod` from branch `main`.
-4. Open the History tab → Data panel in yayog-tracker on each device and paste `SYNC_TOKEN`.
+1. In the xhostd console, connect `chiptus/vibe-projects` as the app's GitHub source (project → Git → GitHub source). Deploy `prod` from `main` (via the console or the connector's `deploy`).
+2. Open yayog-tracker → History tab → Data panel, press **Generate token**, then **Save & sync**. Put the token in a password manager and paste the same one on your other devices.
+
+There is no server-side secret to configure: each token is its own private silo (see "Tokens" below).
+
+## Tokens
+
+There are no accounts. A token (32+ characters) *is* the account: the server stores that token's data under `sha256(token)` and never stores the token itself. Anyone with a token sees only that token's data; a different token sees an empty, separate silo.
+
+- Generate tokens with the button (256-bit random). A hand-written short token is rejected.
+- A lost token means lost sync data: there is no recovery.
+- Anyone can mint a token, so the endpoint is open for storage. Per-silo limits apply (2000 keys / 5 MB per app, 256 KB per value) and the Node server rate-limits each IP (120 requests/min). Watch the database size in the xhostd console.
+- The operator (you) can read the stored data; it is not encrypted at rest.
 
 ## Updating
 
@@ -20,6 +28,6 @@ The whole repo deploys as one xhostd `app`-template app (`vibe-projects`): one N
 
 ## Env the server reads
 
-`DATABASE_URL` and `XHOSTD_HTTP_PORT` (both injected by xhostd), `SYNC_TOKEN` (you set it), optional `STATIC_DIR` (default `dist`).
+`DATABASE_URL` and `XHOSTD_HTTP_PORT` (both injected by xhostd), optional `STATIC_DIR` (default `dist`).
 
 The Vercel + Upstash route (`api/sync.ts`, `vercel.json`) still works as an alternative.

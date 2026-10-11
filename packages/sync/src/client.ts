@@ -41,6 +41,12 @@ interface Meta {
 }
 type MetaMap = Record<string, Meta>;
 
+const SYNC_ERRORS: Record<number, string> = {
+  401: "Sync token rejected — it must be at least 32 characters",
+  413: "Sync storage limit reached",
+  429: "Too many sync requests — try again in a minute",
+};
+
 const META_KEY = "__sync:meta";
 const TOKEN_KEY = "vibe-sync-token";
 
@@ -50,6 +56,12 @@ export function getSyncToken(): string | null {
   } catch {
     return null;
   }
+}
+
+/** A fresh 256-bit token (64 hex chars). The token is the only credential, so don't hand-write one. */
+export function generateSyncToken(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export function setSyncToken(token: string | null): void {
@@ -148,7 +160,7 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
         headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error(res.status === 401 ? "Wrong sync token" : `Sync failed (${res.status})`);
+      if (!res.ok) throw new Error(SYNC_ERRORS[res.status] ?? `Sync failed (${res.status})`);
       const { entries: remote } = (await res.json()) as SyncResponse;
 
       let applied = false;

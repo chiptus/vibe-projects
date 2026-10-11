@@ -1,6 +1,6 @@
 # @vibe/sync
 
-Cross-device sync for the small apps in this repo. Local-first: an app keeps reading and writing its own local store; this package mirrors writes to a tiny server and pulls remote changes in. Built for a single user — one shared token, last write wins per key.
+Cross-device sync for the small apps in this repo. Local-first: an app keeps reading and writing its own local store; this package mirrors writes to a tiny server and pulls remote changes in. Auth is a bearer token that doubles as the account: each token gets its own private data, last write wins per key.
 
 ## Using it in a project
 
@@ -21,8 +21,7 @@ Two supported hosts: **xhostd** (Postgres; one Node process also serves the site
 `api/sync.ts` at the repo root is a Vercel function; `vercel.json` makes Vercel run `pnpm build` and serve `dist/`.
 
 1. In the Vercel project: Storage → add **Upstash Redis** (Marketplace, free tier). This injects `KV_REST_API_URL` / `KV_REST_API_TOKEN`.
-2. Add an env var `SYNC_TOKEN` with a long random string (e.g. `openssl rand -hex 24`).
-3. Redeploy, then paste the same token into each device's app once.
+2. Redeploy. There is no server secret: users generate their own token in the app (`generateSyncToken()`).
 
 ## How it works
 
@@ -30,6 +29,7 @@ Two supported hosts: **xhostd** (Postgres; one Node process also serves the site
 - Every write marks its key dirty with `t = Date.now()`. A debounced `POST /api/sync` sends dirty keys and returns the server's full state; keys with a newer `t` are applied locally.
 - Deletes are tombstones so they propagate. Existing local data is adopted on first sync (`t = 1`), so remote data wins over it, and keys the server lacks get uploaded.
 - Syncs run on load, tab focus, coming back online, and after writes.
-- The token is stored in `localStorage` (`vibe-sync-token`). It is the only auth, so treat the deployment URL + token as the key to your data.
+- **Tokens are accounts.** The server namespaces data by `sha256(token)/<app>` and never stores the token; the namespace comes from the token alone. Tokens must be 32+ characters (`generateSyncToken()` makes 256-bit ones). Anyone can mint one, so the server caps keys/bytes per silo and the Node server rate-limits per IP.
+- The token is stored in `localStorage` (`vibe-sync-token`) on each device. Lose it and the synced data is unrecoverable.
 
 Not handled: merging concurrent edits to the *same key* from two devices (newest write wins), and large datasets (the full state is returned on each sync).

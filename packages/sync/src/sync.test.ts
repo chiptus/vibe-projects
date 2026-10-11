@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createSyncedStore, type KV } from "./client";
+import { createSyncedStore, generateSyncToken, type KV } from "./client";
 import { pgStorage, type PgLike } from "./pg";
 import { redisStorage, type RedisLike } from "./redis";
-import { createSyncHandler, type SyncStorage } from "./server";
+import { createSyncHandler, LIMITS, type SyncStorage } from "./server";
 
 const memKV = (): KV & { data: Map<string, unknown> } => {
   const data = new Map<string, unknown>();
@@ -44,12 +44,14 @@ const storages: Record<string, () => SyncStorage> = {
   postgres: () => pgStorage(memPg()),
 };
 
+const TOKEN = generateSyncToken();
+
 function setup(backend: string) {
-  const handler = createSyncHandler({ storage: storages[backend]!(), token: "secret" });
-  const device = (token: string | null = "secret") => {
+  const handler = createSyncHandler({ storage: storages[backend]!() });
+  const device = (token: string | null = TOKEN, app = "test") => {
     const local = memKV();
     const store = createSyncedStore(local, {
-      app: "test",
+      app,
       debounceMs: 1e9,
       getToken: () => token,
       fetch: (async (_url: string, init: RequestInit) =>
@@ -98,13 +100,53 @@ describe.each(Object.keys(storages))("sync (%s)", (backend) => {
     expect(await b.store.get("old")).toBe(1);
   });
 
-  it("rejects a wrong token and stays usable locally", async () => {
+  it("rejects a too-short token and stays usable locally", async () => {
     const { device } = setup(backend);
-    const a = device("nope");
+    const a = device("short");
     await a.store.set("k", 1);
     await a.store.sync();
     expect(a.store.getStatus().state).toBe("error");
     expect(await a.store.get("k")).toBe(1);
+  });
+
+  it("gives each token its own private data", async () => {
+    const { device } = setup(backend);
+    const mine = device();
+    const theirs = device(generateSyncToken());
+    await mine.store.set("k", "mine");
+    await mine.store.sync();
+    await theirs.store.sync();
+    expect(await theirs.store.get("k")).toBeNull();
+    await theirs.store.set("k", "theirs");
+    await theirs.store.sync();
+    await mine.store.sync();
+    expect(await mine.store.get("k")).toBe("mine");
+    // same token on another device sees the same data
+    const mine2 = device();
+    await mine2.store.sync();
+    expect(await mine2.store.get("k")).toBe("mine");
+  });
+
+  it("keeps apps separate under one token", async () => {
+    const { device } = setup(backend);
+    const a = device(TOKEN, "app-a");
+    const b = device(TOKEN, "app-b");
+    await a.store.set("k", 1);
+    await a.store.sync();
+    await b.store.sync();
+    expect(await b.store.get("k")).toBeNull();
+  });
+
+  it("enforces the per-silo key quota without saving anything", async () => {
+    const { device } = setup(backend);
+    const a = device();
+    for (let i = 0; i <= LIMITS.keysPerSilo; i++) a.local.data.set(`k${i}`, i);
+    await a.store.sync();
+    expect(a.store.getStatus().state).toBe("error");
+    expect(a.store.getStatus().error).toMatch(/limit/);
+    const b = device();
+    await b.store.sync();
+    expect(((await b.store.keys("")) ?? []).filter((k) => !k.startsWith("__sync:"))).toEqual([]);
   });
 
   it("does nothing without a token", async () => {
