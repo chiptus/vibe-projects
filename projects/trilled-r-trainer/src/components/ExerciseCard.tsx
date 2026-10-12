@@ -1,4 +1,3 @@
-import { exerciseBackground } from '../lib/format';
 import type { Exercise } from '../types';
 
 interface ExerciseCardProps {
@@ -9,10 +8,19 @@ interface ExerciseCardProps {
 }
 
 export function ExerciseCard({ exercise, index, total, timeLeft }: ExerciseCardProps) {
+  const name = exercise.name;
+  const background =
+    name.includes('RELAX') || name.includes('Cool Down')
+      ? 'bg-relax'
+      : name.includes('Q-tip')
+        ? 'bg-qtip'
+        : name.includes('Brrrr')
+          ? 'bg-brrrr'
+          : 'bg-panel';
   const progress = ((exercise.duration - timeLeft) / exercise.duration) * 100;
 
   return (
-    <div className={`mb-4 w-full rounded-xl p-6 ${exerciseBackground(exercise)}`}>
+    <div className={`mb-4 w-full rounded-xl p-6 ${background}`}>
       <div className="mb-1 text-sm opacity-75">
         Exercise {index + 1} of {total}
       </div>
