@@ -1,13 +1,13 @@
 // Standalone Node entry for hosts that run a long-lived process (xhostd). Serves
 // POST /api/sync from Postgres and, if STATIC_DIR exists, the built static site.
 //   env: DATABASE_URL, XHOSTD_HTTP_PORT (or PORT), STATIC_DIR (default ./dist)
-import { existsSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
-import { extname, join, normalize, resolve } from "node:path";
+import { extname, resolve } from "node:path";
 import pg from "pg";
 import { pgStorage } from "./pg";
 import { createSyncHandler } from "./server";
+import { resolveStatic } from "./static";
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const storage = pgStorage(pool);
@@ -48,19 +48,6 @@ const TYPES: Record<string, string> = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-/** Resolve a URL path to a file under staticDir, or null. `/x/` serves `/x/index.html`. */
-function resolveStatic(urlPath: string): string | null {
-  const rel = normalize(decodeURIComponent(urlPath)).replace(/^([/\\])+/, "");
-  const full = join(staticDir, rel);
-  if (!full.startsWith(staticDir)) return null; // path traversal
-  if (!existsSync(full)) return null;
-  if (statSync(full).isDirectory()) {
-    const index = join(full, "index.html");
-    return existsSync(index) ? index : null;
-  }
-  return full;
-}
-
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? "/", "http://localhost");
@@ -89,11 +76,16 @@ createServer(async (req, res) => {
       res.writeHead(405).end();
       return;
     }
-    const file = resolveStatic(url.pathname);
-    if (!file) {
+    const found = resolveStatic(staticDir, url.pathname);
+    if (!found) {
       res.writeHead(404, { "content-type": "text/plain" }).end("Not found");
       return;
     }
+    if ("redirect" in found) {
+      res.writeHead(308, { location: found.redirect + url.search }).end();
+      return;
+    }
+    const file = found.file;
     const body = await readFile(file);
     const hashed = /\/assets\/.+-[\w-]{8,}\./.test(file); // vite's content-hashed bundles
     res.writeHead(200, {
