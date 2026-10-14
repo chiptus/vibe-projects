@@ -20,4 +20,6 @@ Ported from a single-file claude.ai artifact (`window.storage`). Storage is behi
 
 Keys: `yayog:index` (list of completed workout keys), `yayog:draft` (in-progress form), `yayog:basic:w{N}:d{N}` (one record per workout).
 
+Outside an artifact, data also syncs across devices via [`@vibe/sync`](../../packages/sync/README.md): set the sync token in the History tab's Data panel (server setup is in that README). Without a token it stays local-only.
+
 Use the Export/Import JSON buttons in the History tab's Data panel to move your data between versions or storage backends.
