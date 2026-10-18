@@ -1,77 +1,11 @@
-import type { Entries, SyncRequest, SyncResponse } from "./protocol";
+import { applyRemoteEntry, pullRemote, runSync, type EngineDeps } from "./engine";
+import { isInternalKey, loadLedger, saveLedger, type Ledger } from "./ledger";
+import { createLock } from "./lock";
+import { MIN_TOKEN_LENGTH } from "./protocol";
+import { getSyncToken, setSyncToken, tokenFingerprint } from "./token";
+import type { ConnectMode, KV, SyncedStore, SyncedStoreOptions, SyncStatus } from "./types";
 
-/** Minimal async key/value store the sync layer wraps (yayog's `Store` fits). */
-export interface KV {
-  get(k: string): Promise<unknown | null>;
-  /** Resolves to null on success, or an error string. */
-  set(k: string, v: unknown): Promise<string | null>;
-  del(k: string): Promise<void>;
-  keys(prefix: string): Promise<string[] | null>;
-}
-
-export type SyncState = "off" | "syncing" | "ok" | "error";
-
-export interface SyncStatus {
-  state: SyncState;
-  lastSyncAt: number | null;
-  error: string | null;
-}
-
-export interface SyncedStore extends KV {
-  /** Push local changes and pull remote ones now. */
-  sync(): Promise<void>;
-  getStatus(): SyncStatus;
-  /** Fires on every status change; `remoteApplied` is true when remote data changed the local store. */
-  subscribe(listener: (status: SyncStatus, remoteApplied: boolean) => void): () => void;
-}
-
-export interface SyncedStoreOptions {
-  /** Namespace on the server, e.g. the project name. Lowercase letters, digits, dashes. */
-  app: string;
-  endpoint?: string;
-  debounceMs?: number;
-  fetch?: typeof fetch;
-  getToken?: () => string | null;
-}
-
-interface Meta {
-  t: number;
-  d?: boolean;
-  dirty?: boolean;
-}
-type MetaMap = Record<string, Meta>;
-
-const SYNC_ERRORS: Record<number, string> = {
-  401: "Sync token rejected — it must be at least 32 characters",
-  413: "Sync storage limit reached",
-  429: "Too many sync requests — try again in a minute",
-};
-
-const META_KEY = "__sync:meta";
-const TOKEN_KEY = "vibe-sync-token";
-
-export function getSyncToken(): string | null {
-  try {
-    return localStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-/** A fresh 256-bit token (64 hex chars). The token is the only credential, so don't hand-write one. */
-export function generateSyncToken(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-export function setSyncToken(token: string | null): void {
-  try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
-  } catch {
-    // storage unavailable
-  }
-}
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 /**
  * Wraps a local store so every write is also pushed to the server, and remote
@@ -80,29 +14,23 @@ export function setSyncToken(token: string | null): void {
  * the wrapped store. Conflicts resolve per key, newest write wins.
  */
 export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedStore {
-  const endpoint = opts.endpoint ?? "/api/sync";
   const debounceMs = opts.debounceMs ?? 1500;
-  const doFetch = opts.fetch ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
   const getToken = opts.getToken ?? getSyncToken;
+  const setToken = opts.setToken ?? setSyncToken;
+  const lock = createLock(`vibe-sync:${opts.app}`);
+  const deps: EngineDeps = {
+    local,
+    app: opts.app,
+    endpoint: opts.endpoint ?? "/api/sync",
+    doFetch: opts.fetch ?? ((...a: Parameters<typeof fetch>) => fetch(...a)),
+    lock,
+  };
 
   let status: SyncStatus = { state: "off", lastSyncAt: null, error: null };
   const listeners = new Set<(s: SyncStatus, remoteApplied: boolean) => void>();
   const emit = (patch: Partial<SyncStatus>, remoteApplied = false) => {
     status = { ...status, ...patch };
     listeners.forEach((l) => l(status, remoteApplied));
-  };
-
-  // Meta read-modify-write is serialised so concurrent writes don't lose updates.
-  let chain: Promise<unknown> = Promise.resolve();
-  const withMeta = <T>(fn: (meta: MetaMap) => Promise<T> | T): Promise<T> => {
-    const run = chain.then(async () => {
-      const meta = ((await local.get(META_KEY)) as MetaMap | null) ?? {};
-      const result = await fn(meta);
-      await local.set(META_KEY, meta);
-      return result;
-    });
-    chain = run.catch(() => {});
-    return run;
   };
 
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -120,7 +48,7 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
       rerun = true;
       return inFlight;
     }
-    inFlight = runSync().finally(() => {
+    inFlight = round().finally(() => {
       inFlight = null;
       if (rerun) {
         rerun = false;
@@ -130,7 +58,7 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
     return inFlight;
   }
 
-  async function runSync(): Promise<void> {
+  async function round(): Promise<void> {
     const token = getToken();
     if (!token) {
       emit({ state: "off", error: null });
@@ -138,52 +66,11 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
     }
     emit({ state: "syncing", error: null });
     try {
-      // Adopt pre-existing local keys (data from before sync was on) with t=1,
-      // so any remote value wins but a key the server lacks still gets pushed.
-      const localKeys = ((await local.keys("")) ?? []).filter((k) => k !== META_KEY);
-      const outgoing: Entries = {};
-      const sentT: Record<string, number> = {};
-      await withMeta(async (meta) => {
-        for (const k of localKeys) if (!meta[k]) meta[k] = { t: 1, dirty: true };
-        for (const [k, m] of Object.entries(meta)) {
-          if (!m.dirty) continue;
-          const value = m.d ? null : await local.get(k);
-          if (value === null && !m.d) continue; // vanished locally without a tombstone
-          outgoing[k] = { v: JSON.stringify(value), t: m.t, d: m.d };
-          sentT[k] = m.t;
-        }
-      });
-
-      const body: SyncRequest = { app: opts.app, entries: outgoing };
-      const res = await doFetch(endpoint, {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error(SYNC_ERRORS[res.status] ?? `Sync failed (${res.status})`);
-      const { entries: remote } = (await res.json()) as SyncResponse;
-
-      let applied = false;
-      await withMeta(async (meta) => {
-        for (const [k, r] of Object.entries(remote)) {
-          const m = meta[k];
-          if (!m || r.t > m.t) {
-            if (r.d) await local.del(k);
-            else {
-              const err = await local.set(k, JSON.parse(r.v));
-              if (err) throw new Error(err);
-            }
-            meta[k] = { t: r.t, d: r.d };
-            applied = true;
-          } else if (m.dirty && sentT[k] === m.t && r.t === m.t) {
-            delete m.dirty; // server has our version
-          }
-        }
-        // Dirty keys the server didn't echo back would only happen on rejected pushes; keep them dirty.
-      });
+      const { applied, pending } = await runSync(deps, token);
       emit({ state: "ok", lastSyncAt: Date.now(), error: null }, applied);
+      if (pending) schedule(); // a write landed mid-request; send it next
     } catch (e) {
-      emit({ state: "error", error: e instanceof Error ? e.message : String(e) });
+      emit({ state: "error", error: errorMessage(e) });
     }
   }
 
@@ -195,23 +82,38 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
     void sync();
   }
 
+  /** Write a value and its ledger entry as one unit, so remote application can't interleave. */
+  const mutate = (k: string, apply: () => Promise<string | null>, tombstone: boolean): Promise<string | null> =>
+    lock(async () => {
+      const err = await apply();
+      if (err) return err;
+      const ledger = await loadLedger(local);
+      const prev = ledger.keys[k];
+      ledger.keys[k] = { t: Math.max(Date.now(), (prev?.t ?? 0) + 1), ...(tombstone ? { d: true } : {}), dirty: true };
+      const saveErr = await saveLedger(local, ledger);
+      if (!saveErr) return null;
+      const message = `Saved locally, but sync bookkeeping failed: ${saveErr}`;
+      emit({ state: "error", error: message });
+      return message;
+    });
+
   return {
     get: (k) => local.get(k),
     keys: (prefix) => local.keys(prefix),
     async set(k, v) {
-      const err = await local.set(k, v);
-      if (err) return err;
-      await withMeta((meta) => {
-        meta[k] = { t: Date.now(), dirty: true };
-      });
-      schedule();
-      return null;
+      const err = await mutate(k, () => local.set(k, v), false);
+      if (!err) schedule();
+      return err;
     },
     async del(k) {
-      await local.del(k);
-      await withMeta((meta) => {
-        meta[k] = { t: Date.now(), d: true, dirty: true };
-      });
+      await mutate(
+        k,
+        async () => {
+          await local.del(k);
+          return null;
+        },
+        true,
+      );
       schedule();
     },
     sync,
@@ -219,6 +121,59 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
     subscribe(listener) {
       listeners.add(listener);
       return () => void listeners.delete(listener);
+    },
+
+    async connect(rawToken, mode: ConnectMode) {
+      const token = rawToken.trim();
+      if (token.length < MIN_TOKEN_LENGTH) return `The token must be at least ${MIN_TOKEN_LENGTH} characters.`;
+      const fp = tokenFingerprint(token);
+
+      if (mode === "replace") {
+        // Read the account first so nothing changes if the token is wrong or the account is empty.
+        let remote;
+        try {
+          remote = await pullRemote(deps, token);
+        } catch (e) {
+          return errorMessage(e);
+        }
+        if (!Object.values(remote).some((e) => !e.d)) {
+          return "This token has no data yet, so there is nothing to replace this device's data with. Use Merge to upload this device's data instead.";
+        }
+        try {
+          await lock(async () => {
+            const ledger: Ledger = { token: fp, keys: {} };
+            for (const k of (await local.keys("")) ?? []) if (!isInternalKey(k)) await local.del(k);
+            for (const [k, r] of Object.entries(remote)) await applyRemoteEntry(local, ledger, k, r);
+            const err = await saveLedger(local, ledger);
+            if (err) throw new Error(`Could not save sync state: ${err}`);
+          });
+        } catch (e) {
+          return errorMessage(e);
+        }
+        setToken(token);
+        emit({ state: "ok", lastSyncAt: Date.now(), error: null }, true);
+        return null;
+      }
+
+      // merge: forget the previous account's bookkeeping; every local key is re-adopted
+      // and uploaded, and wherever the account already has the same key its version wins.
+      try {
+        await lock(async () => {
+          const err = await saveLedger(local, { token: fp, keys: {} });
+          if (err) throw new Error(`Could not save sync state: ${err}`);
+        });
+      } catch (e) {
+        return errorMessage(e);
+      }
+      setToken(token);
+      await sync();
+      return status.state === "error" ? status.error : null;
+    },
+
+    async disconnect() {
+      clearTimeout(timer);
+      setToken(null);
+      emit({ state: "off", error: null });
     },
   };
 }

@@ -28,7 +28,7 @@ export const REMOTE_KEYS_QUERY = ["yayog", "remote-keys"] as const;
 const LOG_QUERY = ["yayog", "log"] as const;
 const EMPTY: LogData = { done: [], logs: {} };
 
-async function loadLog(): Promise<LogData> {
+export async function loadLog(): Promise<LogData> {
   const idx = ((await store.get(INDEX_KEY)) as Index | null) || { done: [] };
   const logs: Record<string, WorkoutRecord> = {};
   await Promise.all(

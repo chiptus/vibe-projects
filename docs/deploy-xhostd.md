@@ -9,7 +9,8 @@ The whole repo deploys as one xhostd `app`-template app (`vibe-projects`): one N
 ## One-time setup
 
 1. In the xhostd console, connect `chiptus/vibe-projects` as the app's GitHub source (project → Git → GitHub source). Deploy `prod` from `main` (via the console or the connector's `deploy`).
-2. Open yayog-tracker → History tab → Data panel, press **Generate token**, then **Save & sync**. Put the token in a password manager and paste the same one on your other devices.
+2. Open yayog-tracker → History tab → Data panel → **Set up sync…**, press **Generate a new token**, then choose **Merge** (keeps this device's data). Put the token in a password manager.
+3. On your other devices, open the same dialog and paste that token. Pick **Merge** to combine with what the device already has, or **Replace this device's data** to take the account's data as is.
 
 There is no server-side secret to configure: each token is its own private silo (see "Tokens" below).
 

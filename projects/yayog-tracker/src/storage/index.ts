@@ -127,8 +127,6 @@ export const localStore: Store = {
   },
 };
 
-// Outside a claude.ai artifact, the IndexedDB store is mirrored to /api/sync
-// (a no-op until a sync token is set in the History tab's Data panel).
 export const syncedStore = window.storage ? null : createSyncedStore(localStore, { app: "yayog-tracker" });
 
 export const store: Store = syncedStore ? { isRemote: false, ...syncedStore } : artifactStore;

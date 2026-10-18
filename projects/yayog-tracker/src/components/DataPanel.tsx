@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { generateSyncToken, getSyncToken, setSyncToken } from "@vibe/sync";
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import { Button } from "./ui/Button";
+import { SyncPanel } from "./SyncPanel";
 import { Textarea } from "./ui/Textarea";
 import { store, syncedStore } from "../storage";
 import { REMOTE_KEYS_QUERY } from "../hooks/useWorkoutLog";
@@ -20,25 +20,6 @@ export function DataPanel({ t }: DataPanelProps) {
   });
   const [text, setText] = useState("");
   const [msg, setMsg] = useState("");
-  const [token, setToken] = useState(getSyncToken() ?? "");
-  const [revealToken, setRevealToken] = useState(false);
-  const sync = useSyncExternalStore(
-    (cb) => syncedStore?.subscribe(cb) ?? (() => {}),
-    () => syncedStore?.getStatus(),
-  );
-  const saveToken = () => {
-    setSyncToken(token.trim() || null);
-    void syncedStore?.sync();
-  };
-  const syncLabel = !sync
-    ? null
-    : sync.state === "off"
-      ? "Sync off — generate a token (or paste the one from your other device) to sync"
-      : sync.state === "syncing"
-        ? "Syncing…"
-        : sync.state === "error"
-          ? `Sync error: ${sync.error}`
-          : `Synced ${sync.lastSyncAt ? new Date(sync.lastSyncAt).toLocaleTimeString() : ""}`;
 
   const status = !store.isRemote
     ? "Using local (IndexedDB) storage — not inside a claude.ai artifact"
@@ -60,43 +41,7 @@ export function DataPanel({ t }: DataPanelProps) {
   return (
     <div className="mt-6 border-t border-ln pt-3">
       <p className="mb-2.5 text-xs break-words text-mu">{status}</p>
-      {syncLabel && (
-        <div className="mb-3">
-          <p className="mb-1.5 text-xs break-words text-mu">{syncLabel}</p>
-          <div className="flex items-center gap-2">
-            <input
-              type={revealToken ? "text" : "password"}
-              autoComplete="off"
-              spellCheck={false}
-              placeholder="Sync token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="min-w-0 flex-1 rounded border border-ln bg-transparent px-2 py-1.5 text-sm"
-            />
-            <Button variant="outline" onClick={saveToken}>
-              Save &amp; sync
-            </Button>
-          </div>
-          <div className="mt-1.5 flex items-center gap-3 text-xs text-mu">
-            <button
-              type="button"
-              className="underline"
-              onClick={() => {
-                setToken(generateSyncToken());
-                setRevealToken(true);
-              }}
-            >
-              Generate token
-            </button>
-            <button type="button" className="underline" onClick={() => setRevealToken((v) => !v)}>
-              {revealToken ? "Hide" : "Show"}
-            </button>
-          </div>
-          <p className="mt-1.5 text-xs text-mu">
-            Your token is your sync account: use the same one on every device and keep it in a password manager. It can't be recovered.
-          </p>
-        </div>
-      )}
+      {syncedStore && <SyncPanel store={syncedStore} />}
       <div className="flex items-center justify-between gap-2">
         <Button variant="outline" className="flex-1" onClick={doExport}>
           Export JSON

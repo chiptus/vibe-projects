@@ -6,6 +6,8 @@ import { createServer } from "node:http";
 import { extname, resolve } from "node:path";
 import pg from "pg";
 import { pgStorage } from "./pg";
+import { readBody } from "./body";
+import { LIMITS } from "./protocol";
 import { createSyncHandler } from "./server";
 import { resolveStatic } from "./static";
 
@@ -59,12 +61,19 @@ createServer(async (req, res) => {
         res.writeHead(429, { "content-type": "application/json", "retry-after": "60" }).end('{"error":"rate limited"}');
         return;
       }
-      const chunks: Buffer[] = [];
-      for await (const c of req) chunks.push(c as Buffer);
+      // Cap the upload while reading it: a Content-Length over the limit is refused outright,
+      // and a body that outgrows the limit mid-stream is dropped without buffering the rest.
+      const tooLarge = () => {
+        res.writeHead(413, { "content-type": "application/json", connection: "close" }).end('{"error":"request too large"}');
+        res.once("finish", () => req.destroy());
+      };
+      if (Number(req.headers["content-length"] ?? 0) > LIMITS.body) return tooLarge();
+      const body = req.method === "POST" ? await readBody(req, LIMITS.body) : Buffer.alloc(0);
+      if (!body) return tooLarge();
       const request = new Request(url, {
         method: req.method,
         headers: req.headers as Record<string, string>,
-        body: req.method === "GET" || req.method === "HEAD" ? undefined : Buffer.concat(chunks),
+        body: req.method === "GET" || req.method === "HEAD" ? undefined : new Uint8Array(body),
       });
       const response = await handle(request);
       res.writeHead(response.status, Object.fromEntries(response.headers));

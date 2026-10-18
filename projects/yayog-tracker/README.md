@@ -22,6 +22,6 @@ Keys: `yayog:index` (list of completed workout keys across all Levels), `yayog:d
 
 Known gap: when a Program is finished the app stays on the last workout. Reset is the only way to start again; repeating a cycle is not supported yet.
 
-Outside an artifact, data also syncs across devices via [`@vibe/sync`](../../packages/sync/README.md): set the sync token in the History tab's Data panel (server setup is in that README). Without a token it stays local-only.
+Outside an artifact, data also syncs across devices via [`@vibe/sync`](../../packages/sync/README.md): set up a sync token in the History tab's Data panel (**Set up sync…**; server setup is in that README). Without a token it stays local-only.
 
 Use the Export/Import JSON buttons in the History tab's Data panel to move your data between versions or storage backends.

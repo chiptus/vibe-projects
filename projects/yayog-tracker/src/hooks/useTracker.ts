@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { blankEntries } from "../program/basic";
 import { sequence } from "../program/basic/workout";
 import { PROGRAMS } from "../program/registry";
 import type { Day, Entry, Level, Position, WorkoutRecord } from "../program/types";
-import { store } from "../storage";
+import { store, syncedStore } from "../storage";
 import { useDraftPersistence } from "./useDraftPersistence";
-import { DRAFT_KEY, keyOf, useWorkoutLog } from "./useWorkoutLog";
+import { DRAFT_KEY, keyOf, loadLog, useWorkoutLog } from "./useWorkoutLog";
 
 interface Draft {
   /** Missing on drafts written before Levels existed; those are Basic. */
@@ -42,39 +42,73 @@ export function useTracker(level: Level) {
     return seq.slice(i + 1).find(({ w, d }) => !doneList.includes(keyOf(level, w, d))) || null;
   };
 
-  // Once the log has loaded, pick up an in-progress draft or continue after
-  // the last completed workout.
+  const draft = useDraftPersistence({ level, ready, pos, entries: form.entries, notes: form.notes });
+
+  // True once the user has changed anything since the form was loaded.
+  const touched = useRef(false);
+
+  // Pick up an in-progress draft, or continue after the last completed workout.
+  const initialise = async (data: { done: string[]; logs: Record<string, WorkoutRecord> }) => {
+    const saved = (await store.get(DRAFT_KEY)) as Draft | null;
+    let at: Position;
+    let next: Form;
+    if (saved && (saved.level ?? "basic") === level && program.weeks[saved.w]?.[saved.d]) {
+      at = { w: saved.w, d: saved.d };
+      next = { entries: saved.entries, notes: saved.notes || "" };
+    } else {
+      const lastKey = data.done.length ? data.done[data.done.length - 1] : undefined;
+      const last = lastKey ? data.logs[lastKey] : null;
+      const start = last ? nextAfter(last, data.done) || last : seq[0]!;
+      at = { w: start.w, d: start.d };
+      next = formFor(start, data.logs);
+    }
+    setPos(at);
+    setForm(next);
+    draft.markBaseline({ ...at, ...next });
+  };
+  // The sync listener below outlives renders, so it reads the latest values through refs.
+  const initialiseRef = useRef(initialise);
+  const readyRef = useRef(false);
+  useEffect(() => {
+    initialiseRef.current = initialise;
+    readyRef.current = ready;
+  });
+
+  // Once the log has loaded, do the first initialisation.
   useEffect(() => {
     if (!log.loaded || ready) return;
-    (async () => {
-      const draft = (await store.get(DRAFT_KEY)) as Draft | null;
-      if (draft && (draft.level ?? "basic") === level && program.weeks[draft.w]?.[draft.d]) {
-        setPos({ w: draft.w, d: draft.d });
-        setForm({ entries: draft.entries, notes: draft.notes || "" });
-      } else {
-        const lastKey = log.done.length ? log.done[log.done.length - 1] : undefined;
-        const last = lastKey ? log.logs[lastKey] : null;
-        const start = last ? nextAfter(last, log.done) || last : seq[0]!;
-        setPos({ w: start.w, d: start.d });
-        setForm(formFor(start, log.logs));
-      }
-      setReady(true);
-    })();
+    initialise({ done: log.done, logs: log.logs }).then(() => setReady(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [log.loaded]);
 
-  const draft = useDraftPersistence({ level, ready, pos, entries: form.entries, notes: form.notes });
+  // When data syncs in from another device, refresh the form from it, but only while the
+  // user hasn't started editing: their in-progress edits always win.
+  useEffect(() => {
+    if (!syncedStore) return;
+    return syncedStore.subscribe((_status, remoteApplied) => {
+      if (!remoteApplied || !readyRef.current || touched.current) return;
+      void loadLog().then((data) => {
+        if (!touched.current) return initialiseRef.current(data); // re-check: an edit may have landed meanwhile
+      });
+    });
+  }, []);
 
   const goTo = (p: Position, logMap: Record<string, WorkoutRecord> = log.logs) => {
+    touched.current = true;
     setForm(formFor(p, logMap));
     setPos(p);
   };
-  const updateEntry = (i: number, patch: Partial<Entry>) =>
+  const updateEntry = (i: number, patch: Partial<Entry>) => {
+    touched.current = true;
     setForm((f) => ({
       ...f,
       entries: f.entries.map((e, j) => (j === i ? ({ ...e, ...patch } as Entry) : e)),
     }));
-  const setNotes = (notes: string) => setForm((f) => ({ ...f, notes }));
+  };
+  const setNotes = (notes: string) => {
+    touched.current = true;
+    setForm((f) => ({ ...f, notes }));
+  };
 
   // Resolves to null on success or an error string.
   const save = async (): Promise<string | null> => {
@@ -92,8 +126,9 @@ export function useTracker(level: Level) {
       const { error, done: newDone } = await log.saveRecord(rec);
       if (error) return error;
       const next = nextAfter(pos, newDone);
+      const onScreen = next ? formFor(next, { ...log.logs, [key]: rec }) : form;
       if (next) goTo(next, { ...log.logs, [key]: rec });
-      draft.markSaved();
+      draft.markSaved({ ...(next ?? pos), ...onScreen });
       return null;
     } finally {
       draft.setSaving(false);
