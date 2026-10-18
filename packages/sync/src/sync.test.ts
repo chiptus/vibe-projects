@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createSyncedStore, generateSyncToken, type KV } from "./client";
 import { pgStorage, type PgLike } from "./pg";
-import { redisStorage, type RedisLike } from "./redis";
 import { createSyncHandler, LIMITS, type SyncStorage } from "./server";
 
 const memKV = (): KV & { data: Map<string, unknown> } => {
@@ -12,14 +11,6 @@ const memKV = (): KV & { data: Map<string, unknown> } => {
     set: async (k, v) => (data.set(k, structuredClone(v)), null),
     del: async (k) => void data.delete(k),
     keys: async (p) => [...data.keys()].filter((k) => k.startsWith(p)),
-  };
-};
-
-const memRedis = (): RedisLike => {
-  const hashes = new Map<string, Record<string, string>>();
-  return {
-    hgetall: async (k) => hashes.get(k) ?? null,
-    hset: async (k, v) => void hashes.set(k, { ...hashes.get(k), ...v }),
   };
 };
 
@@ -40,7 +31,6 @@ const memPg = (): PgLike => {
 };
 
 const storages: Record<string, () => SyncStorage> = {
-  redis: () => redisStorage(memRedis()),
   postgres: () => pgStorage(memPg()),
 };
 

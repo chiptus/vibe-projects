@@ -7,15 +7,13 @@
   "exports": {
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
-    "./pg": "./src/pg.ts",
-    "./redis": "./src/redis.ts"
+    "./pg": "./src/pg.ts"
   },
   "scripts": {
     "test": "vitest run",
     "start": "node --experimental-strip-types src/node.ts"
   },
   "dependencies": {
-    "@upstash/redis": "^1.35.0",
     "pg": "^8.13.0"
   },
   "devDependencies": {

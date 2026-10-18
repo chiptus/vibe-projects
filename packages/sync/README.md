@@ -14,18 +14,11 @@ const store = createSyncedStore(localKV, { app: "my-project" });
 
 ## Server setup
 
-Two supported hosts: **xhostd** (Postgres; one Node process also serves the site — see [`docs/deploy-xhostd.md`](../../docs/deploy-xhostd.md)) or **Vercel** (below).
-
-### Vercel
-
-`api/sync.ts` at the repo root is a Vercel function; `vercel.json` makes Vercel run `pnpm build` and serve `dist/`.
-
-1. In the Vercel project: Storage → add **Upstash Redis** (Marketplace, free tier). This injects `KV_REST_API_URL` / `KV_REST_API_TOKEN`.
-2. Redeploy. There is no server secret: users generate their own token in the app (`generateSyncToken()`).
+The server runs on **xhostd** as one Node process (Postgres storage) that also serves the built site. See [`docs/deploy-xhostd.md`](../../docs/deploy-xhostd.md). `createSyncHandler({ storage })` is a plain `Request → Response` function over a small `SyncStorage` interface, so another host or store is a small adapter (`pg.ts` is the example).
 
 ## How it works
 
-- Data per app is one Redis hash `sync:<app>`: key → `{ v: JSON string, t: ms timestamp, d?: deleted }`.
+- Data is one Postgres row per `(sha256(token)/<app>, key)`: `{ v: JSON string, t: ms timestamp, d?: deleted }`.
 - Every write marks its key dirty with `t = Date.now()`. A debounced `POST /api/sync` sends dirty keys and returns the server's full state; keys with a newer `t` are applied locally.
 - Deletes are tombstones so they propagate. Existing local data is adopted on first sync (`t = 1`), so remote data wins over it, and keys the server lacks get uploaded.
 - Syncs run on load, tab focus, coming back online, and after writes.

@@ -29,5 +29,3 @@ There are no accounts. A token (32+ characters) *is* the account: the server sto
 ## Env the server reads
 
 `DATABASE_URL` and `XHOSTD_HTTP_PORT` (both injected by xhostd), optional `STATIC_DIR` (default `dist`).
-
-The Vercel + Upstash route (`api/sync.ts`, `vercel.json`) still works as an alternative.

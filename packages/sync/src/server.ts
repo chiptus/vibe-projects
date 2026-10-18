@@ -1,6 +1,6 @@
 import type { Entries, Entry, SyncRequest, SyncResponse } from "./protocol";
 
-/** Where a deployment keeps its data: Redis (Vercel) or Postgres (xhostd) — see redis.ts / pg.ts. */
+/** Where a deployment keeps its data — see pg.ts (Postgres on xhostd). */
 export interface SyncStorage {
   load(app: string): Promise<Entries>;
   /** Persist entries that already passed the newest-wins check. */
