@@ -3,22 +3,26 @@ import { Header } from "./components/Header";
 import { SaveBar } from "./components/SaveBar";
 import { Tabs } from "./components/Tabs";
 import { LevelPicker } from "./components/LevelPicker";
+import { useLevelTests } from "./hooks/useLevelTests";
 import { useActiveLevel } from "./hooks/useActiveLevel";
 import { useTracker } from "./hooks/useTracker";
 import { blankEntries } from "./program/basic";
-import { LEVEL_LABEL, unlockedLevels } from "./program/registry";
+import { unlockedLevels } from "./program/levelTests";
+import { LEVEL_LABEL } from "./program/registry";
 import type { Level, Position } from "./program/types";
 import { HistoryScreen } from "./screens/HistoryScreen";
+import { TestScreen } from "./screens/TestScreen";
 import { WorkoutScreen } from "./screens/WorkoutScreen";
 import { keyOf } from "./hooks/useWorkoutLog";
 
-type Tab = "today" | "history";
+type Tab = "today" | "history" | "test";
 
 export default function App() {
   const active = useActiveLevel();
-  if (!active.loaded || !active.level) return <Loading />;
+  const tests = useLevelTests();
+  if (!active.loaded || !active.level || !tests.loaded) return <Loading />;
   // Keyed by level so switching Programs starts from fresh tracker state.
-  return <Tracker key={active.level} level={active.level} onLevel={active.setLevel} />;
+  return <Tracker key={active.level} level={active.level} tests={tests} onLevel={active.setLevel} />;
 }
 
 const Loading = () => (
@@ -27,7 +31,7 @@ const Loading = () => (
   </main>
 );
 
-function Tracker({ level, onLevel }: { level: Level; onLevel: (l: Level) => void }) {
+function Tracker({ level, tests, onLevel }: { level: Level; tests: ReturnType<typeof useLevelTests>; onLevel: (l: Level) => void }) {
   const t = useTracker(level);
   const [tab, setTab] = useState<Tab>("today");
   const [saving, setSaving] = useState(false);
@@ -66,7 +70,7 @@ function Tracker({ level, onLevel }: { level: Level; onLevel: (l: Level) => void
   return (
     <>
       <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
-        <LevelPicker value={level} levels={unlockedLevels()} onChange={onSwitch} />
+        <LevelPicker value={level} levels={unlockedLevels(tests.results)} onChange={onSwitch} />
         <Header pos={t.pos} day={day} program={t.program} seq={t.seq} isDone={t.isDone} onPick={open} />
         <Tabs
           value={tab}
@@ -74,10 +78,13 @@ function Tracker({ level, onLevel }: { level: Level; onLevel: (l: Level) => void
           items={[
             ["today", "Workout"],
             ["history", `History (${t.done.length}/${t.seq.length})`],
+            ["test", "Test"],
           ]}
         />
         {tab === "today" ? (
           <WorkoutScreen day={day} form={t.form} loggedOn={logged?.date} onEntry={t.updateEntry} onNotes={t.setNotes} />
+        ) : tab === "test" ? (
+          <TestScreen active={level} results={tests.results} onRecord={tests.record} onSwitch={onSwitch} />
         ) : (
           <HistoryScreen t={t} onOpen={open} onReset={onReset} />
         )}

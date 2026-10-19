@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Level, WorkoutRecord } from "../program/types";
 import { sleep, store } from "../storage";
+import { TESTS_QUERY } from "./useLevelTests";
 
 export const INDEX_KEY = "yayog:index";
 export const DRAFT_KEY = "yayog:draft";
@@ -60,6 +61,7 @@ export function useWorkoutLog(level: Level) {
     qc.setQueryData(LOG_QUERY, next);
     qc.invalidateQueries({ queryKey: LOG_QUERY });
     qc.invalidateQueries({ queryKey: REMOTE_KEYS_QUERY });
+    qc.invalidateQueries({ queryKey: TESTS_QUERY });
   };
 
   const save = useMutation({
