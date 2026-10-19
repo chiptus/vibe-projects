@@ -1,5 +1,5 @@
 // Widened as each Level's program data lands.
-export const LEVELS = ["basic", "first-class", "master"] as const;
+export const LEVELS = ["basic", "first-class", "master", "chief"] as const;
 export type Level = (typeof LEVELS)[number];
 
 export type WorkoutType = "ladder" | "interval" | "superset" | "tabata" | "stappers";

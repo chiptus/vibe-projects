@@ -44,6 +44,8 @@ describe("guideFor", () => {
     expect(guideFor("Chinese Push Ups")).toBeUndefined();
     expect(guideFor("1-Arm Push Ups w/hands elevated")).toBeUndefined();
     expect(guideFor("Sissy Squats")).toBeUndefined();
+    expect(guideFor("Handstand Push Ups")).toBeUndefined();
+    expect(guideFor("Squat Thrusts")).toBeUndefined();
     expect(guideFor("Squats")).toBeDefined();
     expect(guideFor("Push Ups")).toBeDefined();
   });
