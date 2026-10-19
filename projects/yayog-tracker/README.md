@@ -18,6 +18,8 @@ Ported from a single-file claude.ai artifact (`window.storage`). Storage is behi
 - Inside a published claude.ai artifact (`window.storage` present), data is saved to the artifact's personal storage.
 - Everywhere else (local dev, self-hosted), data is saved to IndexedDB in the browser.
 
-Keys: `yayog:index` (list of completed workout keys), `yayog:draft` (in-progress form), `yayog:basic:w{N}:d{N}` (one record per workout).
+Keys: `yayog:index` (list of completed workout keys across all Levels), `yayog:draft` (in-progress form, tagged with its Level), `yayog:active` (which Level's Program is shown), `yayog:<level>:w{N}:d{N}` (one record per workout; today only `basic`).
+
+Known gap: when a Program is finished the app stays on the last workout. Reset is the only way to start again; repeating a cycle is not supported yet.
 
 Use the Export/Import JSON buttons in the History tab's Data panel to move your data between versions or storage backends.

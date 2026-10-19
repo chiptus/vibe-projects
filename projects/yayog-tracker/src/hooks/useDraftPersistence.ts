@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
-import type { Entry, Position } from "../program/types";
+import type { Entry, Level, Position } from "../program/types";
 import { store } from "../storage";
 import { DRAFT_KEY } from "./useWorkoutLog";
 
 interface Draft {
+  level: Level;
   w: number;
   d: number;
   entries: Entry[];
@@ -12,6 +13,7 @@ interface Draft {
 }
 
 interface DraftPersistenceInput {
+  level: Level;
   ready: boolean;
   pos: Position | null;
   entries: Entry[];
@@ -21,11 +23,11 @@ interface DraftPersistenceInput {
 // Persists the in-progress form so it survives the phone locking / app
 // backgrounding. Primary trigger: the page being hidden. Fallback: 5 s of
 // inactivity. Never during a save, and only if something changed.
-export function useDraftPersistence({ ready, pos, entries, notes }: DraftPersistenceInput) {
+export function useDraftPersistence({ level, ready, pos, entries, notes }: DraftPersistenceInput) {
   const lastDraft = useRef("");
   const savingRef = useRef(false);
   const draftRef = useRef<Draft | null>(null);
-  draftRef.current = ready && pos ? { w: pos.w, d: pos.d, entries, notes } : null;
+  draftRef.current = ready && pos ? { level, w: pos.w, d: pos.d, entries, notes } : null;
 
   const writeDraft = () => {
     if (!draftRef.current || savingRef.current) return;

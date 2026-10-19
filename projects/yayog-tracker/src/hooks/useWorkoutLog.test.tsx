@@ -114,4 +114,21 @@ describe("useWorkoutLog", () => {
     });
     expect(err).toBe("Not valid JSON");
   });
+
+  it("shows only its own Level's workouts and reset leaves other Levels alone", async () => {
+    const mine = keyOf("basic", 1, 1);
+    const other = "yayog:first-class:w1:d1";
+    data.set(INDEX_KEY, { done: [mine, other] });
+    data.set(mine, rec(1, 1));
+    data.set(other, rec(1, 1));
+    const { result } = renderHook(() => useWorkoutLog("basic"), { wrapper });
+    await waitFor(() => expect(result.current.done).toEqual([mine]));
+    expect(Object.keys(result.current.logs)).toEqual([mine]);
+    await act(async () => {
+      await result.current.resetAll();
+    });
+    expect(data.has(mine)).toBe(false);
+    expect(data.get(other)).toEqual(rec(1, 1));
+    expect(data.get(INDEX_KEY)).toEqual({ done: [other] });
+  });
 });

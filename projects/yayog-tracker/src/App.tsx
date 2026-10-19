@@ -2,17 +2,33 @@ import { useState } from "react";
 import { Header } from "./components/Header";
 import { SaveBar } from "./components/SaveBar";
 import { Tabs } from "./components/Tabs";
+import { LevelPicker } from "./components/LevelPicker";
+import { useActiveLevel } from "./hooks/useActiveLevel";
 import { useTracker } from "./hooks/useTracker";
-import type { Position } from "./program/types";
+import { blankEntries } from "./program/basic";
+import { LEVEL_LABEL, unlockedLevels } from "./program/registry";
+import type { Level, Position } from "./program/types";
 import { HistoryScreen } from "./screens/HistoryScreen";
 import { WorkoutScreen } from "./screens/WorkoutScreen";
-
-const keyOf = (level: "basic", w: number, d: number) => `yayog:${level}:w${w}:d${d}`;
+import { keyOf } from "./hooks/useWorkoutLog";
 
 type Tab = "today" | "history";
 
 export default function App() {
-  const t = useTracker("basic");
+  const active = useActiveLevel();
+  if (!active.loaded || !active.level) return <Loading />;
+  // Keyed by level so switching Programs starts from fresh tracker state.
+  return <Tracker key={active.level} level={active.level} onLevel={active.setLevel} />;
+}
+
+const Loading = () => (
+  <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
+    <p className="py-6 text-center text-base text-mu">Loading…</p>
+  </main>
+);
+
+function Tracker({ level, onLevel }: { level: Level; onLevel: (l: Level) => void }) {
+  const t = useTracker(level);
   const [tab, setTab] = useState<Tab>("today");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
@@ -21,16 +37,10 @@ export default function App() {
     setTimeout(() => setToast(""), ms);
   };
 
-  if (!t.ready || !t.pos) {
-    return (
-      <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
-        <p className="py-6 text-center text-base text-mu">Loading…</p>
-      </main>
-    );
-  }
+  if (!t.ready || !t.pos) return <Loading />;
 
   const day = t.dayAt(t.pos);
-  const logged = t.logs[keyOf("basic", t.pos.w, t.pos.d)];
+  const logged = t.logs[keyOf(level, t.pos.w, t.pos.d)];
   const open = (p: Position) => {
     t.goTo(p);
     setTab("today");
@@ -45,9 +55,18 @@ export default function App() {
     if (window.confirm("Delete all logged workouts?")) t.resetAll();
   };
 
+  const hasEntries =
+    t.form.notes !== "" || JSON.stringify(t.form.entries) !== JSON.stringify(blankEntries(day));
+  const onSwitch = (next: Level) => {
+    if (next === level) return;
+    if (hasEntries && !window.confirm(`Switch to ${LEVEL_LABEL[next]}? Unsaved entries for this workout will be lost.`)) return;
+    onLevel(next);
+  };
+
   return (
     <>
       <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
+        <LevelPicker value={level} levels={unlockedLevels()} onChange={onSwitch} />
         <Header pos={t.pos} day={day} program={t.program} seq={t.seq} isDone={t.isDone} onPick={open} />
         <Tabs
           value={tab}
