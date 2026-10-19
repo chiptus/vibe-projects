@@ -42,6 +42,8 @@ describe("guideFor", () => {
   it("does not reuse a plain guide for a different movement", () => {
     expect(guideFor("Alternating 1-Legged Squats while holding onto chairs")).toBeUndefined();
     expect(guideFor("Chinese Push Ups")).toBeUndefined();
+    expect(guideFor("1-Arm Push Ups w/hands elevated")).toBeUndefined();
+    expect(guideFor("Sissy Squats")).toBeUndefined();
     expect(guideFor("Squats")).toBeDefined();
     expect(guideFor("Push Ups")).toBeDefined();
   });
