@@ -1,19 +1,24 @@
 import { BLOCK_NAME } from "../../program/basic";
 import type { Day, Position, Program } from "../../program/types";
 
-interface HeaderTitleProps {
+export function HeaderTitle({ pos }: { pos: Position }) {
+  return (
+    <h1 className="text-3xl leading-none font-extrabold tracking-tight">
+      Week {pos.w}, Day {pos.d}
+    </h1>
+  );
+}
+
+interface HeaderSubtitleProps {
   pos: Position;
   day: Day;
   program: Program;
 }
 
-export function HeaderTitle({ pos, day, program }: HeaderTitleProps) {
+export function HeaderSubtitle({ pos, day, program }: HeaderSubtitleProps) {
   return (
-    <h1 className="text-3xl leading-none font-extrabold tracking-tight">
-      Week {pos.w}, Day {pos.d}
-      <small className="mt-1.5 block text-sm font-medium tracking-wide text-mu">
-        {program.name} · {BLOCK_NAME(pos.w)} block · {day.focus}
-      </small>
-    </h1>
+    <p className="mt-2 text-sm font-medium tracking-wide text-mu">
+      {program.name} · {BLOCK_NAME(pos.w)} block · {day.focus}
+    </p>
   );
 }

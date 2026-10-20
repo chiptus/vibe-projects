@@ -9,12 +9,10 @@ import { HistoryScreen } from "../../screens/HistoryScreen";
 import { TestScreen } from "../../screens/TestScreen";
 import { WorkoutScreen } from "../../screens/WorkoutScreen";
 import { Header } from "./Header";
-import { LevelPicker } from "./LevelPicker";
 import { Loading } from "./Loading";
+import { MainMenu, type View } from "./MainMenu";
 import { SaveBar } from "./SaveBar";
-import { Tabs } from "./Tabs";
-
-type Tab = "today" | "history" | "test";
+import { ViewHeader } from "./ViewHeader";
 
 interface TrackerProps {
   level: Level;
@@ -24,7 +22,7 @@ interface TrackerProps {
 
 export function Tracker({ level, tests, onLevel }: TrackerProps) {
   const t = useTracker(level);
-  const [tab, setTab] = useState<Tab>("today");
+  const [tab, setTab] = useState<View>("today");
   const [toast, setToast] = useState("");
   const flash = (m: string, ms = 1800) => {
     setToast(m);
@@ -53,26 +51,37 @@ export function Tracker({ level, tests, onLevel }: TrackerProps) {
   };
   const onSwitch = levelSwitch(level, day, t.form, onLevel);
 
+  const menu = (
+    <MainMenu
+      level={level}
+      view={tab}
+      historyLabel={`History (${t.done.length}/${t.seq.length})`}
+      onLevel={onSwitch}
+      onView={setTab}
+    />
+  );
+
   return (
     <>
       <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
-        <LevelPicker value={level} onChange={onSwitch} />
-        <Header pos={t.pos} day={day} program={t.program} seq={t.seq} isDone={t.isDone} onPick={open} />
-        <Tabs
-          value={tab}
-          onChange={setTab}
-          items={[
-            ["today", "Workout"],
-            ["history", `History (${t.done.length}/${t.seq.length})`],
-            ["test", "Test"],
-          ]}
-        />
-        {tab === "today" ? (
-          <WorkoutScreen day={day} form={t.form} loggedOn={logged?.date} onEntry={t.updateEntry} onNotes={t.setNotes} />
-        ) : tab === "test" ? (
-          <TestScreen active={level} results={tests.results} onRecord={tests.record} onSwitch={onSwitch} />
-        ) : (
-          <HistoryScreen t={t} onOpen={open} onReset={onReset} />
+        {tab === "today" && (
+          <>
+            <Header pos={t.pos} day={day} program={t.program} seq={t.seq} isDone={t.isDone} onPick={open} menu={menu} />
+            <div className="mt-4" />
+            <WorkoutScreen day={day} form={t.form} loggedOn={logged?.date} onEntry={t.updateEntry} onNotes={t.setNotes} />
+          </>
+        )}
+        {tab === "history" && (
+          <>
+            <ViewHeader title="History" subtitle={`${t.program.name} · ${t.done.length} of ${t.seq.length} logged`} menu={menu} />
+            <HistoryScreen t={t} onOpen={open} onReset={onReset} />
+          </>
+        )}
+        {tab === "test" && (
+          <>
+            <ViewHeader title="Level test" subtitle={`Training at ${t.program.name}`} menu={menu} />
+            <TestScreen active={level} results={tests.results} onRecord={tests.record} onSwitch={onSwitch} />
+          </>
         )}
       </main>
       {tab === "today" && (
