@@ -57,7 +57,7 @@ export function Tracker({ level, view, onView, tests, onLevel }: TrackerProps) {
       level={level}
       view={view}
       historyLabel={`History (${t.done.length}/${t.seq.length})`}
-      onLevel={onSwitch}
+      onLevel={(l) => void onSwitch(l)}
       onView={onView}
     />
   );
@@ -81,7 +81,7 @@ export function Tracker({ level, view, onView, tests, onLevel }: TrackerProps) {
         {view === "test" && (
           <>
             <ViewHeader title="Level test" subtitle={`Training at ${t.program.name}`} menu={menu} />
-            <TestScreen active={level} results={tests.results} onRecord={tests.record} onSwitch={onSwitch} />
+            <TestScreen active={level} results={tests.results} onRecord={tests.record} onSwitch={(l) => onSwitch(l) && onView("today")} />
           </>
         )}
       </main>
