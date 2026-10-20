@@ -46,9 +46,14 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   [/side crunch/, CORE.sideCrunches],
 ];
 
+// New-Program exercises whose names contain a guided exercise's name but are a
+// different movement. They get no guide until one is written for them.
+const NO_GUIDE = /1-legged squat|chinese push up|1-arm|bouncing push up|sissy squat|side v-up|handstand push up|squat thrust/;
+
 // Look up the guide for a program exercise name like
 // "Push Ups w/hands elevated on platform" or "10 Alternating Back Lunges".
 export function guideFor(name: string): ExerciseGuide | undefined {
   const n = name.toLowerCase();
+  if (NO_GUIDE.test(n)) return undefined;
   return MATCHERS.find(([re]) => re.test(n))?.[1];
 }

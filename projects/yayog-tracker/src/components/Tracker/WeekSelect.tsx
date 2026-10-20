@@ -1,4 +1,4 @@
-import type { Position } from "../program/types";
+import type { Position } from "../../program/types";
 
 interface WeekSelectProps {
   week: number;

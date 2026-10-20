@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { BASIC_PROGRAM, blankEntries, sequence } from "../program/basic";
+import { blankEntries } from "../program/basic";
+import { sequence } from "../program/basic/workout";
+import { PROGRAMS } from "../program/registry";
 import type { Day, Entry, Level, Position, WorkoutRecord } from "../program/types";
 import { store } from "../storage";
 import { useDraftPersistence } from "./useDraftPersistence";
 import { DRAFT_KEY, keyOf, useWorkoutLog } from "./useWorkoutLog";
 
 interface Draft {
+  /** Missing on drafts written before Levels existed; those are Basic. */
+  level?: Level;
   w: number;
   d: number;
   entries: Entry[];
@@ -19,8 +23,8 @@ interface Form {
 }
 
 export function useTracker(level: Level) {
-  const program = BASIC_PROGRAM;
-  const seq = useMemo(() => sequence(), []);
+  const program = PROGRAMS[level];
+  const seq = useMemo(() => sequence(program), [program]);
   const dayAt = (p: Position): Day => program.weeks[p.w]![p.d]!;
 
   const log = useWorkoutLog(level);
@@ -44,7 +48,7 @@ export function useTracker(level: Level) {
     if (!log.loaded || ready) return;
     (async () => {
       const draft = (await store.get(DRAFT_KEY)) as Draft | null;
-      if (draft && program.weeks[draft.w]?.[draft.d]) {
+      if (draft && (draft.level ?? "basic") === level && program.weeks[draft.w]?.[draft.d]) {
         setPos({ w: draft.w, d: draft.d });
         setForm({ entries: draft.entries, notes: draft.notes || "" });
       } else {
@@ -59,7 +63,7 @@ export function useTracker(level: Level) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [log.loaded]);
 
-  const draft = useDraftPersistence({ ready, pos, entries: form.entries, notes: form.notes });
+  const draft = useDraftPersistence({ level, ready, pos, entries: form.entries, notes: form.notes });
 
   const goTo = (p: Position, logMap: Record<string, WorkoutRecord> = log.logs) => {
     setForm(formFor(p, logMap));

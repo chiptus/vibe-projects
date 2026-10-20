@@ -3,7 +3,8 @@ import type { Day, Entry, Metric, Position, Program } from "../types";
 // Ordered list of all workouts in a program, week by week.
 export function sequence(program: Program): Position[] {
   const out: Position[] = [];
-  for (let w = 1; w <= 10; w++) {
+  const weeks = Object.keys(program.weeks).map(Number).sort((a, b) => a - b);
+  for (const w of weeks) {
     const days = program.weeks[w]!;
     for (const d of Object.keys(days).map(Number).sort((a, b) => a - b)) out.push({ w, d });
   }

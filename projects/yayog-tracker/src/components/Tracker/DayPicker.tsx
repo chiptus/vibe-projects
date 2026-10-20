@@ -1,6 +1,6 @@
-import type { Position, Program } from "../program/types";
-import { cx } from "./ui/cx";
-import { ToggleButton } from "./ui/ToggleButton";
+import type { Position, Program } from "../../program/types";
+import { cx } from "../ui/cx";
+import { ToggleButton } from "../ui/ToggleButton";
 
 interface DayPickerProps {
   value: Position;
