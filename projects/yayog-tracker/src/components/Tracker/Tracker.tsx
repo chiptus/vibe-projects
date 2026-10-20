@@ -16,13 +16,14 @@ import { ViewHeader } from "./ViewHeader";
 
 interface TrackerProps {
   level: Level;
+  view: View;
+  onView: (view: View) => void;
   tests: ReturnType<typeof useLevelTests>;
   onLevel: (level: Level) => void;
 }
 
-export function Tracker({ level, tests, onLevel }: TrackerProps) {
+export function Tracker({ level, view, onView, tests, onLevel }: TrackerProps) {
   const t = useTracker(level);
-  const [tab, setTab] = useState<View>("today");
   const [toast, setToast] = useState("");
   const flash = (m: string, ms = 1800) => {
     setToast(m);
@@ -44,7 +45,7 @@ export function Tracker({ level, tests, onLevel }: TrackerProps) {
   const logged = t.logs[keyOf(level, t.pos.w, t.pos.d)];
   const open = (p: Position) => {
     t.goTo(p);
-    setTab("today");
+    onView("today");
   };
   const onReset = () => {
     if (window.confirm("Delete all logged workouts?")) t.resetAll();
@@ -54,37 +55,37 @@ export function Tracker({ level, tests, onLevel }: TrackerProps) {
   const menu = (
     <MainMenu
       level={level}
-      view={tab}
+      view={view}
       historyLabel={`History (${t.done.length}/${t.seq.length})`}
       onLevel={onSwitch}
-      onView={setTab}
+      onView={onView}
     />
   );
 
   return (
     <>
       <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
-        {tab === "today" && (
+        {view === "today" && (
           <>
             <Header pos={t.pos} day={day} program={t.program} seq={t.seq} isDone={t.isDone} onPick={open} menu={menu} />
             <div className="mt-4" />
             <WorkoutScreen day={day} form={t.form} loggedOn={logged?.date} onEntry={t.updateEntry} onNotes={t.setNotes} />
           </>
         )}
-        {tab === "history" && (
+        {view === "history" && (
           <>
             <ViewHeader title="History" subtitle={`${t.program.name} · ${t.done.length} of ${t.seq.length} logged`} menu={menu} />
             <HistoryScreen t={t} onOpen={open} onReset={onReset} />
           </>
         )}
-        {tab === "test" && (
+        {view === "test" && (
           <>
             <ViewHeader title="Level test" subtitle={`Training at ${t.program.name}`} menu={menu} />
             <TestScreen active={level} results={tests.results} onRecord={tests.record} onSwitch={onSwitch} />
           </>
         )}
       </main>
-      {tab === "today" && (
+      {view === "today" && (
         <SaveBar label={toast || (logged ? "Update workout" : "Log workout")} disabled={save.isPending} onClick={() => save.mutate()} />
       )}
     </>
