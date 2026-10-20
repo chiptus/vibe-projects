@@ -1,3 +1,5 @@
+import { createSyncedStore } from "@vibe/sync";
+
 export interface Store {
   /** True when data is persisted outside this browser (the claude.ai artifact backend). */
   readonly isRemote: boolean;
@@ -125,4 +127,6 @@ export const localStore: Store = {
   },
 };
 
-export const store: Store = window.storage ? artifactStore : localStore;
+export const syncedStore = window.storage ? null : createSyncedStore(localStore, { app: "yayog-tracker" });
+
+export const store: Store = syncedStore ? { isRemote: false, ...syncedStore } : artifactStore;

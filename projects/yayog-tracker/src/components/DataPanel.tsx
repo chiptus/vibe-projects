@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "./ui/Button";
+import { SyncPanel } from "./SyncPanel";
 import { Textarea } from "./ui/Textarea";
-import { store } from "../storage";
+import { store, syncedStore } from "../storage";
 import { REMOTE_KEYS_QUERY } from "../hooks/useWorkoutLog";
 import type { useTracker } from "../hooks/useTracker";
 
@@ -40,6 +41,7 @@ export function DataPanel({ t }: DataPanelProps) {
   return (
     <div className="mt-6 border-t border-ln pt-3">
       <p className="mb-2.5 text-xs break-words text-mu">{status}</p>
+      {syncedStore && <SyncPanel store={syncedStore} />}
       <div className="flex items-center justify-between gap-2">
         <Button variant="outline" className="flex-1" onClick={doExport}>
           Export JSON
