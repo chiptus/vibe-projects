@@ -1,6 +1,6 @@
-import { RecommendationCard } from "../components/test/RecommendationCard";
-import { ResultsList } from "../components/test/ResultsList";
-import { TestForm } from "../components/test/TestForm";
+import { RecommendationCard } from "../components/TestScreen/RecommendationCard";
+import { ResultsList } from "../components/TestScreen/ResultsList";
+import { TestForm } from "../components/TestScreen/TestForm";
 import { Card } from "../components/Card";
 import { highestPassed, nextTest, type TestResult } from "../program/levelTests";
 import type { Level } from "../program/types";
