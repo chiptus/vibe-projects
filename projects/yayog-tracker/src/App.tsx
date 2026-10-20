@@ -1,5 +1,5 @@
-import { Loading } from "./components/Loading";
-import { Tracker } from "./components/Tracker";
+import { Loading } from "./components/Tracker/Loading";
+import { Tracker } from "./components/Tracker/Tracker";
 import { useActiveLevel } from "./hooks/useActiveLevel";
 import { useLevelTests } from "./hooks/useLevelTests";
 

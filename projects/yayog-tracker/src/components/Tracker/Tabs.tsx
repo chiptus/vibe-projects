@@ -1,4 +1,4 @@
-import { ToggleButton } from "./ui/ToggleButton";
+import { ToggleButton } from "../ui/ToggleButton";
 
 interface TabsProps<T extends string> {
   value: T;

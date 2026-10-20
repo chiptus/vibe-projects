@@ -1,4 +1,4 @@
-import type { Day, Position, Program } from "../program/types";
+import type { Day, Position, Program } from "../../program/types";
 import { DayPicker } from "./DayPicker";
 import { HeaderTitle } from "./HeaderTitle";
 import { WeekSelect } from "./WeekSelect";

@@ -1,6 +1,6 @@
-import { LEVEL_LABEL } from "../program/registry";
-import type { Level } from "../program/types";
-import { ToggleButton } from "./ui/ToggleButton";
+import { LEVEL_LABEL } from "../../program/registry";
+import type { Level } from "../../program/types";
+import { ToggleButton } from "../ui/ToggleButton";
 
 interface LevelPickerProps {
   value: Level;

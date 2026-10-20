@@ -1,5 +1,5 @@
-import { BLOCK_NAME } from "../program/basic";
-import type { Day, Position, Program } from "../program/types";
+import { BLOCK_NAME } from "../../program/basic";
+import type { Day, Position, Program } from "../../program/types";
 
 interface HeaderTitleProps {
   pos: Position;

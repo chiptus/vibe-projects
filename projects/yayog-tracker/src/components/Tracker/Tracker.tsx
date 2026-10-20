@@ -1,13 +1,14 @@
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { levelSwitch } from "../hooks/levelSwitch";
-import type { useLevelTests } from "../hooks/useLevelTests";
-import { useTracker } from "../hooks/useTracker";
-import { keyOf } from "../hooks/useWorkoutLog";
-import { unlockedLevels } from "../program/levelTests";
-import type { Level, Position } from "../program/types";
-import { HistoryScreen } from "../screens/HistoryScreen";
-import { TestScreen } from "../screens/TestScreen";
-import { WorkoutScreen } from "../screens/WorkoutScreen";
+import { levelSwitch } from "../../hooks/levelSwitch";
+import type { useLevelTests } from "../../hooks/useLevelTests";
+import { useTracker } from "../../hooks/useTracker";
+import { keyOf } from "../../hooks/useWorkoutLog";
+import { unlockedLevels } from "../../program/levelTests";
+import type { Level, Position } from "../../program/types";
+import { HistoryScreen } from "../../screens/HistoryScreen";
+import { TestScreen } from "../../screens/TestScreen";
+import { WorkoutScreen } from "../../screens/WorkoutScreen";
 import { Header } from "./Header";
 import { LevelPicker } from "./LevelPicker";
 import { Loading } from "./Loading";
@@ -25,12 +26,20 @@ interface TrackerProps {
 export function Tracker({ level, tests, onLevel }: TrackerProps) {
   const t = useTracker(level);
   const [tab, setTab] = useState<Tab>("today");
-  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
   const flash = (m: string, ms = 1800) => {
     setToast(m);
     setTimeout(() => setToast(""), ms);
   };
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const err = await t.save();
+      if (err) throw new Error(err);
+    },
+    onSuccess: () => flash("Logged"),
+    onError: (e: Error) => flash(`Save failed: ${e.message}`, 5000),
+  });
 
   if (!t.ready || !t.pos) return <Loading />;
 
@@ -39,12 +48,6 @@ export function Tracker({ level, tests, onLevel }: TrackerProps) {
   const open = (p: Position) => {
     t.goTo(p);
     setTab("today");
-  };
-  const onSave = async () => {
-    setSaving(true);
-    const err = await t.save();
-    setSaving(false);
-    flash(err ? `Save failed: ${err}` : "Logged", err ? 5000 : 1800);
   };
   const onReset = () => {
     if (window.confirm("Delete all logged workouts?")) t.resetAll();
@@ -74,7 +77,7 @@ export function Tracker({ level, tests, onLevel }: TrackerProps) {
         )}
       </main>
       {tab === "today" && (
-        <SaveBar label={toast || (logged ? "Update workout" : "Log workout")} disabled={saving} onClick={onSave} />
+        <SaveBar label={toast || (logged ? "Update workout" : "Log workout")} disabled={save.isPending} onClick={() => save.mutate()} />
       )}
     </>
   );

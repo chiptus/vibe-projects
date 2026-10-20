@@ -6,7 +6,6 @@ import {
   type TestResult,
 } from "../../program/levelTests";
 
-// What a failed attempt missed, and nothing about any other Level.
 export function Shortfalls({ result }: { result: TestResult }) {
   const missed = shortfalls(result.level, result.scores);
   if (missed.length === 0) return null;
