@@ -19,13 +19,13 @@ export function Header({ pos, day, program, seq, isDone, onPick, menu }: HeaderP
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <HeaderTitle pos={pos} />
+        <HeaderTitle pos={pos} program={program} />
         <div className="flex items-center gap-2">
           <WeekSelect week={pos.w} seq={seq} isDone={isDone} onPick={(w) => onPick({ w, d: 1 })} />
           {menu}
         </div>
       </div>
-      <HeaderSubtitle pos={pos} day={day} program={program} />
+      <HeaderSubtitle pos={pos} day={day} />
       <DayPicker value={pos} program={program} daysInWeek={daysInWeek} isDone={isDone} onChange={onPick} />
     </>
   );
