@@ -77,11 +77,6 @@ export function highestPassed(results: TestResult[]): Level {
   return LEVELS[best]!;
 }
 
-/** Levels the person may train at: Basic up to the Highest passed. */
-export function unlockedLevels(results: TestResult[]): Level[] {
-  return LEVELS.slice(0, LEVELS.indexOf(highestPassed(results)) + 1);
-}
-
 /** The only test to show: the Level above the Highest passed, if any. */
 export function nextTest(results: TestResult[]): TestedLevel | null {
   const next = LEVELS[LEVELS.indexOf(highestPassed(results)) + 1];

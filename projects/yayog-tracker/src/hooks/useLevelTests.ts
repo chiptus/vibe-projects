@@ -6,7 +6,7 @@ export const TESTS_KEY = "yayog:tests";
 export const TESTS_QUERY = ["yayog", "tests"] as const;
 
 // The person's recorded Level test results, oldest first. Only real results
-// are stored; pass/fail and unlocked Levels are derived from them.
+// are stored; pass/fail, Highest passed and the next test are derived from them.
 export function useLevelTests() {
   const qc = useQueryClient();
   const query = useQuery({

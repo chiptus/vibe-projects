@@ -4,7 +4,6 @@ import { levelSwitch } from "../../hooks/levelSwitch";
 import type { useLevelTests } from "../../hooks/useLevelTests";
 import { useTracker } from "../../hooks/useTracker";
 import { keyOf } from "../../hooks/useWorkoutLog";
-import { unlockedLevels } from "../../program/levelTests";
 import type { Level, Position } from "../../program/types";
 import { HistoryScreen } from "../../screens/HistoryScreen";
 import { TestScreen } from "../../screens/TestScreen";
@@ -57,7 +56,7 @@ export function Tracker({ level, tests, onLevel }: TrackerProps) {
   return (
     <>
       <main className="mx-auto max-w-lg px-3.5 pt-4 pb-24">
-        <LevelPicker value={level} levels={unlockedLevels(tests.results)} onChange={onSwitch} />
+        <LevelPicker value={level} onChange={onSwitch} />
         <Header pos={t.pos} day={day} program={t.program} seq={t.seq} isDone={t.isDone} onPick={open} />
         <Tabs
           value={tab}
