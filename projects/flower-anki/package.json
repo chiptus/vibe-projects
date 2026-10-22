@@ -1,0 +1,10 @@
+{
+  "name": "flower-anki",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Anki decks of Israeli wildflowers, generated from a wildflowers.co.il export.",
+  "scripts": {
+    "decks": "python3 scripts/build_decks.py",
+    "decks:remote": "python3 scripts/build_decks.py --remote-images"
+  }
+}

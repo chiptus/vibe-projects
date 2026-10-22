@@ -8,6 +8,8 @@ importers:
 
   .: {}
 
+  projects/flower-anki: {}
+
   projects/hub:
     dependencies:
       react:
