@@ -27,5 +27,16 @@ export function useLevelTests() {
       return null;
     },
   });
-  return { results, loaded: query.isSuccess, record: record.mutateAsync };
+  // Remove the result at `index` (position in the oldest-first list).
+  const remove = useMutation({
+    mutationFn: async (index: number): Promise<string | null> => {
+      const current = qc.getQueryData<TestResult[]>(TESTS_QUERY) ?? results;
+      const next = current.filter((_, i) => i !== index);
+      const err = await store.set(TESTS_KEY, { results: next });
+      if (err) return err;
+      qc.setQueryData(TESTS_QUERY, next);
+      return null;
+    },
+  });
+  return { results, loaded: query.isSuccess, record: record.mutateAsync, remove: remove.mutateAsync };
 }
