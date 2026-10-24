@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Level, WorkoutRecord } from "../program/types";
 import { sleep, store } from "../storage";
-import { TESTS_QUERY } from "./useLevelTests";
+import { mergeResults, type TestResult } from "../program/levelTests";
+import { TESTS_KEY, TESTS_QUERY } from "./useLevelTests";
 
 export const INDEX_KEY = "yayog:index";
 export const DRAFT_KEY = "yayog:draft";
@@ -105,11 +106,20 @@ export function useWorkoutLog(level: Level) {
       }
       const keys = Object.keys(parsed).filter((k) => k.startsWith("yayog:") && k !== INDEX_KEY && k !== ACTIVE_KEY);
       for (const k of keys) {
+        if (k === TESTS_KEY) continue; // merged below, not overwritten
+
         const e = await store.set(k, parsed[k]);
         if (e) return `Failed on ${k}: ${e}`;
         await sleep(250);
       }
-      const imported = keys.filter((k) => k !== DRAFT_KEY && (parsed[k] as WorkoutRecord | undefined)?.w);
+      const importedTests = (parsed[TESTS_KEY] as { results?: TestResult[] } | undefined)?.results;
+      if (Array.isArray(importedTests)) {
+        const local = (await store.get(TESTS_KEY)) as { results?: TestResult[] } | null;
+        const merged = mergeResults(Array.isArray(local?.results) ? local.results : [], importedTests);
+        const e = await store.set(TESTS_KEY, { results: merged });
+        if (e) return `Failed on ${TESTS_KEY}: ${e}`;
+      }
+      const imported = keys.filter((k) => k !== DRAFT_KEY && k !== TESTS_KEY && (parsed[k] as WorkoutRecord | undefined)?.w);
       const newDone = [...new Set([...current().done, ...imported])];
       const e = await store.set(INDEX_KEY, { done: newDone });
       if (e) return e;

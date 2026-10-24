@@ -131,4 +131,20 @@ describe("useWorkoutLog", () => {
     expect(data.get(other)).toEqual(rec(1, 1));
     expect(data.get(INDEX_KEY)).toEqual({ done: [other] });
   });
+
+  it("merges imported test results with local ones instead of overwriting", async () => {
+    const scores = { push: 1, pull: 1, core: 1, legs: 1 } as never;
+    const a = { level: "first-class", date: "2026-01-01", scores };
+    const b = { level: "first-class", date: "2026-02-01", scores };
+    const c = { level: "first-class", date: "2026-03-01", scores };
+    data.set("yayog:tests", { results: [a, c] });
+    const { result } = renderHook(() => useWorkoutLog("basic"), { wrapper });
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+    let err;
+    await act(async () => {
+      err = await result.current.importAll(JSON.stringify({ "yayog:tests": { results: [a, b] } }));
+    });
+    expect(err).toBeNull();
+    expect(data.get("yayog:tests")).toEqual({ results: [a, b, c] });
+  });
 });
