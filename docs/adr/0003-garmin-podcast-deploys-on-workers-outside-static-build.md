@@ -1,0 +1,3 @@
+# garmin-podcast deploys on Cloudflare Workers, outside the static build
+
+`garmin-podcast` is a TanStack Start app on Cloudflare Workers with D1 and Better Auth (Google). It needs a server for sign-in, feed polling and the audio proxy, so it cannot produce the static `dist/` served from `/<name>/` that `CLAUDE.md` requires of every project. It is deployed on its own, `scripts/build.mjs` skips it, and the hub links to its URL instead of a stitched path. We rejected splitting a static front end from a separate API Worker: it would give up the framework the owner wants to use. Every other project keeps the static-subpath rule.

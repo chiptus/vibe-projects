@@ -1,0 +1,3 @@
+# Audio is streamed through our Worker, only for the signed-in person's own Podcasts
+
+The watch never downloads from a podcast host. It asks our Worker, which follows the host's redirects and streams the file through without storing it. Reason: tracking redirects and the older TLS stack on some Garmin Wi-Fi modules make direct downloads unreliable (whether the Forerunner 165 is affected is unverified). The Worker only streams Episode URLs that belong to a Podcast in the requesting person's Library, and only for a valid watch credential, so it is never an open proxy; this also keeps a later store release safe. We rejected direct download (playrun's approach, with its sync errors) and caching audio in R2 (hosting others' audio, storage cost).

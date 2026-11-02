@@ -8,6 +8,10 @@ A web app and Garmin watch app that put podcast episodes on a Garmin Forerunner 
 A show, identified by its RSS feed URL.
 _Avoid_: Channel, feed (say "feed" only for the RSS document itself)
 
+**Library**:
+The Podcasts a person has saved so they can browse their Episodes and add them to the Playlist.
+_Avoid_: Subscriptions, favourites
+
 **Episode**:
 One item in a Podcast's feed, with its audio file.
 _Avoid_: Track, item
