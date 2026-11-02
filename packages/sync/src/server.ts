@@ -30,7 +30,17 @@ const json = (body: unknown, status = 200) =>
 const isEntry = (e: unknown): e is Entry => {
   if (!e || typeof e !== "object") return false;
   const { v, t, d } = e as Entry;
-  return typeof v === "string" && typeof t === "number" && Number.isFinite(t) && (d === undefined || typeof d === "boolean");
+  return typeof v === "string" && Number.isSafeInteger(t) && t >= 0 && (d === undefined || typeof d === "boolean");
+};
+
+/** A live value is stored as JSON text; clients parse it when applying, so it must parse. */
+const isJson = (text: string) => {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 async function sha256Hex(text: string): Promise<string> {
@@ -63,9 +73,9 @@ export function createSyncHandler({ storage }: { storage: SyncStorage }) {
 
     let body: SyncRequest;
     try {
-      const text = await req.text();
-      if (text.length > LIMITS.body) return json({ error: "request too large" }, 413);
-      body = JSON.parse(text) as SyncRequest;
+      const bytes = new Uint8Array(await req.arrayBuffer());
+      if (bytes.byteLength > LIMITS.body) return json({ error: "request too large" }, 413);
+      body = JSON.parse(new TextDecoder().decode(bytes)) as SyncRequest;
     } catch {
       return json({ error: "invalid JSON" }, 400);
     }
@@ -90,6 +100,7 @@ export function createSyncHandler({ storage }: { storage: SyncStorage }) {
       if (e.v.length > LIMITS.value) {
         return json({ error: `value for "${k.slice(0, 60)}" is too large (max ${LIMITS.value} characters)` }, 413);
       }
+      if (!e.d && !isJson(e.v)) return json({ error: `value for "${k.slice(0, 60)}" is not valid JSON` }, 400);
     }
 
     const silo = `${await sha256Hex(token)}/${body.app}`;

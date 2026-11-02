@@ -373,6 +373,86 @@ describe.each(Object.keys(backends))("sync (%s)", (name) => {
       expect(await other.store.get("k")).toBe("local-new");
     });
 
+    /** A fetch whose first call (and only that) is held until `release()`. */
+    function heldFirst() {
+      let release!: () => void;
+      const gate = new Promise<void>((r) => (release = r));
+      let first = true;
+      const fetchHeld = (async (url: string, init: RequestInit) => {
+        const res = await defaultFetch(url, init);
+        if (first) {
+          first = false;
+          await gate;
+        }
+        return res;
+      }) as unknown as typeof fetch;
+      return { fetchHeld, release };
+    }
+
+    it("turning sync off mid-round neither applies data nor flips the status back on", async () => {
+      await rawPost(TOKEN, { app: "test", entries: { remote: { v: "1", t: 5 } } });
+      const { fetchHeld, release } = heldFirst();
+      const dev = device({ fetch: fetchHeld });
+      const syncing = dev.store.sync();
+      await new Promise((r) => setTimeout(r, 10));
+      await dev.store.disconnect();
+      release();
+      await syncing;
+      expect(dev.store.getStatus().state).toBe("off");
+      expect(user(dev.local)).toEqual([]);
+    });
+
+    it("switching accounts mid-round never mixes the two accounts' data", async () => {
+      await rawPost(TOKEN, { app: "test", entries: { fromA: { v: "1", t: 5 } } });
+      const { fetchHeld, release } = heldFirst();
+      const dev = device({ fetch: fetchHeld });
+      dev.local.data.set("mine", "x");
+      const syncing = dev.store.sync(); // round for account A, held after its response
+      await new Promise((r) => setTimeout(r, 10));
+      const B = generateSyncToken();
+      const joined = dev.store.connect(B, "merge");
+      release();
+      await Promise.all([syncing, joined]);
+      expect(await joined).toBeNull();
+      expect(dev.token()).toBe(B);
+      expect(user(dev.local)).toEqual(["mine"]); // account A's key did not leak in
+      const check = device({ token: B });
+      await check.store.sync();
+      expect(user(check.local)).toEqual(["mine"]);
+    });
+
+    it("merge reports the failure of its own round, not an older round's success", async () => {
+      const B = generateSyncToken();
+      const { fetchHeld, release } = heldFirst();
+      const failB = ((url: string, init: RequestInit) => {
+        if ((init.headers as Record<string, string>).authorization === `Bearer ${B}`) return Promise.resolve(new Response("{}", { status: 500 }));
+        return fetchHeld(url, init);
+      }) as unknown as typeof fetch;
+      const dev = device({ fetch: failB });
+      const syncing = dev.store.sync();
+      await new Promise((r) => setTimeout(r, 10));
+      const joined = dev.store.connect(B, "merge");
+      release();
+      await syncing;
+      expect(await joined).toMatch(/500/);
+    });
+
+    it("uploads a stored JSON null, and turns a vanished key into a deletion", async () => {
+      const a = device();
+      await a.store.set("nothing", null);
+      await a.store.set("gone", 1);
+      a.local.data.delete("gone"); // removed behind the sync layer's back while still unsent
+      await a.store.sync();
+
+      const b = device();
+      await b.store.sync();
+      expect(b.local.data.has("nothing")).toBe(true);
+      expect(await b.store.get("nothing")).toBeNull();
+      expect(b.local.data.has("gone")).toBe(false);
+      const state = (await (await rawPost(TOKEN, { app: "test", entries: {} })).json()) as { entries: Entries };
+      expect(state.entries.gone?.d).toBe(true);
+    });
+
     it("reports a failure to save sync bookkeeping instead of claiming success", async () => {
       const dev = device({ local: memKV((k) => k === "__sync:ledger") });
       const err = await dev.store.set("a", 1);
@@ -437,6 +517,12 @@ describe.each(Object.keys(backends))("sync (%s)", (name) => {
       expect(((await res.json()) as { error: string }).error).toMatch(/too large/);
     });
 
+    it("rejects a live value that is not JSON, and a non-integer version", async () => {
+      for (const entry of [{ v: "not-json", t: 2 }, { v: "1", t: 1.5 }, { v: "1", t: 1e100 }, { v: "1", t: -1 }]) {
+        expect((await rawPost(TOKEN, { app: "test", entries: { k: entry } })).status).toBe(400);
+      }
+    });
+
     it("surfaces the server's reason as the sync error", async () => {
       const a = device();
       a.local.data.set("big", "x".repeat(LIMITS.value + 1));
@@ -461,9 +547,18 @@ describe("chunkEntries", () => {
     const batches = chunkEntries(entries);
     for (const b of batches) {
       const chars = Object.values(b).reduce((n, e) => n + e.v.length, 0);
-      expect(chars).toBeLessThanOrEqual(PUSH_LIMITS.chars);
+      expect(chars).toBeLessThanOrEqual(PUSH_LIMITS.bytes);
     }
     expect(batches.flatMap((b) => Object.keys(b))).toHaveLength(7);
+  });
+
+  it("sizes batches by UTF-8 bytes, not characters", () => {
+    // 100k CJK characters are 300k bytes each: three would be 900k bytes but only 300k characters.
+    const entries = Object.fromEntries(Array.from({ length: 6 }, (_, i) => [`k${i}`, { v: "漢".repeat(100_000), t: 2 }]));
+    const body = (b: object) => new TextEncoder().encode(JSON.stringify({ app: "x", entries: b })).length;
+    const batches = chunkEntries(entries);
+    expect(batches.length).toBeGreaterThan(1);
+    for (const b of batches) expect(body(b)).toBeLessThanOrEqual(LIMITS.body);
   });
 
   it("gives an empty set no batches", () => {

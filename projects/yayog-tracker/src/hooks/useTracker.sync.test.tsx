@@ -6,13 +6,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const data = new Map<string, unknown>();
 const writes: string[] = [];
-let syncListener: ((status: unknown, remoteApplied: boolean) => void) | null = null;
+let syncListener: ((status: unknown, change: "remote" | "replaced" | null) => void) | null = null;
+let draftReadDelay = 0;
 
 vi.mock("../storage", () => ({
   sleep: async () => {},
   store: {
     isRemote: false,
-    get: async (k: string) => data.get(k) ?? null,
+    get: async (k: string) => {
+      if (k === "yayog:draft" && draftReadDelay) await new Promise((r) => setTimeout(r, draftReadDelay));
+      return data.get(k) ?? null;
+    },
     set: async (k: string, v: unknown) => {
       writes.push(k);
       data.set(k, v);
@@ -22,7 +26,7 @@ vi.mock("../storage", () => ({
     keys: async (prefix: string) => [...data.keys()].filter((k) => k.startsWith(prefix)),
   },
   syncedStore: {
-    subscribe: (l: (status: unknown, remoteApplied: boolean) => void) => {
+    subscribe: (l: (status: unknown, change: "remote" | "replaced" | null) => void) => {
       syncListener = l;
       return () => void (syncListener = null);
     },
@@ -43,9 +47,9 @@ const hide = () => {
   document.dispatchEvent(new Event("visibilitychange"));
 };
 const remoteDraft = (notes: string) => data.set(DRAFT_KEY, { w: 1, d: 1, entries: [], notes, at: Date.now() });
-const remoteArrives = async () => {
+const remoteArrives = async (change: "remote" | "replaced" = "remote") => {
   await act(async () => {
-    syncListener?.({}, true);
+    syncListener?.({}, change);
     await new Promise((r) => setTimeout(r, 20));
   });
 };
@@ -56,6 +60,7 @@ beforeEach(() => {
   data.clear();
   writes.length = 0;
   syncListener = null;
+  draftReadDelay = 0;
 });
 
 async function readyTracker() {
@@ -109,5 +114,40 @@ describe("useTracker with sync", () => {
     hide();
     await waitFor(() => expect(draftWrites()).toBe(1));
     expect(data.get(DRAFT_KEY)).toMatchObject({ notes: "my edit" });
+  });
+
+  it("resets an edited form when this device's data is replaced", async () => {
+    const { result } = await readyTracker();
+    act(() => result.current.setNotes("typing on this device"));
+
+    remoteDraft("the account's draft");
+    await remoteArrives("replaced");
+
+    expect(result.current.form.notes).toBe("the account's draft");
+    // ...and the form is clean again, so a later plain remote change can refresh it.
+    remoteDraft("a later change");
+    await remoteArrives();
+    expect(result.current.form.notes).toBe("a later change");
+  });
+
+  it("keeps an edit made while the incoming draft was still being read", async () => {
+    const { result } = await readyTracker();
+    remoteDraft("from my other device");
+    draftReadDelay = 60;
+    const arriving = remoteArrives();
+    await new Promise((r) => setTimeout(r, 15));
+    act(() => result.current.setNotes("typed meanwhile"));
+    await arriving;
+    await act(async () => void (await new Promise((r) => setTimeout(r, 80)))); // the slow draft read finishes
+    expect(result.current.form.notes).toBe("typed meanwhile");
+  });
+
+  it("continues from this Level's workouts only", async () => {
+    const { result } = await readyTracker();
+    const master = { level: "master", w: 2, d: 1, date: "2026-01-01", entries: [], notes: "" };
+    data.set("yayog:master:w2:d1", master); // arrives by sync, from another Level
+    data.set("yayog:index", { done: ["yayog:master:w2:d1"] });
+    await remoteArrives();
+    expect(result.current.pos).toEqual({ w: result.current.seq[0]!.w, d: result.current.seq[0]!.d }); // the Program's start
   });
 });

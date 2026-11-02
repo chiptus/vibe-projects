@@ -1,8 +1,27 @@
 // @vitest-environment jsdom
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ConnectMode, SyncedStore, SyncStatus } from "@vibe/sync";
+import { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SyncPanel } from "./SyncPanel";
+import { SyncPanel as Panel } from "./SyncPanel";
+
+// jsdom has no modal <dialog>; emulate the parts the component relies on.
+HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+  this.setAttribute("open", "");
+};
+HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+  this.removeAttribute("open");
+};
+
+function SyncPanel({ store }: { store: SyncedStore }) {
+  const [client] = useState(() => new QueryClient({ defaultOptions: { mutations: { retry: false } } }));
+  return (
+    <QueryClientProvider client={client}>
+      <Panel store={store} />
+    </QueryClientProvider>
+  );
+}
 
 const TOKEN = "a".repeat(64);
 
@@ -92,13 +111,13 @@ describe("SyncPanel", () => {
     const { store, setStatus } = fakeStore(vi.fn(async () => null));
     render(<SyncPanel store={store} />);
     fireEvent.click(screen.getByText("Change token…"));
-    fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByRole("dialog")).toBeNull();
+    fireEvent(screen.getByRole("dialog"), new Event("cancel", { cancelable: true })); // what Escape does
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 
     act(() => setStatus({ state: "ok", lastSyncAt: Date.now(), error: null }));
     expect(screen.getByText(/^Synced/)).toBeTruthy();
     fireEvent.click(screen.getByText("Turn off"));
-    expect(store.disconnect).toHaveBeenCalled();
+    await waitFor(() => expect(store.disconnect).toHaveBeenCalled());
     await waitFor(() => expect(screen.getByText(/Sync is off/)).toBeTruthy());
   });
 });

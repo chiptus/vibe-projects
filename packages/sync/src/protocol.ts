@@ -23,7 +23,7 @@ export const MAX_TOKEN_LENGTH = 256;
 
 /** Server-enforced limits. The client sizes its pushes to stay inside them. */
 export const LIMITS = {
-  /** Request body, in characters. */
+  /** Request body, in UTF-8 bytes. */
   body: 2_000_000,
   entriesPerRequest: 500,
   key: 200,

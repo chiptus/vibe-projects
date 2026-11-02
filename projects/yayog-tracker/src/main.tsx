@@ -8,8 +8,8 @@ import "./styles.css";
 const queryClient = new QueryClient();
 
 // Remote changes land in the local store behind react-query's back; refetch everything.
-syncedStore?.subscribe((_status, remoteApplied) => {
-  if (remoteApplied) void queryClient.invalidateQueries();
+syncedStore?.subscribe((_status, change) => {
+  if (change) void queryClient.invalidateQueries();
 });
 
 createRoot(document.getElementById("root")!).render(

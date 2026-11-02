@@ -28,16 +28,25 @@ export const REMOTE_KEYS_QUERY = ["yayog", "remote-keys"] as const;
 const LOG_QUERY = ["yayog", "log"] as const;
 const EMPTY: LogData = { done: [], logs: {} };
 
+const RECORD_KEY = /^yayog:[^:]+:w\d+:d\d+$/;
+
+/**
+ * The completed workouts. The index gives their order, but it is one shared key that sync
+ * resolves as a whole (newest write wins), so a workout whose record exists yet is missing
+ * from the winning index would vanish. Records are the truth: any not in the index follow it, by date.
+ */
 export async function loadLog(): Promise<LogData> {
   const idx = ((await store.get(INDEX_KEY)) as Index | null) || { done: [] };
+  const extra = ((await store.keys("yayog:")) ?? []).filter((k) => RECORD_KEY.test(k) && !idx.done.includes(k));
   const logs: Record<string, WorkoutRecord> = {};
   await Promise.all(
-    idx.done.map(async (k) => {
+    [...idx.done, ...extra].map(async (k) => {
       const v = await store.get(k);
       if (v) logs[k] = v as WorkoutRecord;
     }),
   );
-  return { done: idx.done, logs };
+  const orphans = extra.filter((k) => logs[k]).sort((a, b) => (logs[a]!.date ?? "").localeCompare(logs[b]!.date ?? "") || a.localeCompare(b));
+  return { done: [...idx.done, ...orphans], logs };
 }
 
 // Owns the persisted set of completed workouts: a cached query for loading

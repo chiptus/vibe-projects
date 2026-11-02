@@ -22,12 +22,19 @@ export interface SyncStatus {
  */
 export type ConnectMode = "merge" | "replace";
 
+/**
+ * How local data was changed by something other than the app itself:
+ * - `remote`: newer items arrived from the account and were merged in.
+ * - `replaced`: this device's data was discarded and swapped for the account's.
+ */
+export type DataChange = "remote" | "replaced";
+
 export interface SyncedStore extends KV {
   /** Push local changes and pull remote ones now. */
   sync(): Promise<void>;
   getStatus(): SyncStatus;
-  /** Fires on every status change; `remoteApplied` is true when remote data changed the local store. */
-  subscribe(listener: (status: SyncStatus, remoteApplied: boolean) => void): () => void;
+  /** Fires on every status change; `change` says how (if at all) the local data was changed by sync. */
+  subscribe(listener: (status: SyncStatus, change: DataChange | null) => void): () => void;
   /** Join (or switch to) the account for `token`. Resolves to null on success, or an error message. */
   connect(token: string, mode: ConnectMode): Promise<string | null>;
   /** Stop syncing on this device. Local data is kept. */

@@ -48,8 +48,16 @@ export function useTracker(level: Level) {
   const touched = useRef(false);
 
   // Pick up an in-progress draft, or continue after the last completed workout.
-  const initialise = async (data: { done: string[]; logs: Record<string, WorkoutRecord> }) => {
+  // `force` is for a Replace, which throws away what's on screen along with the old data.
+  const initialise = async (all: { done: string[]; logs: Record<string, WorkoutRecord> }, force = false) => {
+    // The shared log holds every Level; this form only continues its own.
+    const prefix = `yayog:${level}:`;
+    const data = {
+      done: all.done.filter((k) => k.startsWith(prefix)),
+      logs: Object.fromEntries(Object.entries(all.logs).filter(([k]) => k.startsWith(prefix))),
+    };
     const saved = (await store.get(DRAFT_KEY)) as Draft | null;
+    if (!force && touched.current) return; // an edit landed while the draft was being read: it wins
     let at: Position;
     let next: Form;
     if (saved && (saved.level ?? "basic") === level && program.weeks[saved.w]?.[saved.d]) {
@@ -82,14 +90,16 @@ export function useTracker(level: Level) {
   }, [log.loaded]);
 
   // When data syncs in from another device, refresh the form from it, but only while the
-  // user hasn't started editing: their in-progress edits always win.
+  // user hasn't started editing: their in-progress edits always win. Replacing this device's
+  // data with an account's is the user's explicit choice, so that always resets the form.
   useEffect(() => {
     if (!syncedStore) return;
-    return syncedStore.subscribe((_status, remoteApplied) => {
-      if (!remoteApplied || !readyRef.current || touched.current) return;
-      void loadLog().then((data) => {
-        if (!touched.current) return initialiseRef.current(data); // re-check: an edit may have landed meanwhile
-      });
+    return syncedStore.subscribe((_status, change) => {
+      if (!change || !readyRef.current) return;
+      const force = change === "replaced";
+      if (force) touched.current = false;
+      else if (touched.current) return;
+      void loadLog().then((data) => initialiseRef.current(data, force)); // re-checks for edits itself
     });
   }, []);
 

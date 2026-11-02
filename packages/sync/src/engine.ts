@@ -11,30 +11,33 @@ export interface EngineDeps {
   endpoint: string;
   doFetch: typeof fetch;
   lock: Lock;
+  /** The token this device is currently syncing with (null when sync is off). */
+  getToken: () => string | null;
 }
 
-/** Push batches stay well inside the server's per-request limits. */
-export const PUSH_LIMITS = { entries: 400, chars: 900_000 };
+/** Push batches stay well inside the server's per-request limits (the body limit is in UTF-8 bytes). */
+export const PUSH_LIMITS = { entries: 400, bytes: 900_000 };
 
-const ENTRY_OVERHEAD = 60; // JSON punctuation around each entry
+const encoder = new TextEncoder();
+const byteLength = (text: string) => encoder.encode(text).length;
 
 /** Split entries into batches bounded by count and serialised size. */
 export function chunkEntries(entries: Entries): Entries[] {
   const batches: Entries[] = [];
   let batch: Entries = {};
   let count = 0;
-  let chars = 0;
+  let bytes = 0;
   for (const [k, e] of Object.entries(entries)) {
-    const size = k.length + e.v.length + ENTRY_OVERHEAD;
-    if (count > 0 && (count >= PUSH_LIMITS.entries || chars + size > PUSH_LIMITS.chars)) {
+    const size = byteLength(JSON.stringify(k)) + byteLength(JSON.stringify(e)) + 1; // as serialised, plus the colon/comma
+    if (count > 0 && (count >= PUSH_LIMITS.entries || bytes + size > PUSH_LIMITS.bytes)) {
       batches.push(batch);
       batch = {};
       count = 0;
-      chars = 0;
+      bytes = 0;
     }
     batch[k] = e;
     count++;
-    chars += size;
+    bytes += size;
   }
   if (count > 0) batches.push(batch);
   return batches;
@@ -82,42 +85,67 @@ export async function applyRemoteEntry(local: KV, ledger: Ledger, k: string, r: 
  * Everything that touches the ledger or local values runs under the lock; the
  * network calls do not. Throws on failure, leaving dirty keys dirty.
  */
-export async function runSync(d: EngineDeps, token: string): Promise<{ applied: boolean; pending: boolean }> {
+export interface RoundResult {
+  applied: boolean;
+  pending: boolean;
+  /** The active account changed (or sync was turned off) mid-round, so nothing was applied. */
+  obsolete?: boolean;
+}
+
+const OBSOLETE: RoundResult = { applied: false, pending: false, obsolete: true };
+
+export async function runSync(d: EngineDeps, token: string): Promise<RoundResult> {
   const fp = tokenFingerprint(token);
+  // The token only changes under the lock, so checking it inside each lock is race-free.
+  const active = () => d.getToken() === token;
 
   // 1. Decide what to send.
   const sentT: Record<string, number> = {};
   const outgoing: Entries = {};
-  await d.lock(async () => {
+  const planned = await d.lock(async () => {
+    if (!active()) return false;
     const ledger = await loadLedger(d.local);
     // A different account's cache must not leak into this one: start over and re-adopt.
     if (ledger.token && ledger.token !== fp) ledger.keys = {};
     ledger.token = fp;
     // Adopt pre-existing local keys (data from before sync was on) at t=1: any remote
     // value wins, but a key the server lacks still gets pushed.
-    for (const k of (await d.local.keys("")) ?? []) {
+    const present = await d.local.keys("");
+    if (!present) throw new Error("Could not list local data");
+    const have = new Set(present);
+    for (const k of present) {
       if (!isInternalKey(k) && !ledger.keys[k]) ledger.keys[k] = { t: 1, dirty: true };
     }
     for (const [k, m] of Object.entries(ledger.keys)) {
       if (!m.dirty) continue;
+      if (!m.d && !have.has(k)) {
+        // Gone locally without a tombstone: record the deletion so it reaches the account.
+        m.d = true;
+        m.t = Math.max(Date.now(), m.t + 1);
+      }
+      // A key that is present is sent as stored, even when its value is JSON null.
       const value = m.d ? null : await d.local.get(k);
-      if (value === null && !m.d) continue; // vanished locally without a tombstone
       outgoing[k] = { v: JSON.stringify(value), t: m.t, ...(m.d ? { d: true } : {}) };
       sentT[k] = m.t;
     }
     await mustSave(d.local, ledger);
+    return true;
   });
+  if (!planned) return OBSOLETE;
 
   // 2. Push in batches; the last response is the server's state after everything.
   let remote: Entries = {};
   const batches = chunkEntries(outgoing);
   if (batches.length === 0) remote = await pullRemote(d, token);
-  for (const batch of batches) remote = await post(d, token, batch);
+  for (const batch of batches) {
+    if (!active()) return OBSOLETE; // switched account or turned off: stop sending this account's data
+    remote = await post(d, token, batch);
+  }
 
   // 3. Reconcile.
   return d.lock(async () => {
     const ledger = await loadLedger(d.local);
-    if (ledger.token !== fp) return { applied: false, pending: false }; // account changed mid-flight: obsolete
+    if (!active() || ledger.token !== fp) return OBSOLETE;
     let applied = false;
     try {
       for (const [k, r] of Object.entries(remote)) {
