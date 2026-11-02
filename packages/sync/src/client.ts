@@ -26,7 +26,15 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
     getToken,
   };
 
-  const status = createStatus();
+  // Other tabs share this IndexedDB, so tell them when sync changed their data under them.
+  const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel(`vibe-sync:${opts.app}`);
+  const status = createStatus((change) => channel?.postMessage(change));
+  if (channel) {
+    (channel as unknown as { unref?: () => void }).unref?.(); // don't keep a Node process alive
+    channel.onmessage = (e: MessageEvent) => {
+      if (e.data === "remote" || e.data === "replaced") status.emitExternal(e.data);
+    };
+  }
   const rounds = createRounds(deps, status, opts.debounceMs ?? 1500);
   const account = createAccount(deps, status, rounds, setToken);
   const sync = async () => void (await rounds.syncNow());
@@ -63,7 +71,7 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
       return err;
     },
     async del(k) {
-      await mutate(
+      const err = await mutate(
         k,
         async () => {
           await local.del(k);
@@ -71,6 +79,7 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
         },
         true,
       );
+      if (err) throw new Error(err); // the deletion has no durable tombstone: a later pull could bring the value back
       rounds.schedule();
     },
     sync,

@@ -27,8 +27,9 @@ export const LIMITS = {
   body: 2_000_000,
   entriesPerRequest: 500,
   key: 200,
+  /** One value, in UTF-8 bytes. */
   value: 256_000,
-  /** Per (token, app): number of keys (tombstones included) and total value characters. */
+  /** Per (token, app): number of keys (tombstones included) and total value bytes (UTF-8). */
   keysPerSilo: 2000,
   bytesPerSilo: 5_000_000,
 };

@@ -48,7 +48,9 @@ async function sha256Hex(text: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-const size = (entries: Entries) => Object.values(entries).reduce((n, e) => n + e.v.length, 0);
+const encoder = new TextEncoder();
+const byteLength = (text: string) => encoder.encode(text).length;
+const size = (entries: Entries) => Object.values(entries).reduce((n, e) => n + byteLength(e.v), 0);
 
 /**
  * Last-write-wins sync endpoint, one private silo per token.
@@ -97,8 +99,8 @@ export function createSyncHandler({ storage }: { storage: SyncStorage }) {
     for (const [k, e] of incoming) {
       if (!isEntry(e)) return json({ error: `invalid entry "${k.slice(0, 60)}"` }, 400);
       if (k.length === 0 || k.length > LIMITS.key) return json({ error: `invalid key "${k.slice(0, 60)}"` }, 400);
-      if (e.v.length > LIMITS.value) {
-        return json({ error: `value for "${k.slice(0, 60)}" is too large (max ${LIMITS.value} characters)` }, 413);
+      if (byteLength(e.v) > LIMITS.value) {
+        return json({ error: `value for "${k.slice(0, 60)}" is too large (max ${LIMITS.value} bytes)` }, 413);
       }
       if (!e.d && !isJson(e.v)) return json({ error: `value for "${k.slice(0, 60)}" is not valid JSON` }, 400);
     }

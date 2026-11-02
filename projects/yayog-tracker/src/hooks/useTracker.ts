@@ -4,6 +4,7 @@ import { sequence } from "../program/basic/workout";
 import { PROGRAMS } from "../program/registry";
 import type { Day, Entry, Level, Position, WorkoutRecord } from "../program/types";
 import { store, syncedStore } from "../storage";
+import type { DataChange } from "@vibe/sync";
 import { useDraftPersistence } from "./useDraftPersistence";
 import { DRAFT_KEY, keyOf, loadLog, useWorkoutLog } from "./useWorkoutLog";
 
@@ -46,6 +47,10 @@ export function useTracker(level: Level) {
 
   // True once the user has changed anything since the form was loaded.
   const touched = useRef(false);
+  // Counts edits, so a save can tell whether anything was typed while it was in flight.
+  const edits = useRef(0);
+  // A sync change that arrived before the first initialisation finished; replayed afterwards.
+  const pendingChange = useRef<DataChange | null>(null);
 
   // Pick up an in-progress draft, or continue after the last completed workout.
   // `force` is for a Replace, which throws away what's on screen along with the old data.
@@ -85,21 +90,39 @@ export function useTracker(level: Level) {
   // Once the log has loaded, do the first initialisation.
   useEffect(() => {
     if (!log.loaded || ready) return;
-    initialise({ done: log.done, logs: log.logs }).then(() => setReady(true));
+    initialise({ done: log.done, logs: log.logs }).then(() => {
+      setReady(true);
+      const missed = pendingChange.current;
+      pendingChange.current = null;
+      if (missed) refreshRef.current(missed);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [log.loaded]);
 
   // When data syncs in from another device, refresh the form from it, but only while the
   // user hasn't started editing: their in-progress edits always win. Replacing this device's
   // data with an account's is the user's explicit choice, so that always resets the form.
+  const refresh = (change: DataChange) => {
+    const force = change === "replaced";
+    if (force) touched.current = false;
+    else if (touched.current) return;
+    void loadLog().then((data) => initialiseRef.current(data, force)); // re-checks for edits itself
+  };
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  });
+
   useEffect(() => {
     if (!syncedStore) return;
     return syncedStore.subscribe((_status, change) => {
-      if (!change || !readyRef.current) return;
-      const force = change === "replaced";
-      if (force) touched.current = false;
-      else if (touched.current) return;
-      void loadLog().then((data) => initialiseRef.current(data, force)); // re-checks for edits itself
+      if (!change) return;
+      if (!readyRef.current) {
+        // Still initialising: remember it (a Replace outranks an ordinary change) and apply it once ready.
+        pendingChange.current = pendingChange.current === "replaced" ? "replaced" : change;
+        return;
+      }
+      refreshRef.current(change);
     });
   }, []);
 
@@ -110,6 +133,7 @@ export function useTracker(level: Level) {
   };
   const updateEntry = (i: number, patch: Partial<Entry>) => {
     touched.current = true;
+    edits.current++;
     setForm((f) => ({
       ...f,
       entries: f.entries.map((e, j) => (j === i ? ({ ...e, ...patch } as Entry) : e)),
@@ -117,6 +141,7 @@ export function useTracker(level: Level) {
   };
   const setNotes = (notes: string) => {
     touched.current = true;
+    edits.current++;
     setForm((f) => ({ ...f, notes }));
   };
 
@@ -124,6 +149,7 @@ export function useTracker(level: Level) {
   const save = async (): Promise<string | null> => {
     if (!pos) return "not ready";
     draft.setSaving(true);
+    const editsAtStart = edits.current;
     try {
       const key = keyOf(level, pos.w, pos.d);
       const rec: WorkoutRecord = {
@@ -139,6 +165,9 @@ export function useTracker(level: Level) {
       const onScreen = next ? formFor(next, { ...log.logs, [key]: rec }) : form;
       if (next) goTo(next, { ...log.logs, [key]: rec });
       draft.markSaved({ ...(next ?? pos), ...onScreen });
+      // The next workout is a clean form again, so remote drafts may refresh it. Anything typed
+      // while the save was in flight keeps the guard on.
+      if (edits.current === editsAtStart) touched.current = false;
       return null;
     } finally {
       draft.setSaving(false);

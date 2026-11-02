@@ -45,11 +45,25 @@ export function createAccount(
     }
     try {
       await lock(async () => {
-        const ledger: Ledger = { token: tokenFingerprint(token), keys: {} };
-        for (const k of (await local.keys("")) ?? []) if (!isInternalKey(k)) await local.del(k);
-        for (const [k, r] of Object.entries(remote)) await applyRemoteEntry(local, ledger, k, r);
-        await mustSave(local, ledger);
-        setToken(token);
+        const existing = await local.keys("");
+        if (!existing) throw new Error("Could not list this device's data, so it was left untouched.");
+        try {
+          const ledger: Ledger = { token: tokenFingerprint(token), keys: {} };
+          for (const k of existing) if (!isInternalKey(k)) await local.del(k);
+          for (const [k, r] of Object.entries(remote)) await applyRemoteEntry(local, ledger, k, r);
+          await mustSave(local, ledger);
+          setToken(token);
+        } catch (e) {
+          // Half-replaced data must never be uploaded to either account: stop syncing here and
+          // forget the bookkeeping. The old account still has its copy; Replace again to recover.
+          try {
+            setToken(null);
+            await saveLedger(local, { keys: {} });
+          } catch {
+            // nothing more can be done; the error below tells the user
+          }
+          throw new Error(`Replace failed part-way and sync was turned off (${errorMessage(e)}). Try Replace again.`);
+        }
       });
     } catch (e) {
       return errorMessage(e);
@@ -81,7 +95,7 @@ export function createAccount(
 
     async disconnect() {
       rounds.cancelScheduled();
-      await lock(async () => setToken(null));
+      await lock(async () => setToken(null)); // throws if the token could not be removed: still syncing
       status.emit({ state: "off", error: null });
     },
   };

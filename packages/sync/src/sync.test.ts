@@ -4,7 +4,7 @@ import { chunkEntries, PUSH_LIMITS } from "./engine";
 import { pgStorage } from "./pg";
 import { LIMITS, type Entries } from "./protocol";
 import { createSyncHandler, type SyncStorage } from "./server";
-import { generateSyncToken } from "./token";
+import { generateSyncToken, setSyncToken } from "./token";
 import type { KV } from "./types";
 
 type TestKV = KV & { data: Map<string, unknown> };
@@ -253,6 +253,32 @@ describe.each(Object.keys(backends))("sync (%s)", (name) => {
       expect(dev.token()).toBe(TOKEN);
     });
 
+    it("replace leaves the device untouched when it can't list its own data", async () => {
+      const acct = device();
+      await acct.store.set("a", 1);
+      await acct.store.sync();
+      const local = { ...memKV(), keys: async () => null };
+      const dev = device({ token: null, local });
+      local.data.set("keep", 1);
+      expect(await dev.store.connect(TOKEN, "replace")).toMatch(/untouched/);
+      expect(dev.token()).toBeNull();
+      expect(local.data.has("keep")).toBe(true);
+    });
+
+    it("a replace that fails part-way turns sync off instead of mixing two accounts", async () => {
+      const acct = device();
+      await acct.store.set("a", 1);
+      await acct.store.sync();
+      const local = memKV((k) => k === "a"); // the account's value can't be written here
+      const dev = device({ token: "x".repeat(40), local });
+      local.data.set("old", "from the previous account");
+      expect(await dev.store.connect(TOKEN, "replace")).toMatch(/turned off/);
+      expect(dev.token()).toBeNull();
+      await dev.store.sync(); // off: must send nothing anywhere
+      const state = (await (await rawPost(TOKEN, { app: "test", entries: {} })).json()) as Entries;
+      expect(Object.keys((state as unknown as { entries: Entries }).entries)).toEqual(["a"]);
+    });
+
     it("replace refuses an empty account and changes nothing", async () => {
       const dev = device({ token: null });
       dev.local.data.set("keep", 1);
@@ -453,6 +479,22 @@ describe.each(Object.keys(backends))("sync (%s)", (name) => {
       expect(state.entries.gone?.d).toBe(true);
     });
 
+    it("a delete whose tombstone can't be saved fails instead of resolving", async () => {
+      const dev = device({ local: memKV((k) => k === "__sync:ledger") });
+      await expect(dev.store.del("a")).rejects.toThrow(/bookkeeping/);
+    });
+
+    it("tells other tabs of the same app when sync changed their data", async () => {
+      await rawPost(TOKEN, { app: "test", entries: { k: { v: "1", t: 5 } } });
+      const tab1 = device();
+      const tab2 = device({ local: memKV() });
+      const seen: (string | null)[] = [];
+      tab2.store.subscribe((_s, change) => void seen.push(change));
+      await tab1.store.sync(); // pulls "k" into tab1's store
+      await new Promise((r) => setTimeout(r, 30));
+      expect(seen).toContain("remote");
+    });
+
     it("reports a failure to save sync bookkeeping instead of claiming success", async () => {
       const dev = device({ local: memKV((k) => k === "__sync:ledger") });
       const err = await dev.store.set("a", 1);
@@ -523,6 +565,12 @@ describe.each(Object.keys(backends))("sync (%s)", (name) => {
       }
     });
 
+    it("limits values in UTF-8 bytes, not characters", async () => {
+      const v = JSON.stringify("漢".repeat(100_000)); // ~100k characters, ~300k bytes
+      const res = await rawPost(TOKEN, { app: "test", entries: { cjk: { v, t: 2 } } });
+      expect(res.status).toBe(413);
+    });
+
     it("surfaces the server's reason as the sync error", async () => {
       const a = device();
       a.local.data.set("big", "x".repeat(LIMITS.value + 1));
@@ -563,5 +611,21 @@ describe("chunkEntries", () => {
 
   it("gives an empty set no batches", () => {
     expect(chunkEntries({})).toEqual([]);
+  });
+});
+
+describe("setSyncToken", () => {
+  it("throws when browser storage refuses the write, instead of pretending it worked", () => {
+    const original = globalThis.localStorage;
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: { setItem: () => { throw new Error("quota"); }, removeItem: () => { throw new Error("denied"); }, getItem: () => null },
+    });
+    try {
+      expect(() => setSyncToken("t".repeat(40))).toThrow(/Could not save the sync token/);
+      expect(() => setSyncToken(null)).toThrow(/Could not save the sync token/);
+    } finally {
+      Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });
+    }
   });
 });

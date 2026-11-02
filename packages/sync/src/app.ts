@@ -3,6 +3,7 @@ import { statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
+import { cors } from "hono/cors";
 import { rateLimiter } from "hono-rate-limiter";
 import { LIMITS } from "./protocol";
 import { createSyncHandler, type SyncStorage } from "./server";
@@ -38,6 +39,9 @@ export function createApp({ storage, staticDir, rate = { windowMs: 60_000, limit
     handler: (c) => c.json({ error: "rate limited" }, 429, { "retry-after": String(Math.ceil(rate.windowMs / 1000)) }),
   });
   const tooLarge = bodyLimit({ maxSize: LIMITS.body, onError: (c) => c.json({ error: "request too large" }, 413) });
+
+  // Errors from the middleware below need the same CORS headers as the handler's own responses.
+  app.use("/api/sync", cors({ origin: "*", allowHeaders: ["authorization", "content-type"], allowMethods: ["POST", "OPTIONS"] }));
 
   app.all(
     "/api/sync",

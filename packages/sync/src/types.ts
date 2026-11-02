@@ -48,5 +48,6 @@ export interface SyncedStoreOptions {
   debounceMs?: number;
   fetch?: typeof fetch;
   getToken?: () => string | null;
+  /** Should throw if the token cannot be stored. */
   setToken?: (token: string | null) => void;
 }

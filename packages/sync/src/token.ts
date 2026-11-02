@@ -8,12 +8,13 @@ export function getSyncToken(): string | null {
   }
 }
 
+/** Throws when the token can't be stored: callers must not carry on as if it were saved. */
 export function setSyncToken(token: string | null): void {
   try {
     if (token) localStorage.setItem(TOKEN_KEY, token);
     else localStorage.removeItem(TOKEN_KEY);
   } catch {
-    // storage unavailable
+    throw new Error("Could not save the sync token on this device (browser storage is unavailable)");
   }
 }
 

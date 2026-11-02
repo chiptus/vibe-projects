@@ -53,6 +53,17 @@ describe("app", () => {
     expect(big.status).toBe(413);
   });
 
+  it("keeps CORS headers on errors raised before the sync handler", async () => {
+    const big = await post(app, JSON.stringify({ pad: "a".repeat(LIMITS.body) }), "4.4.4.4");
+    expect(big.status).toBe(413);
+    expect(big.headers.get("access-control-allow-origin")).toBe("*");
+    const limited = createApp({ storage, staticDir: dir, rate: { windowMs: 60_000, limit: 1 } });
+    await post(limited, "{}", "5.5.5.5");
+    const second = await post(limited, "{}", "5.5.5.5");
+    expect(second.status).toBe(429);
+    expect(second.headers.get("access-control-allow-origin")).toBe("*");
+  });
+
   it("rate limits one address, not others", async () => {
     const body = JSON.stringify({ app: "x", entries: {} });
     const statuses = [];

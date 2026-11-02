@@ -14,8 +14,9 @@ vi.mock("../storage", () => ({
   store: {
     isRemote: false,
     get: async (k: string) => {
+      const value = data.get(k) ?? null; // read first, so a slow read returns what was there when it began
       if (k === "yayog:draft" && draftReadDelay) await new Promise((r) => setTimeout(r, draftReadDelay));
-      return data.get(k) ?? null;
+      return value;
     },
     set: async (k: string, v: unknown) => {
       writes.push(k);
@@ -149,5 +150,26 @@ describe("useTracker with sync", () => {
     data.set("yayog:index", { done: ["yayog:master:w2:d1"] });
     await remoteArrives();
     expect(result.current.pos).toEqual({ w: result.current.seq[0]!.w, d: result.current.seq[0]!.d }); // the Program's start
+  });
+
+  it("applies a change that arrived while the tracker was still initialising", async () => {
+    draftReadDelay = 60;
+    const hook = renderHook(() => useTracker("basic"), { wrapper });
+    await act(async () => void (await new Promise((r) => setTimeout(r, 20)))); // mid-initialisation
+    remoteDraft("arrived early");
+    draftReadDelay = 0;
+    await remoteArrives();
+    await waitFor(() => expect(hook.result.current.ready).toBe(true));
+    await waitFor(() => expect(hook.result.current.form.notes).toBe("arrived early"));
+  });
+
+  it("accepts remote drafts again after a save, unless something was typed meanwhile", async () => {
+    const { result } = await readyTracker();
+    act(() => result.current.setNotes("done"));
+    await act(async () => void (await result.current.save()));
+
+    remoteDraft("from my other device");
+    await remoteArrives();
+    expect(result.current.form.notes).toBe("from my other device");
   });
 });
