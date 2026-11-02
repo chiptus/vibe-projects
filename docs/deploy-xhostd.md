@@ -2,7 +2,7 @@
 
 The whole repo deploys as one xhostd `app`-template app (`vibe-projects`): one Node process serves the stitched `dist/` (hub at `/`, each project at `/<name>/`) and `POST /api/sync`, backed by the app's Postgres. Same origin, so no CORS.
 
-- `install.sh` (build time, as root): `pnpm install`, `pnpm build`, `scripts/package-xhostd.ts` (bundles `packages/sync/src/node.ts` + copies `dist/` into `.xhostd/`), installs `pg`, deletes the rest.
+- `install.sh` (build time, as root): `pnpm install`, `pnpm build`, `scripts/package-xhostd.ts` (bundles `packages/sync/src/node.ts` (Hono) + copies `dist/` into `.xhostd/`), installs `pg`, deletes the rest.
 - `launch.sh` (boot, non-root): `cd .xhostd && exec node server.mjs`.
 - Health check is `GET /`, which is the hub's `index.html`.
 
