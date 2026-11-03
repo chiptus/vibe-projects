@@ -52,6 +52,7 @@ export function createSyncedStore(local: KV, opts: SyncedStoreOptions): SyncedSt
     lock(async () => {
       const err = await apply();
       if (err) return err;
+      if (!getToken()) return null; // sync is off: behave exactly like the wrapped store
       const ledger = await loadLedger(local);
       const prev = ledger.keys[k];
       ledger.keys[k] = { t: Math.max(Date.now(), (prev?.t ?? 0) + 1), ...(tombstone ? { d: true } : {}), dirty: true };

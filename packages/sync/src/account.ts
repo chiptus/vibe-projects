@@ -77,8 +77,14 @@ export function createAccount(
   async function merge(token: string): Promise<string | null> {
     try {
       await lock(async () => {
-        await mustSave(local, { token: tokenFingerprint(token), keys: {} });
-        setToken(token);
+        const previous = deps.getToken();
+        setToken(token); // can throw (storage unavailable): nothing has changed yet
+        try {
+          await mustSave(local, { token: tokenFingerprint(token), keys: {} });
+        } catch (e) {
+          setToken(previous); // keep the old token paired with its untouched ledger
+          throw e;
+        }
       });
     } catch (e) {
       return errorMessage(e);
