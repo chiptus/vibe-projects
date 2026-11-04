@@ -61,6 +61,17 @@ export interface TestResult {
   scores: Scores;
 }
 
+const sameResult = (a: TestResult, b: TestResult) =>
+  a.level === b.level && a.date === b.date && CATEGORIES.every((c) => a.scores[c] === b.scores[c]);
+
+/** Local results plus imported ones not already present (same level, date and scores), oldest first. */
+export function mergeResults(local: TestResult[], imported: TestResult[]): TestResult[] {
+  const merged = [...local];
+  for (const r of imported) if (!merged.some((m) => sameResult(m, r))) merged.push(r);
+  // Array.prototype.sort is stable, so same-date results keep their relative order.
+  return merged.sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export const isTested = (l: Level): l is TestedLevel => l !== "basic";
 
 /** Categories whose Minimum was missed; empty means the test is passed. */
