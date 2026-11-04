@@ -3,7 +3,7 @@ import { LEVELS, type Level } from "../program/types";
 import { store } from "../storage";
 
 export const ACTIVE_KEY = "yayog:active";
-const ACTIVE_QUERY = ["yayog", "active"] as const;
+export const ACTIVE_QUERY = ["yayog", "active"] as const;
 
 const isLevel = (v: unknown): v is Level => LEVELS.includes(v as Level);
 

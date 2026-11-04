@@ -25,7 +25,7 @@ vi.mock("../storage", () => ({
   },
 }));
 
-const { DRAFT_KEY, INDEX_KEY, keyOf, useWorkoutLog } = await import("./useWorkoutLog");
+const { DRAFT_KEY, INDEX_KEY, keyOf, loadLog, useWorkoutLog } = await import("./useWorkoutLog");
 
 const rec = (w: number, d: number): WorkoutRecord => ({ level: "basic", w, d, date: "2026-01-01", entries: [], notes: "" }) as WorkoutRecord;
 
@@ -130,5 +130,21 @@ describe("useWorkoutLog", () => {
     expect(data.has(mine)).toBe(false);
     expect(data.get(other)).toEqual(rec(1, 1));
     expect(data.get(INDEX_KEY)).toEqual({ done: [other] });
+  });
+});
+
+describe("loadLog", () => {
+  it("includes workouts whose record exists but are missing from the index, after the indexed ones", async () => {
+    const a = keyOf("basic", 0, 0);
+    const b = keyOf("basic", 0, 1);
+    const c = keyOf("basic", 0, 2);
+    data.set(a, rec(0, 0));
+    data.set(b, { ...rec(0, 1), date: "2026-01-03" });
+    data.set(c, { ...rec(0, 2), date: "2026-01-02" });
+    data.set(INDEX_KEY, { done: [a] }); // as after a Merge where the account's index won
+    data.set(DRAFT_KEY, { w: 0, d: 0 });
+    const { done, logs } = await loadLog();
+    expect(done).toEqual([a, c, b]);
+    expect(Object.keys(logs).sort()).toEqual([a, b, c].sort());
   });
 });
