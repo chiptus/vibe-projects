@@ -81,7 +81,7 @@ export function Tracker({ level, view, onView, tests, onLevel }: TrackerProps) {
         {view === "test" && (
           <>
             <ViewHeader title="Level test" subtitle={`Training at ${t.program.name}`} menu={menu} />
-            <TestScreen active={level} results={tests.results} onRecord={tests.record} onSwitch={(l) => onSwitch(l) && onView("today")} />
+            <TestScreen active={level} results={tests.results} onRecord={tests.record} onDelete={tests.remove} onSwitch={(l) => onSwitch(l) && onView("today")} />
           </>
         )}
       </main>
