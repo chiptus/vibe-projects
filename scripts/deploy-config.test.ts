@@ -1,17 +1,37 @@
-import assert from "node:assert/strict";
-import { test } from "node:test";
-import { buildFilterArgs, isDeployedSeparately } from "./deploy-config.ts";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, test } from "vitest";
+import { buildFilterArgs, isDeployedSeparately, listProjects } from "./deploy-config.ts";
 
-test("a project is stitched unless it opts out", () => {
-  assert.equal(isDeployedSeparately({ name: "a" }), false);
-  assert.equal(isDeployedSeparately({ name: "a", deployedSeparately: false }), false);
-  assert.equal(isDeployedSeparately({ name: "a", deployedSeparately: true }), true);
+describe("isDeployedSeparately", () => {
+  test("a project is stitched unless it opts out", () => {
+    expect(isDeployedSeparately({ name: "a" })).toBe(false);
+    expect(isDeployedSeparately({ name: "a", deployedSeparately: false })).toBe(false);
+    expect(isDeployedSeparately({ name: "a", deployedSeparately: true })).toBe(true);
+  });
 });
 
-test("only separately deployed projects are excluded from the recursive build", () => {
-  assert.deepEqual(
-    buildFilterArgs([{ name: "hub" }, { name: "podcast", deployedSeparately: true }]),
-    ["--filter=!podcast"],
-  );
-  assert.deepEqual(buildFilterArgs([{ name: "hub" }]), []);
+describe("buildFilterArgs", () => {
+  test("excludes only separately deployed projects", () => {
+    expect(buildFilterArgs([{ name: "hub" }, { name: "podcast", deployedSeparately: true }])).toEqual([
+      "--filter=!podcast",
+    ]);
+    expect(buildFilterArgs([{ name: "hub" }])).toEqual([]);
+  });
+});
+
+describe("listProjects", () => {
+  let dir = "";
+  afterEach(() => rmSync(dir, { recursive: true, force: true }));
+
+  test("ignores folders and files without a package.json", () => {
+    dir = mkdtempSync(join(tmpdir(), "projects-"));
+    mkdirSync(join(dir, "real"));
+    writeFileSync(join(dir, "real", "package.json"), JSON.stringify({ name: "real" }));
+    mkdirSync(join(dir, "stray"));
+    writeFileSync(join(dir, "notes.txt"), "x");
+
+    expect(listProjects(dir)).toEqual([{ dir: "real", manifest: { name: "real" } }]);
+  });
 });
