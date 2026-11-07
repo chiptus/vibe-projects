@@ -6,13 +6,21 @@
 import { execSync } from "node:child_process";
 import { cpSync, existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { buildFilterArgs, isDeployedSeparately, type ProjectManifest } from "./deploy-config.ts";
 
 const root = new URL("..", import.meta.url).pathname;
 const projectsDir = join(root, "projects");
 const outDir = join(root, "dist");
 
+const readManifest = (dir: string) =>
+  JSON.parse(readFileSync(join(projectsDir, dir, "package.json"), "utf8")) as ProjectManifest;
+
+const manifests = readdirSync(projectsDir, { withFileTypes: true })
+  .filter((e) => e.isDirectory() && existsSync(join(projectsDir, e.name, "package.json")))
+  .map((e) => readManifest(e.name));
+
 console.log("Building all projects (pnpm -r build)...");
-execSync("pnpm -r build", { cwd: root, stdio: "inherit" });
+execSync(["pnpm", "-r", ...buildFilterArgs(manifests), "build"].join(" "), { cwd: root, stdio: "inherit" });
 
 rmSync(outDir, { recursive: true, force: true });
 
@@ -21,6 +29,10 @@ for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
 
   const projectDir = join(projectsDir, entry.name);
   const projectDist = join(projectDir, "dist");
+  if (isDeployedSeparately(readManifest(entry.name))) {
+    console.log(`Skipping ${entry.name}: deployed separately.`);
+    continue;
+  }
   if (!existsSync(projectDist)) {
     console.warn(`Skipping ${entry.name}: no dist/ after build.`);
     continue;

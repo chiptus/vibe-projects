@@ -2,8 +2,10 @@ export interface ProjectLink {
   name: string;
   title: string;
   description: string;
-  /** Path this project is served at when deployed alongside the hub. */
+  /** Path this project is served at when deployed alongside the hub, or an absolute URL when it is deployed elsewhere. */
   href: string;
+  /** True when `href` points off-site; the card opens in a new tab. */
+  external?: boolean;
 }
 
 // Keep in sync with the root README's project list.
