@@ -32,6 +32,8 @@ Every project must therefore:
 - Build with `pnpm --filter <name> build`, producing a `dist/` folder.
 - Be deployable from a subpath (`/<project-name>/`) — don't assume it's served from `/`.
 
+Exception (ADR 0003): a project deployed on its own (e.g. a Cloudflare Worker) sets `"deployedSeparately": true` in its `package.json`. The root build then neither builds nor stitches it, and it needn't produce `dist/` or work from a subpath. Its hub entry in `projects/hub/src/projects.ts` uses an absolute `href` with `external: true`.
+
 ## Agent skills
 
 ### Issue tracker
