@@ -22,4 +22,12 @@ export const PROJECTS: ProjectLink[] = [
     description: "Interval-timer trainer for the Spanish rolled R (RR).",
     href: "/trilled-r-trainer/",
   },
+  {
+    name: "garmin-podcast",
+    title: "Garmin Podcast",
+    description: "Pick podcast episodes and sync them to a Garmin watch.",
+    // Placeholder until the Worker is deployed; update to the real workers.dev URL.
+    href: "https://garmin-podcast.workers.dev/",
+    external: true,
+  },
 ];
