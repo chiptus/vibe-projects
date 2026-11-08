@@ -8,7 +8,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "deploy": "vite build && wrangler deploy",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "wrangler types && tsc --noEmit",
     "lint": "oxlint",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
