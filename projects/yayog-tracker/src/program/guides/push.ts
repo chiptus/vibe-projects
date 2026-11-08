@@ -45,6 +45,22 @@ export const PUSH = {
     ],
     page: 68,
   },
+  dips: {
+    title: "Dips",
+    muscles: "triceps, pectorals",
+    steps: [
+      "Find two stable surfaces a couple of feet apart, roughly equal in height and at least waist high, strong enough to hold your full weight (counters, bed posts, desks, bureaus, stools, a window sill).",
+      "Put a palm on each surface, lock your arms straight at your sides, bend your knees and suspend your body between the surfaces.",
+      "Lower yourself as far as possible, knees hanging in the air, then push back up. Only your elbows and shoulders bend — don't swing your legs.",
+    ],
+    variations: [
+      "Assisted (easier): push off the ground lightly with your legs, or put a chair behind you, bend your knees and put your feet on it to help push up.",
+      "Build up to unassisted: lift your legs off the surface during the lowering part and control the fall back down.",
+      "Surfaces needn't be exactly equal in height (e.g. mantle and chair back) — switch sides every other set.",
+      "Harder: wear a weighted backpack.",
+    ],
+    page: 74,
+  },
   militaryPress: {
     title: "Military Press",
     muscles: "shoulders, triceps",

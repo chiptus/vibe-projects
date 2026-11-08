@@ -9,11 +9,14 @@ export type { ExerciseGuide } from "./types";
 // First match wins, so more specific patterns come before general ones
 // (e.g. "close grip push up" before "push up").
 const MATCHERS: [RegExp, ExerciseGuide][] = [
+  // Dips come first: names like "Assisted Dips (… to help push up)" mention
+  // "push up" in their description.
+  [/seated dip/, PUSH.seatedDips],
+  [/dip/, PUSH.dips],
   [/close grip push up/, PUSH.closeGripPushUps],
   [/push up/, PUSH.pushUps],
   [/let me in/, PULL.letMeIns],
   [/let me up/, PULL.letMeUps],
-  [/seated dip/, PUSH.seatedDips],
   [/military press/, PUSH.militaryPress],
   [/shove off/, PUSH.shoveOffs],
   [/thumbs up/, PUSH.thumbsUp],
