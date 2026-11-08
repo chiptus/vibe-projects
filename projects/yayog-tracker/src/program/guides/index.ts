@@ -62,7 +62,7 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   [/iron cross/, CORE.ironCrosses],
   [/jack knive/, CORE.jackKnives],
   [/pillow hump/, CORE.pillowHumpers],
-  [/hanging leg lift/, CORE.hangingLegLifts],
+  [/hanging leg (lift|raise)/, CORE.hangingLegLifts],
   [/leg lift/, CORE.legLifts],
   [/russian twist/, CORE.russianTwists],
   [/v-up/, CORE.vUps],

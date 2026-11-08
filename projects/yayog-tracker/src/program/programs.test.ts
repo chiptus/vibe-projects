@@ -65,6 +65,7 @@ describe("guideFor", () => {
     ["Hello Darlings", "Hello Darlings"],
     ["Mountain Climbers", "Mountain Climbers"],
     ["Pillow Humpers", "Pillow Humpers"],
+    ["Hanging Leg Raises (bringing legs parallel to ground)", "Hanging Leg Lifts"],
   ])("gives %s its own guide", (name, title) => {
     expect(guideFor(name)?.title).toBe(title);
   });

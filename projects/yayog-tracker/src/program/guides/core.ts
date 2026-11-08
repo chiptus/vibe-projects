@@ -122,7 +122,11 @@ export const CORE = {
       "Without swinging, bring your knees up toward your chest.",
       "Lower them under control.",
     ],
-    variations: ["Knees bent: the program's version. Bringing knees to the sides also works the obliques."],
+    variations: [
+      "Knees bent: the easier version.",
+      "Bringing your legs up to one side, then the other, works the ribs and obliques more.",
+      "Harder: straight legs. For the elite, bring your feet all the way up to your hands without swinging — easier on a bar than a door, which blocks your upper body from leaning back.",
+    ],
     page: 129,
   },
   russianTwists: {
