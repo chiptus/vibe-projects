@@ -13,8 +13,17 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   // "push up" in their description.
   [/seated dip/, PUSH.seatedDips],
   [/dip/, PUSH.dips],
+  [/1-arm push up/, PUSH.oneArmPushUps],
+  [/chinese push up/, PUSH.chinesePushUps],
+  [/handstand push up/, PUSH.handstandPushUps],
+  [/bouncing push up/, PUSH.bouncingPushUps],
   [/close grip push up/, PUSH.closeGripPushUps],
   [/push up/, PUSH.pushUps],
+  [/dive bomber/, PUSH.diveBombers],
+  [/surface tricep/, PUSH.surfaceTricepsExtensions],
+  [/overhead press/, PUSH.overheadPress],
+  [/mountain climber/, PUSH.mountainClimbers],
+  [/1-arm let me in/, PULL.oneArmLetMeIns],
   [/let me in/, PULL.letMeIns],
   [/let me up/, PULL.letMeUps],
   [/military press/, PUSH.militaryPress],
@@ -30,6 +39,15 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   [/lunge/, LEGS.lunges],
   [/bulgarian/, LEGS.bulgarianSplitSquats],
   [/rdl/, LEGS.rdls],
+  [/hip extension/, LEGS.hipExtensions],
+  [/ham sandwich/, LEGS.hamSandwich],
+  [/iron mike/, LEGS.ironMikes],
+  [/side jump/, LEGS.sideJumps],
+  [/box jump/, LEGS.boxJumps],
+  [/squat thrust/, LEGS.squatThrusts],
+  [/1-legged squat/, LEGS.oneLeggedSquats],
+  [/pistol/, LEGS.pistols],
+  [/sissy squat/, LEGS.sissySquats],
   [/good morning/, LEGS.goodMornings],
   [/beat your boots/, LEGS.beatYourBoots],
   [/toyota/, LEGS.toyotas],
@@ -38,6 +56,12 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   [/swimmer/, CORE.swimmers],
   [/superman/, CORE.supermans],
   [/hyperextension/, CORE.hyperextensions],
+  [/flutter kick/, CORE.flutterKicks],
+  [/hello darling/, CORE.helloDarlings],
+  [/side v-up/, CORE.sideVUps],
+  [/iron cross/, CORE.ironCrosses],
+  [/jack knive/, CORE.jackKnives],
+  [/pillow hump/, CORE.pillowHumpers],
   [/hanging leg lift/, CORE.hangingLegLifts],
   [/leg lift/, CORE.legLifts],
   [/russian twist/, CORE.russianTwists],
@@ -49,14 +73,9 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   [/side crunch/, CORE.sideCrunches],
 ];
 
-// New-Program exercises whose names contain a guided exercise's name but are a
-// different movement. They get no guide until one is written for them.
-const NO_GUIDE = /1-legged squat|chinese push up|1-arm|bouncing push up|sissy squat|side v-up|handstand push up|squat thrust/;
-
 // Look up the guide for a program exercise name like
 // "Push Ups w/hands elevated on platform" or "10 Alternating Back Lunges".
 export function guideFor(name: string): ExerciseGuide | undefined {
   const n = name.toLowerCase();
-  if (NO_GUIDE.test(n)) return undefined;
   return MATCHERS.find(([re]) => re.test(n))?.[1];
 }

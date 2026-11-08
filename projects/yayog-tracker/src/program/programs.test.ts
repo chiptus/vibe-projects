@@ -39,14 +39,40 @@ describe.each(LEVELS)("%s program", (level) => {
 });
 
 describe("guideFor", () => {
-  it("does not reuse a plain guide for a different movement", () => {
-    expect(guideFor("Alternating 1-Legged Squats while holding onto chairs")).toBeUndefined();
-    expect(guideFor("Chinese Push Ups")).toBeUndefined();
-    expect(guideFor("1-Arm Push Ups w/hands elevated")).toBeUndefined();
-    expect(guideFor("Sissy Squats")).toBeUndefined();
-    expect(guideFor("Handstand Push Ups")).toBeUndefined();
-    expect(guideFor("Squat Thrusts")).toBeUndefined();
-    expect(guideFor("Squats")).toBeDefined();
-    expect(guideFor("Push Ups")).toBeDefined();
+  it.each([
+    ["Alternating 1-Legged Squats while holding onto chairs", "1-Legged Squats"],
+    ["Chinese Push Ups w/hands elevated", "Chinese Push Ups"],
+    ["1-Arm Push Ups w/hands elevated", "1-Arm Push Ups"],
+    ["Alternating 1-Arm Let Me Ins", "1-Arm Let Me Ins"],
+    ["Sissy Squats w/1–3 s pause at bottom", "Sissy Squats"],
+    ["Handstand Push Ups", "Handstand Push Ups"],
+    ["Bouncing Push Ups", "Bouncing Push Ups"],
+    ["Squat Thrusts", "Squat Thrusts"],
+    ["Alternating Pistols", "Pistols"],
+    ["Assisted Dips (legs bent behind you, feet on a chair to help push up)", "Dips"],
+    ["Dive Bombers w/pauses when your chest is between your hands on the way up", "Dive Bombers"],
+    ["Surface Tricep Extensions w/about knee height surface", "Surface Triceps Extensions"],
+    ["Overhead Presses", "Overhead Press"],
+    ["Alternating 1-Legged Hip Extensions", "Hip Extensions"],
+    ["Ham Sandwiches (without using hands)", "Ham Sandwiches"],
+    ["Iron Mikes", "Iron Mikes"],
+    ["Side Jumps", "Side Jumps"],
+    ["Box Jumps", "Box Jumps"],
+    ["Iron Crosses w/knees bent", "Iron Crosses"],
+    ["Jack Knives", "Jack Knives"],
+    ["Side V-Ups w/bent legs", "Side V-Ups"],
+    ["Flutter Kicks w/hands on chest", "Flutter Kicks"],
+    ["Hello Darlings", "Hello Darlings"],
+    ["Mountain Climbers", "Mountain Climbers"],
+    ["Pillow Humpers", "Pillow Humpers"],
+  ])("gives %s its own guide", (name, title) => {
+    expect(guideFor(name)?.title).toBe(title);
+  });
+
+  it("keeps the plain guides for the plain movements", () => {
+    expect(guideFor("Squats")?.title).toBe("Squats");
+    expect(guideFor("Push Ups")?.title).toBe("Push Ups");
+    expect(guideFor("Let Me Ins")?.title).toBe("Let Me Ins");
+    expect(guideFor("Seated Dips")?.title).toBe("Seated Dips");
   });
 });

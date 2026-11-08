@@ -47,6 +47,73 @@ export const CORE = {
     variations: ["Harder: hands on your chest instead of under your butt."],
     page: 125,
   },
+  flutterKicks: {
+    title: "Flutter Kicks",
+    muscles: "lower abs, hip flexors",
+    steps: [
+      "Lie on your back, hands under your butt, head up. Legs straight and together, feet about 15 cm off the floor.",
+      "Raise your right leg to about three feet in the air, then bring it back down to level with your left, which stays 15 cm up.",
+      "Repeat with the left leg. Fast or slow, but always controlled.",
+    ],
+    variations: ["Harder: hands on your chest."],
+    page: 125,
+  },
+  helloDarlings: {
+    title: "Hello Darlings",
+    muscles: "lower abs, hip flexors",
+    steps: [
+      "Lie on your back, hands under your butt, head up (it strengthens your neck). Lift your feet about 15 cm off the floor.",
+      "Open your legs as wide as you can, then close them.",
+    ],
+    variations: [
+      "Harder: hands on your chest.",
+      "Cross your ankles each time you close, alternating which foot is on top.",
+    ],
+    page: 125,
+  },
+  sideVUps: {
+    title: "Side V-Ups",
+    muscles: "intercostals, obliques, abs",
+    steps: [
+      "Lie on your left side, left arm straight out ahead of you on the floor, palm down. Right hand behind your head with the elbow up.",
+      "Legs straight and together, bend only at the hips and bring your knees up toward your right elbow, until your legs are at 90° to your upper body.",
+      "Lower slowly without letting your feet touch the floor before the next rep. Then switch sides after your reps.",
+    ],
+    variations: ["Bent legs: easier. Straight legs: harder."],
+    page: 127,
+  },
+  ironCrosses: {
+    title: "Iron Crosses",
+    muscles: "abs, obliques, intercostals",
+    steps: [
+      "Lie on your back, arms straight out to the sides, palms down. Legs straight up so your body makes an L.",
+      "With your head off the floor, lower your legs to the right, staying in an L shape.",
+      "Just before your feet touch down, raise them back to vertical, then lower to the left. Keep alternating.",
+    ],
+    variations: ["Knees bent: easier."],
+    page: 128,
+  },
+  jackKnives: {
+    title: "Jack Knives",
+    muscles: "abs, hip flexors",
+    steps: [
+      "For strong abs and good coordination. Lie on your back, feet about 15 cm up, arms straight overhead.",
+      "Balancing on your butt, bring your chest and straight legs up together until your hands touch your feet.",
+      "Lean back and lower your arms and legs until shoulders and feet hover a few inches off the floor.",
+    ],
+    variations: ["Easier: let your shoulders rest all the way on the floor at the bottom."],
+    page: 128,
+  },
+  pillowHumpers: {
+    title: "Pillow Humpers",
+    muscles: "glutes, lower back, hamstrings, spinal erectors, back of neck",
+    steps: [
+      "Lie face down, feet hooked under a couch or pressed flat against a wall so your legs stay still. Tightly rolled pillow under your hips.",
+      "Hands behind your head, lift your upper body as high as you can while your toes stay down.",
+      "Look at the ceiling at the top and squeeze your back and glutes hard.",
+    ],
+    page: 130,
+  },
   hangingLegLifts: {
     title: "Hanging Leg Lifts",
     muscles: "abs, hip flexors, forearms",
