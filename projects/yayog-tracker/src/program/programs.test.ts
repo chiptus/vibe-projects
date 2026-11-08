@@ -66,6 +66,10 @@ describe("guideFor", () => {
     ["Mountain Climbers", "Mountain Climbers"],
     ["Pillow Humpers", "Pillow Humpers"],
     ["Hanging Leg Raises (bringing legs parallel to ground)", "Hanging Leg Lifts"],
+    ["Seated Dips w/feet on ground", "Seated Dips"],
+    // A label that offers two exercises opens the first one named.
+    ["12 Alternating Pistols (6 total on each side) or 24 Iron Mikes (jumping as high as possible)", "Pistols"],
+    ["12 Assisted Alternating 1-Legged Squats or Box Jumps", "1-Legged Squats"],
   ])("gives %s its own guide", (name, title) => {
     expect(guideFor(name)?.title).toBe(title);
   });

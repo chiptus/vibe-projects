@@ -6,11 +6,13 @@ import type { ExerciseGuide } from "./types";
 
 export type { ExerciseGuide } from "./types";
 
-// First match wins, so more specific patterns come before general ones
-// (e.g. "close grip push up" before "push up").
+// guideFor picks the pattern that matches earliest in the name, so a label that
+// offers two exercises ("Pistols or Iron Mikes") opens the first one, and a
+// description that mentions another exercise ("Assisted Dips (… to help push
+// up)") opens the exercise the name starts with. Ties go to the pattern listed
+// first, so more specific patterns come before general ones (e.g. "close grip
+// push up" before "push up").
 const MATCHERS: [RegExp, ExerciseGuide][] = [
-  // Dips come first: names like "Assisted Dips (… to help push up)" mention
-  // "push up" in their description.
   [/seated dip/, PUSH.seatedDips],
   [/dip/, PUSH.dips],
   [/1-arm push up/, PUSH.oneArmPushUps],
@@ -77,5 +79,10 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
 // "Push Ups w/hands elevated on platform" or "10 Alternating Back Lunges".
 export function guideFor(name: string): ExerciseGuide | undefined {
   const n = name.toLowerCase();
-  return MATCHERS.find(([re]) => re.test(n))?.[1];
+  let best: { index: number; guide: ExerciseGuide } | undefined;
+  for (const [re, guide] of MATCHERS) {
+    const index = n.search(re);
+    if (index !== -1 && (!best || index < best.index)) best = { index, guide };
+  }
+  return best?.guide;
 }
