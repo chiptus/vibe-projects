@@ -10,19 +10,28 @@ export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
   const [me, setMe] = useState<Me | null | undefined>(undefined);
+  const [signInFailed, setSignInFailed] = useState(false);
 
   useEffect(() => {
-    fetch("/api/me").then(async (res) => setMe(res.ok ? ((await res.json()) as Me) : null));
+    fetch("/api/me")
+      .then(async (res) => setMe(res.ok ? ((await res.json()) as Me) : null))
+      .catch(() => setMe(null));
   }, []);
 
   async function signIn() {
-    const res = await fetch("/api/auth/sign-in/social", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ provider: "google", callbackURL: "/" }),
-    });
-    const { url } = (await res.json()) as { url?: string };
-    if (url) window.location.href = url;
+    setSignInFailed(false);
+    try {
+      const res = await fetch("/api/auth/sign-in/social", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ provider: "google", callbackURL: "/" }),
+      });
+      const { url } = (await res.json()) as { url?: string };
+      if (!res.ok || !url) throw new Error("sign-in failed");
+      window.location.href = url;
+    } catch {
+      setSignInFailed(true);
+    }
   }
 
   return (
@@ -35,7 +44,10 @@ function Home() {
           Signed in as {me.name} ({me.email})
         </p>
       ) : (
-        <button onClick={signIn}>Sign in with Google</button>
+        <>
+          <button onClick={signIn}>Sign in with Google</button>
+          {signInFailed && <p role="alert">Sign-in failed, try again.</p>}
+        </>
       )}
     </main>
   );

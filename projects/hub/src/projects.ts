@@ -26,8 +26,8 @@ export const PROJECTS: ProjectLink[] = [
     name: "garmin-podcast",
     title: "Garmin Podcast",
     description: "Pick podcast episodes and sync them to a Garmin watch.",
-    // Placeholder until the Worker is deployed; update to the real workers.dev URL.
-    href: "https://garmin-podcast.workers.dev/",
+    // TODO: point at the deployed Worker URL (<name>.<account-subdomain>.workers.dev) once it exists.
+    href: "https://github.com/chiptus/vibe-projects/tree/main/projects/garmin-podcast",
     external: true,
   },
 ];

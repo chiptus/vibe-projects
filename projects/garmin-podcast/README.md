@@ -8,8 +8,10 @@ It is **deployed separately** (`"deployedSeparately": true`, ADR 0003): the root
 
 ## Run
 
+From this folder (`projects/garmin-podcast`):
+
 ```
-cp .dev.vars.example .dev.vars   # fill in Google credentials
+cp .dev.vars.example .dev.vars   # fill in Google credentials (local OAuth redirect URI: http://localhost:5173/api/auth/callback/google)
 pnpm --filter garmin-podcast db:migrate:local
 pnpm --filter garmin-podcast dev
 ```
@@ -21,6 +23,8 @@ Other scripts: `test` (Vitest in the Workers runtime), `typecheck`, `lint`, `bui
 `test/` exercises the Worker's HTTP API handler (`src/server/api.ts`) against a real local D1 (Miniflare) with migrations from `drizzle/` applied and Google sign-in stubbed (the signed-in person is named by a request header). No network needed.
 
 ## Deploy
+
+Run the `wrangler` commands from this folder.
 
 1. `wrangler d1 create garmin-podcast`, then put the printed id in `wrangler.jsonc`.
 2. `pnpm --filter garmin-podcast db:migrate:remote`.
