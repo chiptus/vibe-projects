@@ -19,6 +19,20 @@ export const PULL = {
     ],
     page: 85,
   },
+  oneArmLetMeIns: {
+    title: "1-Arm Let Me Ins",
+    muscles: "forearms, biceps, lats",
+    steps: [
+      "Set up as for a Let Me In, but hold on with just one hand: a towel looped around a doorknob or the door frame's edge, a pole, a railing, a thin tree trunk, or a rope or strap looped around something fixed.",
+      "Straddle the anchor with your feet as usual, lean back with a straight arm, and pull your chest to your hand, then lower under control.",
+      "Do all reps on one arm, then switch (or alternate, as the program says).",
+    ],
+    variations: [
+      "The further forward your feet are relative to your hand, the harder it is.",
+      "Grip choice changes the emphasis: a towel builds grip and forearms; a door frame edge or pole works too.",
+    ],
+    page: 86,
+  },
   letMeUps: {
     title: "Let Me Ups",
     muscles: "lats, biceps, forearms, rear shoulders",

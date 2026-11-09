@@ -13,7 +13,7 @@ export function GuideDetails({ guide, name }: GuideDetailsProps) {
       {name !== guide.title && <p className="mt-2.5 rounded-r-md border-l-3 border-ac bg-sf2 px-2.5 py-1.5">Today: {name}</p>}
       <Steps steps={guide.steps} />
       {guide.variations && <Variations variations={guide.variations} />}
-      <BookPage page={guide.page} />
+      {guide.page !== undefined && <BookPage page={guide.page} />}
     </>
   );
 }
