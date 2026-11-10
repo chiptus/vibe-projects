@@ -9,5 +9,7 @@ export interface ExerciseGuide {
   // Notes on the easier/harder versions the program asks for (e.g. "w/hands
   // elevated", "w/knees bent").
   variations?: string[];
-  page: number;
+  // The book page with the photos. Leave it out unless the page is known —
+  // never guess.
+  page?: number;
 }

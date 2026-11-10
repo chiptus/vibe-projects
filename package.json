@@ -8,6 +8,11 @@
   },
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "build": "node scripts/build.ts"
+    "build": "node scripts/build.ts",
+    "test": "vitest run scripts"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "vitest": "^5.0.3"
   }
 }

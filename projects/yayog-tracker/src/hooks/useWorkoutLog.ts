@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Level, WorkoutRecord } from "../program/types";
 import { sleep, store } from "../storage";
+import { TESTS_QUERY } from "./useLevelTests";
 
 export const INDEX_KEY = "yayog:index";
 export const DRAFT_KEY = "yayog:draft";
+const ACTIVE_KEY = "yayog:active";
 export const keyOf = (level: Level, w: number, d: number) => `yayog:${level}:w${w}:d${d}`;
 
 interface Index {
@@ -22,20 +24,29 @@ interface SaveResult {
 }
 
 export const REMOTE_KEYS_QUERY = ["yayog", "remote-keys"] as const;
-// The index lives under one shared key, so the cache is not split by level.
+// The index lives under one shared key, so the cache holds every level and each hook instance filters by its own.
 const LOG_QUERY = ["yayog", "log"] as const;
 const EMPTY: LogData = { done: [], logs: {} };
 
-async function loadLog(): Promise<LogData> {
+const RECORD_KEY = /^yayog:[^:]+:w\d+:d\d+$/;
+
+/**
+ * The completed workouts. The index gives their order, but it is one shared key that sync
+ * resolves as a whole (newest write wins), so a workout whose record exists yet is missing
+ * from the winning index would vanish. Records are the truth: any not in the index follow it, by date.
+ */
+export async function loadLog(): Promise<LogData> {
   const idx = ((await store.get(INDEX_KEY)) as Index | null) || { done: [] };
+  const extra = ((await store.keys("yayog:")) ?? []).filter((k) => RECORD_KEY.test(k) && !idx.done.includes(k));
   const logs: Record<string, WorkoutRecord> = {};
   await Promise.all(
-    idx.done.map(async (k) => {
+    [...idx.done, ...extra].map(async (k) => {
       const v = await store.get(k);
       if (v) logs[k] = v as WorkoutRecord;
     }),
   );
-  return { done: idx.done, logs };
+  const orphans = extra.filter((k) => logs[k]).sort((a, b) => (logs[a]!.date ?? "").localeCompare(logs[b]!.date ?? "") || a.localeCompare(b));
+  return { done: [...idx.done, ...orphans], logs };
 }
 
 // Owns the persisted set of completed workouts: a cached query for loading
@@ -44,8 +55,13 @@ async function loadLog(): Promise<LogData> {
 export function useWorkoutLog(level: Level) {
   const qc = useQueryClient();
   const query = useQuery({ queryKey: LOG_QUERY, queryFn: loadLog, staleTime: Infinity });
-  const data = query.data ?? EMPTY;
-  const { done } = data;
+  const all = query.data ?? EMPTY;
+  const prefix = `yayog:${level}:`;
+  const done = all.done.filter((k) => k.startsWith(prefix));
+  const data: LogData = {
+    done,
+    logs: Object.fromEntries(Object.entries(all.logs).filter(([k]) => k.startsWith(prefix))),
+  };
   // Mutations read the cache at run time, not the render closure, so back-to-back writes don't clobber each other.
   const current = (): LogData => qc.getQueryData<LogData>(LOG_QUERY) ?? EMPTY;
 
@@ -54,6 +70,7 @@ export function useWorkoutLog(level: Level) {
     qc.setQueryData(LOG_QUERY, next);
     qc.invalidateQueries({ queryKey: LOG_QUERY });
     qc.invalidateQueries({ queryKey: REMOTE_KEYS_QUERY });
+    qc.invalidateQueries({ queryKey: TESTS_QUERY });
   };
 
   const save = useMutation({
@@ -73,10 +90,17 @@ export function useWorkoutLog(level: Level) {
 
   const reset = useMutation({
     mutationFn: async () => {
-      await Promise.all(current().done.map((k) => store.del(k)));
-      await store.del(INDEX_KEY);
+      const before = current();
+      const mine = before.done.filter((k) => k.startsWith(prefix));
+      await Promise.all(mine.map((k) => store.del(k)));
+      const rest = before.done.filter((k) => !k.startsWith(prefix));
+      if (rest.length) await store.set(INDEX_KEY, { done: rest });
+      else await store.del(INDEX_KEY);
       await store.del(DRAFT_KEY);
-      commit(EMPTY);
+      commit({
+        done: rest,
+        logs: Object.fromEntries(Object.entries(before.logs).filter(([k]) => !k.startsWith(prefix))),
+      });
     },
   });
 
@@ -88,7 +112,7 @@ export function useWorkoutLog(level: Level) {
       } catch {
         return "Not valid JSON";
       }
-      const keys = Object.keys(parsed).filter((k) => k.startsWith("yayog:") && k !== INDEX_KEY);
+      const keys = Object.keys(parsed).filter((k) => k.startsWith("yayog:") && k !== INDEX_KEY && k !== ACTIVE_KEY);
       for (const k of keys) {
         const e = await store.set(k, parsed[k]);
         if (e) return `Failed on ${k}: ${e}`;

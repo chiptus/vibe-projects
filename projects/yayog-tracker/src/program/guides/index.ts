@@ -6,14 +6,28 @@ import type { ExerciseGuide } from "./types";
 
 export type { ExerciseGuide } from "./types";
 
-// First match wins, so more specific patterns come before general ones
-// (e.g. "close grip push up" before "push up").
+// guideFor picks the pattern that matches earliest in the name, so a label that
+// offers two exercises ("Pistols or Iron Mikes") opens the first one, and a
+// description that mentions another exercise ("Assisted Dips (… to help push
+// up)") opens the exercise the name starts with. Ties go to the pattern listed
+// first, so more specific patterns come before general ones (e.g. "close grip
+// push up" before "push up").
 const MATCHERS: [RegExp, ExerciseGuide][] = [
+  [/seated dip/, PUSH.seatedDips],
+  [/dip/, PUSH.dips],
+  [/1-arm push up/, PUSH.oneArmPushUps],
+  [/chinese push up/, PUSH.chinesePushUps],
+  [/handstand push up/, PUSH.handstandPushUps],
+  [/bouncing push up/, PUSH.bouncingPushUps],
   [/close grip push up/, PUSH.closeGripPushUps],
   [/push up/, PUSH.pushUps],
+  [/dive bomber/, PUSH.diveBombers],
+  [/surface tricep/, PUSH.surfaceTricepsExtensions],
+  [/overhead press/, PUSH.overheadPress],
+  [/mountain climber/, PUSH.mountainClimbers],
+  [/1-arm let me in/, PULL.oneArmLetMeIns],
   [/let me in/, PULL.letMeIns],
   [/let me up/, PULL.letMeUps],
-  [/seated dip/, PUSH.seatedDips],
   [/military press/, PUSH.militaryPress],
   [/shove off/, PUSH.shoveOffs],
   [/thumbs up/, PUSH.thumbsUp],
@@ -27,6 +41,15 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   [/lunge/, LEGS.lunges],
   [/bulgarian/, LEGS.bulgarianSplitSquats],
   [/rdl/, LEGS.rdls],
+  [/hip extension/, LEGS.hipExtensions],
+  [/ham sandwich/, LEGS.hamSandwich],
+  [/iron mike/, LEGS.ironMikes],
+  [/side jump/, LEGS.sideJumps],
+  [/box jump/, LEGS.boxJumps],
+  [/squat thrust/, LEGS.squatThrusts],
+  [/1-legged squat/, LEGS.oneLeggedSquats],
+  [/pistol/, LEGS.pistols],
+  [/sissy squat/, LEGS.sissySquats],
   [/good morning/, LEGS.goodMornings],
   [/beat your boots/, LEGS.beatYourBoots],
   [/toyota/, LEGS.toyotas],
@@ -35,7 +58,13 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
   [/swimmer/, CORE.swimmers],
   [/superman/, CORE.supermans],
   [/hyperextension/, CORE.hyperextensions],
-  [/hanging leg lift/, CORE.hangingLegLifts],
+  [/flutter kick/, CORE.flutterKicks],
+  [/hello darling/, CORE.helloDarlings],
+  [/side v-up/, CORE.sideVUps],
+  [/iron cross/, CORE.ironCrosses],
+  [/jack knive/, CORE.jackKnives],
+  [/pillow hump/, CORE.pillowHumpers],
+  [/hanging leg (lift|raise)/, CORE.hangingLegLifts],
   [/leg lift/, CORE.legLifts],
   [/russian twist/, CORE.russianTwists],
   [/v-up/, CORE.vUps],
@@ -50,5 +79,10 @@ const MATCHERS: [RegExp, ExerciseGuide][] = [
 // "Push Ups w/hands elevated on platform" or "10 Alternating Back Lunges".
 export function guideFor(name: string): ExerciseGuide | undefined {
   const n = name.toLowerCase();
-  return MATCHERS.find(([re]) => re.test(n))?.[1];
+  let best: { index: number; guide: ExerciseGuide } | undefined;
+  for (const [re, guide] of MATCHERS) {
+    const index = n.search(re);
+    if (index !== -1 && (!best || index < best.index)) best = { index, guide };
+  }
+  return best?.guide;
 }
