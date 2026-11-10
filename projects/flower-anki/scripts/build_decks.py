@@ -15,9 +15,9 @@ The code lives in flower_anki/: plants.py (cleaning the export), tags.py,
 media.py (downloads), note_model.py + templates/ (card layout), package.py.
 
 Usage:
-  python3 scripts/build_decks.py                  # download media, embed it
-  python3 scripts/build_decks.py --remote-images  # no downloads: images load
-                                                  # from the site, no audio
+  uv run scripts/build_decks.py                  # download media, embed it
+  uv run scripts/build_decks.py --remote-images  # no downloads: images load
+                                                 # from the site, no audio
 """
 
 import argparse

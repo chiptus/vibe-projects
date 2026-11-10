@@ -6,7 +6,7 @@ lookup tables), which a normal JSON parser rejects. This writes:
   data/flowers.json  - list of plants
   data/lookups.json  - lookup tables (families, colors, months, ...)
 
-Usage: python3 scripts/split_source.py <raw-export.json>
+Usage: uv run scripts/split_source.py <raw-export.json>
 """
 
 import json

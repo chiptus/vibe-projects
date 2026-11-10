@@ -49,11 +49,12 @@ Notes are tagged so you can build filtered decks, e.g. `tag:wildflowers::month::
 
 ## Building
 
+Needs [uv](https://docs.astral.sh/uv/) (`brew install uv`). It reads `pyproject.toml`, creates
+`.venv/` and installs the pinned dependencies from `uv.lock` on the first run.
+
 ```sh
 cd projects/flower-anki
-python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
-python3 scripts/build_decks.py        # or: pnpm --filter flower-anki decks
+uv run scripts/build_decks.py        # or: pnpm --filter flower-anki decks
 ```
 
 The first run downloads about 2,800 photos and 2,700 audio clips from wildflowers.co.il into
@@ -61,7 +62,7 @@ The first run downloads about 2,800 photos and 2,700 audio clips from wildflower
 have a file it's remembered and skipped; a plant whose photo is missing is left out of the decks.
 Network errors aren't remembered, so re-running retries those files.
 
-`--remote-images` skips the downloads and writes `out/israeli-wildflowers-remote.apkg`.
+`uv run scripts/build_decks.py --remote-images` skips the downloads and writes `out/israeli-wildflowers-remote.apkg`.
 Cards then load photos from the site, so you need internet while studying, and they have no audio.
 This mode is mainly for a quick preview.
 
@@ -90,7 +91,7 @@ To change how cards look, edit `templates/`; no Python changes needed.
 - `data/lookups.json`: the site's lookup tables (families, colours, months, regions, …). The decks don't use these yet.
 
 Both come from a single export file that holds two JSON documents back to back.
-`scripts/split_source.py <export.json>` regenerates them from a new export.
+`uv run scripts/split_source.py <export.json>` regenerates them from a new export.
 
 Field notes, because the source names are misleading:
 
