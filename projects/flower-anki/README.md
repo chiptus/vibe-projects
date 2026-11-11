@@ -1,7 +1,7 @@
 # flower-anki
 
 Anki decks for learning Israeli wildflowers, built from the plant data on
-KKL's wildflower site, [kkl.org.il/wild-flower](https://www.kkl.org.il/wild-flower/).
+KKL's wildflower site, [kkl.org.il/wild-flower/plants](https://www.kkl.org.il/wild-flower/plants/).
 
 This project is a Python script that writes `.apkg` files, not a web app. It
 has no `dev` or `build` script, so the root build skips it.
