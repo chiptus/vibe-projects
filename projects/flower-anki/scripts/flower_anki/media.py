@@ -37,7 +37,11 @@ class Media:
 
 
 def media_url(path: str) -> str:
-    return MEDIA_BASE + urllib.parse.quote(path.strip().lstrip("/"))
+    """Full URL for a path from the export; absolute http(s) URLs are kept as given."""
+    path = path.strip()
+    if path.lower().startswith(("http://", "https://")):
+        return path
+    return MEDIA_BASE + urllib.parse.quote(path.lstrip("/"))
 
 
 def fetch(url: str, attempts: int = 3) -> bytes | None:
