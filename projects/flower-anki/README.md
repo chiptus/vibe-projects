@@ -1,7 +1,7 @@
 # flower-anki
 
 Anki decks for learning Israeli wildflowers, built from the plant data on
-[wildflowers.co.il](https://www.wildflowers.co.il) ("צמח השדה").
+KKL's wildflower site, [kkl.org.il/wild-flower](https://www.kkl.org.il/wild-flower/).
 
 This project is a Python script that writes `.apkg` files, not a web app. It
 has no `dev` or `build` script, so the root build skips it.
@@ -57,7 +57,7 @@ cd projects/flower-anki
 uv run scripts/build_decks.py        # or: pnpm --filter flower-anki decks
 ```
 
-The first run downloads about 2,800 photos and 2,700 audio clips from wildflowers.co.il into
+The first run downloads about 2,800 photos and 2,700 audio clips from kkl.org.il into
 `.media-cache/`, shrinking photos to 800px. Later runs reuse the cache. If the site doesn't
 have a file it's remembered and skipped; a plant whose photo is missing is left out of the decks.
 Network errors aren't remembered, so re-running retries those files.

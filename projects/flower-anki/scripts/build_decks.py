@@ -8,7 +8,7 @@ every plant in exactly one of them:
 
 Each plant becomes one note with two cards: photo -> Hebrew name, and Hebrew
 name -> photo. Photos and pronunciation audio (Hebrew, Latin, English) are
-downloaded from wildflowers.co.il once, cached in .media-cache/, shrunk, and
+downloaded from kkl.org.il/wild-flower once, cached in .media-cache/, shrunk, and
 embedded. The cards only play the Hebrew audio.
 
 The code lives in flower_anki/: plants.py (cleaning the export), tags.py,

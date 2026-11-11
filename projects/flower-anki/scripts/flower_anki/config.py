@@ -7,7 +7,7 @@ DATA_FILE = ROOT / "data" / "flowers.json"
 CACHE_DIR = ROOT / ".media-cache"
 OUT_DIR = ROOT / "out"
 
-SITE = "https://www.wildflowers.co.il"
+SITE = "https://www.kkl.org.il"
 MEDIA_BASE = f"{SITE}/wild-flower/"
 
 # Fixed IDs so re-importing a rebuilt package updates notes instead of duplicating.

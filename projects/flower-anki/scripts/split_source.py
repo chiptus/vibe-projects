@@ -1,4 +1,4 @@
-"""Split the raw wildflowers.co.il export into two clean JSON files.
+"""Split the raw KKL wildflower-site export into two clean JSON files.
 
 The export is two JSON documents back to back (the plant list, then the
 lookup tables), which a normal JSON parser rejects. This writes:
