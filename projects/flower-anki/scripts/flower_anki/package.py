@@ -10,6 +10,11 @@ from .plants import Plant
 
 
 def write_package(plants: list[Plant], cache_dir: Path, out_path: Path) -> None:
+    """Write one .apkg: popular plants in one subdeck, the rest in the other.
+
+    Plants without a photo are left out, and only media found in cache_dir is
+    packed.
+    """
     decks = {
         True: genanki.Deck(DECK_POPULAR_ID, f"{PARENT_DECK}::פופולריים"),
         False: genanki.Deck(DECK_REST_ID, f"{PARENT_DECK}::שאר הצמחים"),

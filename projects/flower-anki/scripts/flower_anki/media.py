@@ -57,6 +57,7 @@ def fetch(url: str, attempts: int = 3) -> bytes | None:
 
 
 def shrink_jpeg(data: bytes) -> bytes:
+    """Re-encode a photo as JPEG, at most MAX_IMAGE_SIDE px on its longer side."""
     img = Image.open(io.BytesIO(data))
     # For JPEGs, decode straight at 1/2, 1/4 or 1/8 size, so a huge photo
     # never needs its full-size pixels in memory. No-op for other formats.

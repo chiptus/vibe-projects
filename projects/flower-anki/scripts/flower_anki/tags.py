@@ -19,6 +19,12 @@ def plant_tags(
     status: list[str],
     popular: bool,
 ) -> list[str]:
+    """Tags as wildflowers::<kind>::<value>, e.g. wildflowers::month::03.
+
+    Kinds: family, lifeform, color, month, habitat, region, status, plus
+    wildflowers::popular. Known Hebrew values map to English names (vocab.py);
+    the rest keep their Hebrew text with spaces turned into underscores.
+    """
     t = ["wildflowers"]
     if family_latin:
         t.append(f"wildflowers::family::{family_latin}")

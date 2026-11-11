@@ -31,6 +31,7 @@ class Plant:
 
 
 def clean(value: str) -> str:
+    """Collapse whitespace; the source's "unknown" placeholders become ""."""
     value = re.sub(r"\s+", " ", value or "").strip()
     return "" if value in UNKNOWN_VALUES else value
 
@@ -58,6 +59,10 @@ def is_popular(raw: dict) -> bool:
 
 
 def build_plant(raw: dict, remote_images: bool) -> Plant:
+    """Turn one raw export record into a Plant: note fields, media to fetch, tags.
+
+    With remote_images, the photo links to the site and no media is listed.
+    """
     family_he, family_latin = split_family(raw["Flower_Family"])
     life_form = clean(raw["Life_form"])
     colors = split_list(raw["Flower_color"])
