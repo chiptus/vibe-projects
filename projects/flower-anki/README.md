@@ -61,6 +61,9 @@ The first run downloads about 2,800 photos and 2,700 audio clips from wildflower
 `.media-cache/`, shrinking photos to 800px. Later runs reuse the cache. If the site doesn't
 have a file it's remembered and skipped; a plant whose photo is missing is left out of the decks.
 Network errors aren't remembered, so re-running retries those files.
+Before downloading, the build checks the first few photos: if none of them exists on the site,
+it stops and points at `MEDIA_BASE` in `scripts/flower_anki/config.py` rather than marking
+every file as missing.
 
 `uv run scripts/build_decks.py --remote-images` skips the downloads and writes `out/israeli-wildflowers-remote.apkg`.
 Cards then load photos from the site, so you need internet while studying, and they have no audio.

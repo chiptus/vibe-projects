@@ -16,6 +16,12 @@ from .config import MEDIA_BASE, SITE
 
 MAX_IMAGE_SIDE = 800
 JPEG_QUALITY = 80
+PROBE_IMAGES = 5
+
+# Pillow refuses images over ~180M pixels as possible decompression bombs.
+# Every photo comes from the one site we chose, and shrink_jpeg decodes JPEGs
+# at reduced scale, so a huge photo is shrunk like any other.
+Image.MAX_IMAGE_PIXELS = None
 
 
 @dataclass
@@ -52,6 +58,9 @@ def fetch(url: str, attempts: int = 3) -> bytes | None:
 
 def shrink_jpeg(data: bytes) -> bytes:
     img = Image.open(io.BytesIO(data))
+    # For JPEGs, decode straight at 1/2, 1/4 or 1/8 size, so a huge photo
+    # never needs its full-size pixels in memory. No-op for other formats.
+    img.draft("RGB", (MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
     img = img.convert("RGB")
     img.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
     out = io.BytesIO()
@@ -81,7 +90,7 @@ def ensure_media(m: Media, cache_dir: Path) -> Path | None:
         except OSError:
             data = None
     if data is None:
-        missing.write_text(m.url)
+        missing.write_text(m.url, encoding="utf-8")
         return None
     tmp = path.with_suffix(".part")
     tmp.write_bytes(data)
@@ -89,18 +98,37 @@ def ensure_media(m: Media, cache_dir: Path) -> Path | None:
     return path
 
 
+def _probe(media: list[Media], cache_dir: Path) -> None:
+    """Exit before the bulk download if the site is unreachable or MEDIA_BASE is wrong.
+
+    Runs before any .missing marker is written, so a wrong MEDIA_BASE can't
+    leave thousands of markers behind that block retries once it's fixed.
+    """
+    images = [m for m in media if m.kind == "image"]
+    uncached = [m for m in images if not (cache_dir / m.filename).exists()]
+    if not uncached:
+        return
+    # A photo already in the cache proves the base works; then one check for
+    # reachability is enough, and later 404s are genuinely missing files.
+    base_proven = len(uncached) < len(images)
+    for m in uncached[: 1 if base_proven else PROBE_IMAGES]:
+        try:
+            if fetch(m.url, attempts=2) is not None:
+                return
+        except OSError as err:
+            sys.exit(f"Can't reach {SITE} ({err}). Check your network, "
+                     "or build with --remote-images.")
+    if not base_proven:
+        sys.exit(f"None of the first {PROBE_IMAGES} photos exist under {MEDIA_BASE}. "
+                 "The media URL base looks wrong: fix MEDIA_BASE in "
+                 "scripts/flower_anki/config.py.")
+
+
 def download_all(media: list[Media], cache_dir: Path, workers: int) -> set[str]:
     """Fetch every file into cache_dir; return the filenames that couldn't be had."""
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    # Fail fast if the site is unreachable, instead of retrying every file.
-    probe = next((m for m in media if not (cache_dir / m.filename).exists()), None)
-    if probe:
-        try:
-            fetch(probe.url, attempts=2)
-        except OSError as err:
-            sys.exit(f"Can't reach {SITE} ({err}). Check your network, "
-                     "or build with --remote-images.")
+    _probe(media, cache_dir)
 
     missing = set()
     with ThreadPoolExecutor(workers) as pool:
