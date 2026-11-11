@@ -58,9 +58,15 @@ uv run scripts/build_decks.py        # or: pnpm --filter flower-anki decks
 ```
 
 The first run downloads about 2,800 photos and 2,700 audio clips from kkl.org.il into
-`.media-cache/`, shrinking photos to 800px. Later runs reuse the cache. If the site doesn't
-have a file it's remembered and skipped; a plant whose photo is missing is left out of the decks.
-Network errors aren't remembered, so re-running retries those files.
+`.media-cache/`, shrinking photos to 800px. Later runs reuse the cache.
+
+- If the site doesn't have a file, that's remembered (a `.missing` marker holding its URL) and
+  skipped; a plant whose photo is missing is left out of the deck. A marker for a different URL,
+  e.g. from before `MEDIA_BASE` changed, is ignored and the file is fetched again.
+- If any file fails to download (network error), the build stops before writing the package.
+  Run it again: it only fetches what isn't cached yet.
+- A photo that downloads but won't decode is left out of this build and retried on the next one.
+
 Before downloading, the build checks the first few photos: if none of them exists on the site,
 it stops and points at `MEDIA_BASE` in `scripts/flower_anki/config.py` rather than marking
 every file as missing.

@@ -22,4 +22,11 @@ export const PROJECTS: ProjectLink[] = [
     description: "Interval-timer trainer for the Spanish rolled R (RR).",
     href: "/trilled-r-trainer/",
   },
+  {
+    name: "flower-anki",
+    title: "Flower Anki",
+    description: "Anki decks for learning Israeli wildflowers by their Hebrew names.",
+    href: "https://github.com/chiptus/vibe-projects/tree/main/projects/flower-anki",
+    external: true,
+  },
 ];
