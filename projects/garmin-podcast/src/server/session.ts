@@ -1,12 +1,11 @@
 import { env } from "cloudflare:workers";
 import { createAuth } from "./auth";
-import type { MeDeps } from "./me";
+import type { ApiUser } from "./me";
 
-export const productionDeps: MeDeps = {
-  async getUser(request) {
-    const session = await createAuth(env).api.getSession({ headers: request.headers });
-    if (!session) return null;
-    const { id, name, email } = session.user;
-    return { id, name, email };
-  },
-};
+/** The signed-in person for a request (from the Better Auth session cookie), or null. */
+export async function getUser(request: Request): Promise<ApiUser | null> {
+  const session = await createAuth(env).api.getSession({ headers: request.headers });
+  if (!session) return null;
+  const { id, name, email } = session.user;
+  return { id, name, email };
+}

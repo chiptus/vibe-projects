@@ -1,6 +1,7 @@
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { authClient } from "../auth-client";
 import { meQueryOptions } from "../server/me.fn";
 
 export const Route = createFileRoute("/")({
@@ -11,14 +12,8 @@ export const Route = createFileRoute("/")({
 });
 
 async function startGoogleSignIn() {
-  const res = await fetch("/api/auth/sign-in/social", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ provider: "google", callbackURL: "/" }),
-  });
-  const { url } = (await res.json()) as { url?: string };
-  if (!res.ok || !url) throw new Error("sign-in failed");
-  window.location.href = url;
+  const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/" });
+  if (error) throw new Error(error.message ?? "sign-in failed");
 }
 
 function MeError() {
