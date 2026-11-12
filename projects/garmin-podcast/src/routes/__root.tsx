@@ -1,6 +1,7 @@
-import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -8,15 +9,22 @@ export const Route = createRootRoute({
       { title: "Garmin Podcast" },
     ],
   }),
-  component: () => (
+  component: Root,
+});
+
+function Root() {
+  const { queryClient } = Route.useRouteContext();
+  return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
-        <Outlet />
+        <QueryClientProvider client={queryClient}>
+          <Outlet />
+        </QueryClientProvider>
         <Scripts />
       </body>
     </html>
-  ),
-});
+  );
+}

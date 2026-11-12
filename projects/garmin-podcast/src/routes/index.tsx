@@ -1,5 +1,5 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 
 interface Me {
   name: string;
@@ -8,45 +8,47 @@ interface Me {
 
 export const Route = createFileRoute("/")({ component: Home });
 
+/** The signed-in person, or null when signed out (401). Other failures throw. */
+async function fetchMe(): Promise<Me | null> {
+  const res = await fetch("/api/me");
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(`/api/me failed: ${res.status}`);
+  return (await res.json()) as Me;
+}
+
+async function startGoogleSignIn() {
+  const res = await fetch("/api/auth/sign-in/social", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ provider: "google", callbackURL: "/" }),
+  });
+  const { url } = (await res.json()) as { url?: string };
+  if (!res.ok || !url) throw new Error("sign-in failed");
+  window.location.href = url;
+}
+
 function Home() {
-  const [me, setMe] = useState<Me | null | undefined>(undefined);
-  const [signInFailed, setSignInFailed] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/me")
-      .then(async (res) => setMe(res.ok ? ((await res.json()) as Me) : null))
-      .catch(() => setMe(null));
-  }, []);
-
-  async function signIn() {
-    setSignInFailed(false);
-    try {
-      const res = await fetch("/api/auth/sign-in/social", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ provider: "google", callbackURL: "/" }),
-      });
-      const { url } = (await res.json()) as { url?: string };
-      if (!res.ok || !url) throw new Error("sign-in failed");
-      window.location.href = url;
-    } catch {
-      setSignInFailed(true);
-    }
-  }
+  const me = useQuery({ queryKey: ["me"], queryFn: fetchMe });
+  const signIn = useMutation({ mutationFn: startGoogleSignIn });
 
   return (
     <main style={{ fontFamily: "system-ui", maxWidth: 480, margin: "2rem auto", padding: "0 1rem" }}>
       <h1>Garmin Podcast</h1>
-      {me === undefined ? (
+      {me.isPending ? (
         <p>Loading…</p>
-      ) : me ? (
+      ) : me.isError ? (
+        <>
+          <p role="alert">Couldn't load your account.</p>
+          <button onClick={() => me.refetch()}>Retry</button>
+        </>
+      ) : me.data ? (
         <p>
-          Signed in as {me.name} ({me.email})
+          Signed in as {me.data.name} ({me.data.email})
         </p>
       ) : (
         <>
-          <button onClick={signIn}>Sign in with Google</button>
-          {signInFailed && <p role="alert">Sign-in failed, try again.</p>}
+          <button onClick={() => signIn.mutate()}>Sign in with Google</button>
+          {signIn.isError && <p role="alert">Sign-in failed, try again.</p>}
         </>
       )}
     </main>

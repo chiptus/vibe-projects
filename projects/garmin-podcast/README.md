@@ -20,15 +20,15 @@ Other scripts: `test` (Vitest in the Workers runtime), `typecheck`, `lint`, `bui
 
 ## Tests
 
-`test/` exercises the Worker's HTTP API handler (`src/server/api.ts`) against a real local D1 (Miniflare) with migrations from `drizzle/` applied and Google sign-in stubbed (the signed-in person is named by a request header). No network needed.
+Tests sit next to the code they cover (`src/server/me.test.ts` exercises `GET /api/me`'s handler, `src/server/me.ts`) against a real local D1 (Miniflare) with migrations from `drizzle/` applied (setup in `test/`) and Google sign-in stubbed (the signed-in person is named by a request header). No network needed.
 
 ## Deploy
 
 Run the `wrangler` commands from this folder.
 
-1. `wrangler d1 create garmin-podcast`, then put the printed id in `wrangler.jsonc`.
+1. `pnpm exec wrangler d1 create garmin-podcast`, then put the printed id in `wrangler.jsonc`.
 2. `pnpm --filter garmin-podcast db:migrate:remote`.
-3. Create a Google OAuth client (redirect URI `<worker url>/api/auth/callback/google`), then set secrets with `wrangler secret put`: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+3. Create a Google OAuth client (redirect URI `<worker url>/api/auth/callback/google`), then set secrets with `pnpm exec wrangler secret put`: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 4. `pnpm --filter garmin-podcast deploy`.
 5. Update the hub entry's `href` in `projects/hub/src/projects.ts` to the real Worker URL.
 
