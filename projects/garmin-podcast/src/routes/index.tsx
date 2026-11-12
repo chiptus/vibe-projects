@@ -1,20 +1,14 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+import { meQueryOptions } from "../server/me.fn";
 
-interface Me {
-  name: string;
-  email: string;
-}
-
-export const Route = createFileRoute("/")({ component: Home });
-
-/** The signed-in person, or null when signed out (401). Other failures throw. */
-async function fetchMe(): Promise<Me | null> {
-  const res = await fetch("/api/me");
-  if (res.status === 401) return null;
-  if (!res.ok) throw new Error(`/api/me failed: ${res.status}`);
-  return (await res.json()) as Me;
-}
+export const Route = createFileRoute("/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(meQueryOptions),
+  pendingComponent: () => <p>Loading…</p>,
+  errorComponent: MeError,
+  component: Home,
+});
 
 async function startGoogleSignIn() {
   const res = await fetch("/api/auth/sign-in/social", {
@@ -27,23 +21,34 @@ async function startGoogleSignIn() {
   window.location.href = url;
 }
 
-function Home() {
-  const me = useQuery({ queryKey: ["me"], queryFn: fetchMe });
-  const signIn = useMutation({ mutationFn: startGoogleSignIn });
+function MeError() {
+  const router = useRouter();
+  return (
+    <Page>
+      <p role="alert">Couldn't load your account.</p>
+      <button onClick={() => router.invalidate()}>Retry</button>
+    </Page>
+  );
+}
 
+function Page({ children }: { children: ReactNode }) {
   return (
     <main style={{ fontFamily: "system-ui", maxWidth: 480, margin: "2rem auto", padding: "0 1rem" }}>
       <h1>Garmin Podcast</h1>
-      {me.isPending ? (
-        <p>Loading…</p>
-      ) : me.isError ? (
-        <>
-          <p role="alert">Couldn't load your account.</p>
-          <button onClick={() => me.refetch()}>Retry</button>
-        </>
-      ) : me.data ? (
+      {children}
+    </main>
+  );
+}
+
+function Home() {
+  const { data: me } = useSuspenseQuery(meQueryOptions);
+  const signIn = useMutation({ mutationFn: startGoogleSignIn });
+
+  return (
+    <Page>
+      {me ? (
         <p>
-          Signed in as {me.data.name} ({me.data.email})
+          Signed in as {me.name} ({me.email})
         </p>
       ) : (
         <>
@@ -51,6 +56,6 @@ function Home() {
           {signIn.isError && <p role="alert">Sign-in failed, try again.</p>}
         </>
       )}
-    </main>
+    </Page>
   );
 }
