@@ -18,6 +18,9 @@ from .config import MEDIA_BASE, SITE
 MAX_IMAGE_SIDE = 800
 JPEG_QUALITY = 80
 PROBE_IMAGES = 5
+# 4xx codes that mean "try again later", not "this file doesn't exist".
+RETRYABLE_4XX = {408, 429}
+MAX_RETRY_AFTER = 60  # seconds
 
 # Pillow refuses images over ~180M pixels as possible decompression bombs.
 # Every photo comes from the one site we chose, and shrink_jpeg decodes JPEGs
@@ -44,27 +47,36 @@ def media_url(path: str) -> str:
     return MEDIA_BASE + urllib.parse.quote(path.lstrip("/"))
 
 
+def _retry_after(err: urllib.error.HTTPError) -> float | None:
+    """Seconds the server asked us to wait (Retry-After), capped; None if absent."""
+    value = err.headers.get("Retry-After", "") if err.headers else ""
+    return min(float(value), MAX_RETRY_AFTER) if value.strip().isdigit() else None
+
+
 def fetch(url: str, attempts: int = 3) -> bytes | None:
     """Return the body, None if the site says the file doesn't exist (4xx).
 
-    Raises OSError or http.client.HTTPException if the site can't be reached
-    or keeps cutting the transfer off after all attempts.
+    Rate limiting (429) and request timeouts (408) are retried like network
+    errors, honouring Retry-After. Raises OSError or http.client.HTTPException
+    if the site can't be reached, keeps rate limiting, or keeps cutting the
+    transfer off after all attempts.
     """
     for attempt in range(attempts):
+        wait = None
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "flower-anki/1.0"})
             with urllib.request.urlopen(req, timeout=30) as resp:
                 return resp.read()
         except urllib.error.HTTPError as err:
-            if 400 <= err.code < 500:
+            if 400 <= err.code < 500 and err.code not in RETRYABLE_4XX:
                 return None
-            error = err
+            error, wait = err, _retry_after(err)
         # URLError, timeouts and connection resets are OSErrors; a transfer cut
         # off mid-body raises IncompleteRead, an HTTPException.
         except (OSError, http.client.HTTPException) as err:
             error = err
         if attempt < attempts - 1:
-            time.sleep(2**attempt)
+            time.sleep(wait if wait is not None else 2**attempt)
     raise error
 
 
