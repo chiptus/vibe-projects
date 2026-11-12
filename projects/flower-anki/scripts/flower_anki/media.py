@@ -9,6 +9,8 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 from PIL import Image
@@ -48,9 +50,23 @@ def media_url(path: str) -> str:
 
 
 def _retry_after(err: urllib.error.HTTPError) -> float | None:
-    """Seconds the server asked us to wait (Retry-After), capped; None if absent."""
-    value = err.headers.get("Retry-After", "") if err.headers else ""
-    return min(float(value), MAX_RETRY_AFTER) if value.strip().isdigit() else None
+    """Seconds the server asked us to wait, clamped to 0..MAX_RETRY_AFTER.
+
+    Retry-After is either a number of seconds or an HTTP date. Returns None
+    when the header is missing or unreadable, so the caller backs off normally.
+    """
+    value = (err.headers.get("Retry-After", "") if err.headers else "").strip()
+    if value.isdigit():
+        seconds = float(value)
+    else:
+        try:
+            when = parsedate_to_datetime(value)
+        except (TypeError, ValueError):
+            return None
+        if when.tzinfo is None:  # HTTP dates are GMT
+            when = when.replace(tzinfo=timezone.utc)
+        seconds = (when - datetime.now(timezone.utc)).total_seconds()
+    return min(max(seconds, 0.0), MAX_RETRY_AFTER)
 
 
 def fetch(url: str, attempts: int = 3) -> bytes | None:
