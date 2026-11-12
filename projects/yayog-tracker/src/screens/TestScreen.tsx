@@ -9,10 +9,11 @@ interface TestScreenProps {
   active: Level;
   results: TestResult[];
   onRecord: (result: TestResult) => Promise<string | null>;
+  onDelete: (index: number) => Promise<string | null>;
   onSwitch: (level: Level) => void;
 }
 
-export function TestScreen({ active, results, onRecord, onSwitch }: TestScreenProps) {
+export function TestScreen({ active, results, onRecord, onDelete, onSwitch }: TestScreenProps) {
   const recommended = highestPassed(results);
   const next = nextTest(results);
   const latest = next ? [...results].reverse().find((r) => r.level === next) : undefined;
@@ -27,7 +28,7 @@ export function TestScreen({ active, results, onRecord, onSwitch }: TestScreenPr
           <p className="text-base text-mu">You have passed every Level test.</p>
         </Card>
       )}
-      {results.length > 0 && <ResultsList results={results} />}
+      {results.length > 0 && <ResultsList results={results} onDelete={onDelete} />}
     </>
   );
 }
