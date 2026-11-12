@@ -1,11 +1,11 @@
 import { Card } from "../Card";
 import { ExerciseNameList } from "../exercise/ExerciseNameList";
 import { CountRow } from "../CountRow";
-import type { StappersEntry } from "../../program/types";
+import type { ExerciseItem, StappersEntry } from "../../program/types";
 
 interface StappersCardProps {
   entry: StappersEntry;
-  exercises: string[];
+  exercises: ExerciseItem[];
   onChange: (patch: Partial<StappersEntry>) => void;
 }
 

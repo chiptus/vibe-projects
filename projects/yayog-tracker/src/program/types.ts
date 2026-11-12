@@ -28,10 +28,13 @@ export interface TabataDay {
   exercises: string[];
 }
 
+// A plain exercise, or a group of alternatives where the person picks one.
+export type ExerciseItem = string | string[];
+
 export interface StappersDay {
   type: "stappers";
   focus: string;
-  exercises: string[];
+  exercises: ExerciseItem[];
 }
 
 export type Day = LadderDay | IntervalDay | SupersetDay | TabataDay | StappersDay;
