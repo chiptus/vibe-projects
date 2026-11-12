@@ -7,7 +7,7 @@ const STAPPERS_CHIEF: StappersDay = {
   type: "stappers",
   focus: "Stappers",
   exercises: [
-    "12 Alternating Pistols (6 total on each side) or 24 Iron Mikes (jumping as high as possible)",
+    ["12 Alternating Pistols (6 total on each side)", "24 Iron Mikes (jumping as high as possible)"],
     "6 Handstand Push Ups",
     "8 Door Pull Ups",
   ],
