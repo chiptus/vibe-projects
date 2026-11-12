@@ -1,0 +1,13 @@
+[project]
+name = "flower-anki"
+version = "0.0.0"
+description = "Anki decks of Israeli wildflowers, generated from a KKL wildflower-site export."
+requires-python = ">=3.11"
+dependencies = [
+    "genanki==0.13.1",
+    "pillow>=10",
+]
+
+[tool.uv]
+# A set of scripts, not an installable package.
+package = false

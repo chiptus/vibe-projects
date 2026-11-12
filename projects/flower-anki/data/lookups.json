@@ -1,0 +1,1376 @@
+{
+ "families": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": null
+  },
+  {
+   "Title": "אברשיים",
+   "Value": "אברשיים  Ericaceae",
+   "Link": "/wild-flower/plant-families/ericaceae/"
+  },
+  {
+   "Title": "אברתיים",
+   "Value": "אברתיים Pteridaceae",
+   "Link": "/wild-flower/plant-families/pteridaceae/"
+  },
+  {
+   "Title": "אדמוניתיים",
+   "Value": "אדמוניתיים Paeoniaceae",
+   "Link": "/wild-flower/plant-families/paeoniaceae/"
+  },
+  {
+   "Title": "אורניים",
+   "Value": "אורניים Pinaceae",
+   "Link": "/wild-flower/plant-families/pinaceae/"
+  },
+  {
+   "Title": "אזדרכתיים",
+   "Value": "אזדרכתיים Meliaceae",
+   "Link": "/wild-flower/plant-families/meliaceae/"
+  },
+  {
+   "Title": "איריסיים",
+   "Value": "איריסיים Iridaceae",
+   "Link": "/wild-flower/plant-families/iridaceae/"
+  },
+  {
+   "Title": "אלוניים",
+   "Value": "אלוניים Fagaceae",
+   "Link": "/wild-flower/plant-families/fagaceae/"
+  },
+  {
+   "Title": "אלטיניים",
+   "Value": "אלטיניים Elatinaceae",
+   "Link": "/wild-flower/plant-families/elatinaceae/"
+  },
+  {
+   "Title": "אלף-העלה",
+   "Value": "אלף-העלה Haloragaceae",
+   "Link": "/wild-flower/plant-families/haloragaceae/"
+  },
+  {
+   "Title": "אלתיים",
+   "Value": "אלתיים Anacardiaceae",
+   "Link": "/wild-flower/plant-families/anacardiaceae/"
+  },
+  {
+   "Title": "אספלניים",
+   "Value": "אספלניים Aspleniaceae",
+   "Link": "/wild-flower/plant-families/aspleniaceae/"
+  },
+  {
+   "Title": "אספרגיים",
+   "Value": "אספרגיים Asparagaceae",
+   "Link": "/wild-flower/plant-families/asparagaceae/"
+  },
+  {
+   "Title": "אפרוריתיים",
+   "Value": "אפרוריתיים Molluginaceae",
+   "Link": "/wild-flower/plant-families/molluginaceae/"
+  },
+  {
+   "Title": "ארכוביתיים",
+   "Value": "ארכוביתיים Polygonaceae",
+   "Link": "/wild-flower/plant-families/polygonaceae/"
+  },
+  {
+   "Title": "אשחריים",
+   "Value": "אשחריים Rhamnaceae",
+   "Link": "/wild-flower/plant-families/rhamnaceae/"
+  },
+  {
+   "Title": "אשליים",
+   "Value": "אשליים Tamaricaceae",
+   "Link": "/wild-flower/plant-families/tamaricaceae/"
+  },
+  {
+   "Title": "באשניים",
+   "Value": "באשניים Cleomaceae",
+   "Link": "/wild-flower/plant-families/cleomaceae/"
+  },
+  {
+   "Title": "בוציציים",
+   "Value": "בוציציים Butomaceae",
+   "Link": "/wild-flower/plant-families/butomaceae/"
+  },
+  {
+   "Title": "ביברשטיניים",
+   "Value": "ביברשטיניים  Biebersteiniaceae",
+   "Link": "/wild-flower/plant-families/biebersteiniaceae/"
+  },
+  {
+   "Title": "ביגנוניים",
+   "Value": "ביגנוניים Bignoniaceae",
+   "Link": "/wild-flower/plant-families/bignoniaceae/"
+  },
+  {
+   "Title": "בקעצוריים",
+   "Value": "בקעצוריים Saxifragaceae",
+   "Link": "/wild-flower/plant-families/saxifragaceae/"
+  },
+  {
+   "Title": "ברושיים",
+   "Value": "ברושיים Cupressaceae",
+   "Link": "/wild-flower/plant-families/cupressaceae/"
+  },
+  {
+   "Title": "גומאיים",
+   "Value": "גומאיים Cyperaceae",
+   "Link": "/wild-flower/plant-families/cyperaceae/"
+  },
+  {
+   "Title": "גליתיים",
+   "Value": "גליתיים Cymodoceaceae",
+   "Link": "/wild-flower/plant-families/cymodoceaceae/"
+  },
+  {
+   "Title": "גפיתיים",
+   "Value": "גפיתיים Thelypteridiaceae",
+   "Link": "/wild-flower/plant-families/thelypteridiaceae/"
+  },
+  {
+   "Title": "גפניים",
+   "Value": "גפניים Vitaceae",
+   "Link": "/wild-flower/plant-families/vitaceae/"
+  },
+  {
+   "Title": "גרניים",
+   "Value": "גרניים Geraniaceae",
+   "Link": "/wild-flower/plant-families/geraniaceae/"
+  },
+  {
+   "Title": "דגניים",
+   "Value": "דגניים Poaceae",
+   "Link": "/wild-flower/plant-families/poaceae/"
+  },
+  {
+   "Title": "דולביים",
+   "Value": "דולביים Platanaceae",
+   "Link": "/wild-flower/plant-families/platanaceae/"
+  },
+  {
+   "Title": "דלועיים",
+   "Value": "דלועיים Cucurbitaceae",
+   "Link": "/wild-flower/plant-families/cucurbitaceae/"
+  },
+  {
+   "Title": "דנשטטיים",
+   "Value": "דנשטטיים Dennstaedtiaceae",
+   "Link": "/wild-flower/plant-families/dennstaedtiaceae/"
+  },
+  {
+   "Title": "דקליים",
+   "Value": "דקליים Arecaceae",
+   "Link": "/wild-flower/plant-families/arecaceae/"
+  },
+  {
+   "Title": "הדסיים",
+   "Value": "הדסיים Myrtaceae",
+   "Link": "/wild-flower/plant-families/myrtaceae/"
+  },
+  {
+   "Title": "הרדופיים",
+   "Value": "הרדופיים Apocynaceae",
+   "Link": "/wild-flower/plant-families/apocynaceae/"
+  },
+  {
+   "Title": "הרנוגיים",
+   "Value": "הרנוגיים Loranthaceae",
+   "Link": "/wild-flower/plant-families/loranthaceae/"
+  },
+  {
+   "Title": "ולריניים",
+   "Value": "ולריניים Valerianaceae",
+   "Link": "/wild-flower/plant-families/valerianaceae/"
+  },
+  {
+   "Title": "ורבניים",
+   "Value": "ורבניים Verbenaceae",
+   "Link": "/wild-flower/plant-families/verbenaceae/"
+  },
+  {
+   "Title": "ורדיים",
+   "Value": "ורדיים Rosaceae",
+   "Link": "/wild-flower/plant-families/rosaceae/"
+  },
+  {
+   "Title": "זוגניים",
+   "Value": "זוגניים Zygophyllaceae",
+   "Link": "/wild-flower/plant-families/zygophyllaceae/"
+  },
+  {
+   "Title": "זיפניים",
+   "Value": "זיפניים Boraginaceae",
+   "Link": "/wild-flower/plant-families/boraginaceae/"
+  },
+  {
+   "Title": "זיתיים",
+   "Value": "זיתיים Oleaceae",
+   "Link": "/wild-flower/plant-families/oleaceae/"
+  },
+  {
+   "Title": "חבלבליים",
+   "Value": "חבלבליים Convolvulaceae",
+   "Link": "/wild-flower/plant-families/convolvulaceae/"
+  },
+  {
+   "Title": "חיעדיים",
+   "Value": "חיעדיים Aizoaceae",
+   "Link": "/wild-flower/plant-families/aizoaceae/"
+  },
+  {
+   "Title": "חלבלוביים",
+   "Value": "חלבלוביים Euphorbiaceae",
+   "Link": "/wild-flower/plant-families/euphorbiaceae/"
+  },
+  {
+   "Title": "חלמיתיים",
+   "Value": "חלמיתיים Malvaceae",
+   "Link": "/wild-flower/plant-families/malvaceae/"
+  },
+  {
+   "Title": "חמציציים",
+   "Value": "חמציציים Oxalidaceae",
+   "Link": "/wild-flower/plant-families/oxalidaceae/"
+  },
+  {
+   "Title": "טבוריתיים",
+   "Value": "טבוריתיים Crassulaceae",
+   "Link": "/wild-flower/plant-families/crassulaceae/"
+  },
+  {
+   "Title": "טובעניתיים",
+   "Value": "טובעניתיים",
+   "Link": null
+  },
+  {
+   "Title": "טופליים",
+   "Value": "טופליים Cynomoriaceae",
+   "Link": "/wild-flower/plant-families/cynomoriaceae/"
+  },
+  {
+   "Title": "טחבי כבד (מערכת)",
+   "Value": "טחבי כבד (מערכת) Marchantiophyta",
+   "Link": "/wild-flower/plant-families/marchantiophyta/"
+  },
+  {
+   "Title": "טחבי עלים (מערכת)",
+   "Value": "טחבי עלים (מערכת)   Bryophyta",
+   "Link": "/wild-flower/plant-families/bryophyta/"
+  },
+  {
+   "Title": "טחבי קרן (מערכת)",
+   "Value": "טחבי קרן (מערכת) Anthocerophyta",
+   "Link": "/wild-flower/plant-families/anthocerophyta/"
+  },
+  {
+   "Title": "טמוסיים",
+   "Value": "טמוסיים Dioscoreaceae",
+   "Link": "/wild-flower/plant-families/dioscoreaceae/"
+  },
+  {
+   "Title": "ימלוחיים",
+   "Value": "ימלוחיים Nitrariaceae",
+   "Link": "/wild-flower/plant-families/nitrariaceae/"
+  },
+  {
+   "Title": "יערתיים",
+   "Value": "יערתיים Caprifoliaceae",
+   "Link": "/wild-flower/plant-families/caprifoliaceae/"
+  },
+  {
+   "Title": "יצהרוניים",
+   "Value": "יצהרוניים Elaeagnaceae",
+   "Link": "/wild-flower/plant-families/elaeagnaceae/"
+  },
+  {
+   "Title": "ירבוזיים",
+   "Value": "ירבוזיים Amaranthaceae",
+   "Link": "/wild-flower/plant-families/amaranthaceae/"
+  },
+  {
+   "Title": "כדורניים",
+   "Value": "כדורניים",
+   "Link": null
+  },
+  {
+   "Title": "כופריים",
+   "Value": "כופריים Lythraceae",
+   "Link": "/wild-flower/plant-families/lythraceae/"
+  },
+  {
+   "Title": "כחליתיים",
+   "Value": "כחליתיים Ixioliriaceae",
+   "Link": "/wild-flower/plant-families/ixioliriaceae/"
+  },
+  {
+   "Title": "כף-צפרדע",
+   "Value": "כף-צפרדע Alismataceae",
+   "Link": "/wild-flower/plant-families/alismataceae/"
+  },
+  {
+   "Title": "כפתוריים",
+   "Value": "כפתוריים Neuradaceae",
+   "Link": "/wild-flower/plant-families/neuradaceae/"
+  },
+  {
+   "Title": "לבניים",
+   "Value": "לבניים Styracaceae",
+   "Link": "/wild-flower/plant-families/styracaceae/"
+  },
+  {
+   "Title": "לוטמיים",
+   "Value": "לוטמיים Cistaceae",
+   "Link": "/wild-flower/plant-families/cistaceae/"
+  },
+  {
+   "Title": "לועניתיים",
+   "Value": "לועניתיים Scrophulariaceae",
+   "Link": "/wild-flower/plant-families/scrophulariaceae/"
+  },
+  {
+   "Title": "לופיים",
+   "Value": "לופיים Araceae",
+   "Link": "/wild-flower/plant-families/araceae/"
+  },
+  {
+   "Title": "לחכיים",
+   "Value": "לחכיים Plantaginaceae",
+   "Link": "/wild-flower/plant-families/plantaginaceae/"
+  },
+  {
+   "Title": "לילניים",
+   "Value": "לילניים Nyctaginaceae",
+   "Link": "/wild-flower/plant-families/nyctaginaceae/"
+  },
+  {
+   "Title": "לשון-אפעה",
+   "Value": "לשון-אפעה Ophioglossaceae",
+   "Link": "/wild-flower/plant-families/ophioglossaceae/"
+  },
+  {
+   "Title": "מורינגיים",
+   "Value": "מורינגיים Moringaceae",
+   "Link": "/wild-flower/plant-families/moringaceae/"
+  },
+  {
+   "Title": "מורכבים",
+   "Value": "מורכבים Asteraceae",
+   "Link": "/wild-flower/plant-families/asteraceae/"
+  },
+  {
+   "Title": "מורניים",
+   "Value": "מורניים Viburnaceae",
+   "Link": "/wild-flower/plant-families/viburnaceae/"
+  },
+  {
+   "Title": "מימוניים",
+   "Value": "מימוניים Hydrocharitaceae",
+   "Link": "/wild-flower/plant-families/hydrocharitaceae/"
+  },
+  {
+   "Title": "מישיים",
+   "Value": "מישיים Ulmaceae",
+   "Link": "/wild-flower/plant-families/ulmaceae/"
+  },
+  {
+   "Title": "מצליבים",
+   "Value": "מצליבים Brassicaceae",
+   "Link": "/wild-flower/plant-families/brassicaceae/"
+  },
+  {
+   "Title": "מרבה-חלב",
+   "Value": "מרבה-חלב Polygalaceae",
+   "Link": "/wild-flower/plant-families/polygalaceae/"
+  },
+  {
+   "Title": "מרסיליים",
+   "Value": "מרסיליים Marsileaceae",
+   "Link": "/wild-flower/plant-families/marsileaceae/"
+  },
+  {
+   "Title": "מרשנטיים",
+   "Value": "מרשנטיים",
+   "Link": null
+  },
+  {
+   "Title": "מתנניים",
+   "Value": "מתנניים Thymelaeaceae",
+   "Link": "/wild-flower/plant-families/thymelaeaceae/"
+  },
+  {
+   "Title": "נאדידיים",
+   "Value": "נאדידיים Lentibulariaceae",
+   "Link": "/wild-flower/plant-families/lentibulariaceae/"
+  },
+  {
+   "Title": "נהרוניתיים",
+   "Value": "נהרוניתיים Potamogetonaceae",
+   "Link": "/wild-flower/plant-families/potamogetonaceae/"
+  },
+  {
+   "Title": "נופריים",
+   "Value": "נופריים Nymphaeaceae",
+   "Link": "/wild-flower/plant-families/nymphaeaceae/"
+  },
+  {
+   "Title": "נוריתיים",
+   "Value": "נוריתיים Ranunculaceae",
+   "Link": "/wild-flower/plant-families/ranunculaceae/"
+  },
+  {
+   "Title": "ניידיים",
+   "Value": "ניידיים",
+   "Link": null
+  },
+  {
+   "Title": "נר-הלילה",
+   "Value": "נר-הלילה Onagraceae",
+   "Link": "/wild-flower/plant-families/onagraceae/"
+  },
+  {
+   "Title": "נרקיסיים",
+   "Value": "נרקיסיים Amaryllidaceae",
+   "Link": "/wild-flower/plant-families/amaryllidaceae/"
+  },
+  {
+   "Title": "סבונניים",
+   "Value": "סבונניים Sapindaceae",
+   "Link": "/wild-flower/plant-families/sapindaceae/"
+  },
+  {
+   "Title": "סהרוניים",
+   "Value": "סהרוניים Menispermaceae",
+   "Link": "/wild-flower/plant-families/menispermaceae/"
+  },
+  {
+   "Title": "סוככיים",
+   "Value": "סוככיים Apiaceae",
+   "Link": "/wild-flower/plant-families/apiaceae/"
+  },
+  {
+   "Title": "סולניים",
+   "Value": "סולניים Solanaceae",
+   "Link": "/wild-flower/plant-families/solanaceae/"
+  },
+  {
+   "Title": "סופיים",
+   "Value": "סופיים Typhaceae",
+   "Link": "/wild-flower/plant-families/typhaceae/"
+  },
+  {
+   "Title": "סחלביים",
+   "Value": "סחלביים Orchidaceae",
+   "Link": "/wild-flower/plant-families/orchidaceae/"
+  },
+  {
+   "Title": "סיגליים",
+   "Value": "סיגליים Violaceae",
+   "Link": "/wild-flower/plant-families/violaceae/"
+  },
+  {
+   "Title": "סימרוביים",
+   "Value": "סימרוביים Simaroubaceae",
+   "Link": "/wild-flower/plant-families/simaroubaceae/"
+  },
+  {
+   "Title": "סלביניים",
+   "Value": "סלביניים Salviniaceae",
+   "Link": "/wild-flower/plant-families/salviniaceae/"
+  },
+  {
+   "Title": "סלוודוריים",
+   "Value": "סלוודוריים Salvadoraceae",
+   "Link": "/wild-flower/plant-families/salvadoraceae/"
+  },
+  {
+   "Title": "סמריים",
+   "Value": "סמריים Juncaceae",
+   "Link": "/wild-flower/plant-families/juncaceae/"
+  },
+  {
+   "Title": "סנטליים",
+   "Value": "סנטליים Santalaceae",
+   "Link": "/wild-flower/plant-families/santalaceae/"
+  },
+  {
+   "Title": "ספוטיים",
+   "Value": "ספוטיים Sapotaceae",
+   "Link": null
+  },
+  {
+   "Title": "ספלוליים",
+   "Value": "ספלוליים Aristolochiaceae",
+   "Link": "/wild-flower/plant-families/aristolochiaceae/"
+  },
+  {
+   "Title": "סרפדיים",
+   "Value": "סרפדיים Urticaceae",
+   "Link": "/wild-flower/plant-families/urticaceae/"
+  },
+  {
+   "Title": "סתווניתיים",
+   "Value": "סתווניתיים Colchicaceae",
+   "Link": "/wild-flower/plant-families/colchicaceae/"
+  },
+  {
+   "Title": "עופריתיים",
+   "Value": "עופריתיים Plumbaginaceae",
+   "Link": "/wild-flower/plant-families/plumbaginaceae/"
+  },
+  {
+   "Title": "עיריתיים",
+   "Value": "עיריתיים Asphodelaceae",
+   "Link": "/wild-flower/plant-families/asphodelaceae/"
+  },
+  {
+   "Title": "עלקתיים",
+   "Value": "עלקתיים Orobanchaceae",
+   "Link": "/wild-flower/plant-families/orobanchaceae/"
+  },
+  {
+   "Title": "ערבזיים",
+   "Value": "ערבזיים Gentianaceae",
+   "Link": "/wild-flower/plant-families/gentianaceae/"
+  },
+  {
+   "Title": "ערבתיים",
+   "Value": "ערבתיים Salicaceae",
+   "Link": "/wild-flower/plant-families/salicaceae/"
+  },
+  {
+   "Title": "ערטניתיים",
+   "Value": "ערטניתיים Berberidaceae",
+   "Link": "/wild-flower/plant-families/berberidaceae/"
+  },
+  {
+   "Title": "עריים",
+   "Value": "עריים Lauraceae",
+   "Link": "/wild-flower/plant-families/lauraceae/"
+  },
+  {
+   "Title": "פואתיים",
+   "Value": "פואתיים Rubiaceae",
+   "Link": "/wild-flower/plant-families/rubiaceae/"
+  },
+  {
+   "Title": "פונטדריים",
+   "Value": "פונטדריים Pontederiaceae",
+   "Link": "/wild-flower/plant-families/pontederiaceae/"
+  },
+  {
+   "Title": "פיגמיים",
+   "Value": "פיגמיים Rutaceae",
+   "Link": "/wild-flower/plant-families/rutaceae/"
+  },
+  {
+   "Title": "פיטולקיים",
+   "Value": "פיטולקיים Phytolaccaceae",
+   "Link": "/wild-flower/plant-families/phytolaccaceae/"
+  },
+  {
+   "Title": "פיטוספוריים",
+   "Value": "פיטוספוריים Pittosporaceae",
+   "Link": null
+  },
+  {
+   "Title": "פילנתאיים",
+   "Value": "פילנתאיים Phyllanthaceae",
+   "Link": "/wild-flower/plant-families/phyllanthaceae/"
+  },
+  {
+   "Title": "פעמוניתיים",
+   "Value": "פעמוניתיים Campanulaceae",
+   "Link": "/wild-flower/plant-families/campanulaceae/"
+  },
+  {
+   "Title": "פרגיים",
+   "Value": "פרגיים Papaveraceae",
+   "Link": "/wild-flower/plant-families/papaveraceae/"
+  },
+  {
+   "Title": "פרנקניים",
+   "Value": "פרנקניים Frankeniaceae",
+   "Link": "/wild-flower/plant-families/frankeniaceae/"
+  },
+  {
+   "Title": "פרעיים",
+   "Value": "פרעיים Hypericaceae",
+   "Link": "/wild-flower/plant-families/hypericaceae/"
+  },
+  {
+   "Title": "פשתיים",
+   "Value": "פשתיים Linaceae",
+   "Link": "/wild-flower/plant-families/linaceae/"
+  },
+  {
+   "Title": "צבריים",
+   "Value": "צבריים Cactaceae",
+   "Link": "/wild-flower/plant-families/cactaceae/"
+  },
+  {
+   "Title": "ציקסיים",
+   "Value": "ציקסיים Cycadaceae",
+   "Link": null
+  },
+  {
+   "Title": "צלפיים",
+   "Value": "צלפיים Capparaceae",
+   "Link": "/wild-flower/plant-families/capparaceae/"
+  },
+  {
+   "Title": "צפורניים",
+   "Value": "צפורניים Caryophyllaceae",
+   "Link": "/wild-flower/plant-families/caryophyllaceae/"
+  },
+  {
+   "Title": "קוציציים",
+   "Value": "קוציציים Acanthaceae",
+   "Link": "/wild-flower/plant-families/acanthaceae/"
+  },
+  {
+   "Title": "קזואריניים",
+   "Value": "קזואריניים Casuarinaceae",
+   "Link": "/wild-flower/plant-families/casuarinaceae/"
+  },
+  {
+   "Title": "קטניות",
+   "Value": "קטניות Fabaceae",
+   "Link": "/wild-flower/plant-families/fabaceae/"
+  },
+  {
+   "Title": "קיסוסיים",
+   "Value": "קיסוסיים Araliaceae",
+   "Link": "/wild-flower/plant-families/araliaceae/"
+  },
+  {
+   "Title": "קיסוסיתיים",
+   "Value": "קיסוסיתיים Smilacaceae",
+   "Link": "/wild-flower/plant-families/smilacaceae/"
+  },
+  {
+   "Title": "קירקיים",
+   "Value": "קירקיים Kirkiaceae",
+   "Link": null
+  },
+  {
+   "Title": "קנאביים",
+   "Value": "קנאביים Cannabaceae",
+   "Link": "/wild-flower/plant-families/cannabaceae/"
+  },
+  {
+   "Title": "קרנניים",
+   "Value": "קרנניים Ceratophyllaceae",
+   "Link": "/wild-flower/plant-families/ceratophyllaceae/"
+  },
+  {
+   "Title": "רב-רגליים",
+   "Value": "רב-רגליים Polypodiaceae",
+   "Link": "/wild-flower/plant-families/polypodiaceae/"
+  },
+  {
+   "Title": "רגלתיים",
+   "Value": "רגלתיים Portulacaceae",
+   "Link": "/wild-flower/plant-families/portulacaceae/"
+  },
+  {
+   "Title": "רופיניים",
+   "Value": "רופיניים Ruppiaceae",
+   "Link": "/wild-flower/plant-families/ruppiaceae/"
+  },
+  {
+   "Title": "רימוניתיים",
+   "Value": "רימוניתיים Cytinaceae",
+   "Link": "/wild-flower/plant-families/cytinaceae/"
+  },
+  {
+   "Title": "רכפתיים",
+   "Value": "רכפתיים Resedaceae",
+   "Link": "/wild-flower/plant-families/resedaceae/"
+  },
+  {
+   "Title": "רקפתיים",
+   "Value": "רקפתיים Primulaceae",
+   "Link": "/wild-flower/plant-families/primulaceae/"
+  },
+  {
+   "Title": "שבטבטיים",
+   "Value": "שבטבטיים Equisetaceae",
+   "Link": "/wild-flower/plant-families/equisetaceae/"
+  },
+  {
+   "Title": "שושניים",
+   "Value": "שושניים Liliaceae",
+   "Link": "/wild-flower/plant-families/liliaceae/"
+  },
+  {
+   "Title": "שלמוניים",
+   "Value": "שלמוניים Dipsaceae",
+   "Link": "/wild-flower/plant-families/dipsaceae/"
+  },
+  {
+   "Title": "שעוניתיים",
+   "Value": "שעוניתיים Passifloraceae",
+   "Link": "/wild-flower/plant-families/passifloraceae/"
+  },
+  {
+   "Title": "שפתניים",
+   "Value": "שפתניים Lamiaceae",
+   "Link": "/wild-flower/plant-families/lamiaceae/"
+  },
+  {
+   "Title": "שרביטניים",
+   "Value": "שרביטניים Ephedraceae",
+   "Link": "/wild-flower/plant-families/ephedraceae/"
+  },
+  {
+   "Title": "שרכיניים",
+   "Value": "שרכיניים Dryopteridaceae",
+   "Link": "/wild-flower/plant-families/dryopteridaceae/"
+  },
+  {
+   "Title": "תותיים",
+   "Value": "תותיים Moraceae",
+   "Link": "/wild-flower/plant-families/moraceae/"
+  },
+  {
+   "Title": "תת-משפחת סילקיים במשפחת הירבוזיים",
+   "Value": "תת-משפחת סילקיים במשפחת הירבוזיים",
+   "Link": "/wild-flower/plant-families/sub-family-chenopodiaceae-in-family-amaranthaceaen/"
+  }
+ ],
+ "colors": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_1.svg"
+  },
+  {
+   "Title": "לבן",
+   "Value": "לבן",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_2.svg"
+  },
+  {
+   "Title": "צהוב",
+   "Value": "צהוב",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_3.svg"
+  },
+  {
+   "Title": "אדום",
+   "Value": "אדום",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_4.svg"
+  },
+  {
+   "Title": "ורוד",
+   "Value": "ורוד",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_5.svg"
+  },
+  {
+   "Title": "סגול",
+   "Value": "סגול",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_6.svg"
+  },
+  {
+   "Title": "כחול",
+   "Value": "כחול",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_7.svg"
+  },
+  {
+   "Title": "בורדו",
+   "Value": "בורדו",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_8.svg"
+  },
+  {
+   "Title": "כתום",
+   "Value": "כתום",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_9.svg"
+  },
+  {
+   "Title": "ירוק",
+   "Value": "ירוק",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_10.svg"
+  },
+  {
+   "Title": "חום",
+   "Value": "חום",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_11.svg"
+  },
+  {
+   "Title": "קרם",
+   "Value": "קרם",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_12.svg"
+  },
+  {
+   "Title": "תכלת",
+   "Value": "תכלת",
+   "Link": "/wild-flower/files/properties/FlowerColor/flower_color_13.svg"
+  },
+  {
+   "Title": "מנומר",
+   "Value": "מנומר",
+   "Link": null
+  },
+  {
+   "Title": "אדום-כחול",
+   "Value": "אדום-כחול",
+   "Link": null
+  }
+ ],
+ "lifeforms": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/lifeForm/type1.svg"
+  },
+  {
+   "Title": "עץ",
+   "Value": "עץ",
+   "Link": "/wild-flower/files/properties/lifeForm/type2.svg"
+  },
+  {
+   "Title": "עשבוני רב-שנתי",
+   "Value": "עשבוני רב-שנתי",
+   "Link": "/wild-flower/files/properties/lifeForm/type3.svg"
+  },
+  {
+   "Title": "שיח ובן-שיח",
+   "Value": "שיח ובן-שיח",
+   "Link": "/wild-flower/files/properties/lifeForm/type4.svg"
+  },
+  {
+   "Title": "מטפס",
+   "Value": "מטפס",
+   "Link": "/wild-flower/files/properties/lifeForm/type5.svg"
+  },
+  {
+   "Title": "חד-שנתי",
+   "Value": "חד-שנתי",
+   "Link": "/wild-flower/files/properties/lifeForm/type6.svg"
+  },
+  {
+   "Title": "בעל בצל או פקעת (גיאופיט)",
+   "Value": "בעל בצל או פקעת (גיאופיט)",
+   "Link": "/wild-flower/files/properties/lifeForm/type7.svg"
+  },
+  {
+   "Title": "טפיל",
+   "Value": "טפיל",
+   "Link": "/wild-flower/files/properties/lifeForm/type8.svg"
+  },
+  {
+   "Title": "שרכים",
+   "Value": "שרכים",
+   "Link": "/wild-flower/files/properties/lifeForm/type9.svg"
+  },
+  {
+   "Title": "טחבים",
+   "Value": "טחבים",
+   "Link": "/wild-flower/files/properties/lifeForm/type10.svg"
+  }
+ ],
+ "distributions": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": null
+  },
+  {
+   "Title": "גולן",
+   "Value": "גולן",
+   "Link": null
+  },
+  {
+   "Title": "חרמון",
+   "Value": "חרמון",
+   "Link": null
+  },
+  {
+   "Title": "גליל",
+   "Value": "גליל",
+   "Link": null
+  },
+  {
+   "Title": "חוף הים התיכון",
+   "Value": "חוף הים התיכון",
+   "Link": null
+  },
+  {
+   "Title": "עמק ירדן עליון",
+   "Value": "עמק ירדן עליון",
+   "Link": null
+  },
+  {
+   "Title": "עמקים",
+   "Value": "עמקים",
+   "Link": null
+  },
+  {
+   "Title": "גלבוע",
+   "Value": "גלבוע",
+   "Link": null
+  },
+  {
+   "Title": "כרמל",
+   "Value": "כרמל",
+   "Link": null
+  },
+  {
+   "Title": "הרי שומרון",
+   "Value": "הרי שומרון",
+   "Link": null
+  },
+  {
+   "Title": "מדבר שומרון",
+   "Value": "מדבר שומרון",
+   "Link": null
+  },
+  {
+   "Title": "הרי יהודה",
+   "Value": "הרי יהודה",
+   "Link": null
+  },
+  {
+   "Title": "מדבר יהודה ובקעת ים המלח",
+   "Value": "מדבר יהודה ובקעת ים המלח",
+   "Link": null
+  },
+  {
+   "Title": "עין גדי",
+   "Value": "עין גדי",
+   "Link": null
+  },
+  {
+   "Title": "שרון",
+   "Value": "שרון",
+   "Link": null
+  },
+  {
+   "Title": "שפלה",
+   "Value": "שפלה",
+   "Link": null
+  },
+  {
+   "Title": "נגב צפוני",
+   "Value": "נגב צפוני",
+   "Link": null
+  },
+  {
+   "Title": "נגב והרי אילת",
+   "Value": "נגב והרי אילת",
+   "Link": null
+  },
+  {
+   "Title": "ערבה",
+   "Value": "ערבה",
+   "Link": null
+  },
+  {
+   "Title": "בקעת הירדן",
+   "Value": "בקעת הירדן",
+   "Link": null
+  },
+  {
+   "Title": "נחל כזיב (גליל)",
+   "Value": "נחל כזיב (גליל)",
+   "Link": null
+  },
+  {
+   "Title": "בורות לוץ (נגב והרי אילת)",
+   "Value": "בורות לוץ (נגב והרי אילת)",
+   "Link": null
+  },
+  {
+   "Title": "נחל כלח (כרמל)",
+   "Value": "נחל כלח (כרמל)",
+   "Link": null
+  },
+  {
+   "Title": "לא נמסר מידע",
+   "Value": "לא נמסר מידע",
+   "Link": null
+  }
+ ],
+ "lifecount": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/flowerLeafCount/flower_shape_dont_know.svg"
+  },
+  {
+   "Title": "3",
+   "Value": "3",
+   "Link": null
+  },
+  {
+   "Title": "4",
+   "Value": "4",
+   "Link": "/wild-flower/files/properties/flowerLeafCount/flower_shape_4_petals.svg"
+  },
+  {
+   "Title": "5",
+   "Value": "5",
+   "Link": "/wild-flower/files/properties/flowerLeafCount/flower_shape_5_petals.svg"
+  },
+  {
+   "Title": "6",
+   "Value": "6",
+   "Link": "/wild-flower/files/properties/flowerLeafCount/flower_shape_6_petals.svg"
+  },
+  {
+   "Title": "מאוחה",
+   "Value": "מאוחה",
+   "Link": "/wild-flower/files/properties/flowerLeafCount/flower_shape_meuche.svg"
+  },
+  {
+   "Title": "רבים",
+   "Value": "רבים",
+   "Link": "/wild-flower/files/properties/flowerLeafCount/flower_shape_many_petals.svg"
+  },
+  {
+   "Title": "חסר עלי כותרת",
+   "Value": "חסר עלי כותרת",
+   "Link": "/wild-flower/files/properties/flowerLeafCount/blank.svg"
+  },
+  {
+   "Title": "לא נמסר מידע",
+   "Value": "לא נמסר מידע",
+   "Link": null
+  }
+ ],
+ "plantplace": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/plantPlace/life1.svg"
+  },
+  {
+   "Title": "חוף הים",
+   "Value": "חוף הים",
+   "Link": "/wild-flower/files/properties/plantPlace/life2.svg"
+  },
+  {
+   "Title": "נחלים וביצות",
+   "Value": "נחלים וביצות",
+   "Link": "/wild-flower/files/properties/plantPlace/life3.svg"
+  },
+  {
+   "Title": "קרקעות קלות",
+   "Value": "קרקעות קלות",
+   "Link": "/wild-flower/files/properties/plantPlace/life4.svg"
+  },
+  {
+   "Title": "קרקעות כבדות",
+   "Value": "קרקעות כבדות",
+   "Link": "/wild-flower/files/properties/plantPlace/life5.svg"
+  },
+  {
+   "Title": "חברות שיחים (בתה וגריגה)",
+   "Value": "חברות שיחים (בתה וגריגה)",
+   "Link": "/wild-flower/files/properties/plantPlace/life6.svg"
+  },
+  {
+   "Title": "חורש",
+   "Value": "חורש",
+   "Link": "/wild-flower/files/properties/plantPlace/life7.svg"
+  },
+  {
+   "Title": "יער",
+   "Value": "יער",
+   "Link": "/wild-flower/files/properties/plantPlace/life8.svg"
+  },
+  {
+   "Title": "מדבר",
+   "Value": "מדבר",
+   "Link": "/wild-flower/files/properties/plantPlace/life9.svg"
+  },
+  {
+   "Title": "כתלים וקירות",
+   "Value": "כתלים וקירות",
+   "Link": "/wild-flower/files/properties/plantPlace/life10.svg"
+  },
+  {
+   "Title": "קרקעות מלוחות",
+   "Value": "קרקעות מלוחות",
+   "Link": "/wild-flower/files/properties/plantPlace/life11.svg"
+  },
+  {
+   "Title": "נטע אדם",
+   "Value": "נטע אדם",
+   "Link": "/wild-flower/files/properties/plantPlace/life13.svg"
+  },
+  {
+   "Title": "שדות וגינות",
+   "Value": "שדות וגינות",
+   "Link": "/wild-flower/files/properties/plantPlace/life14.svg"
+  },
+  {
+   "Title": "אחר",
+   "Value": "אחר",
+   "Link": "/wild-flower/files/properties/plantPlace/life12.svg"
+  }
+ ],
+ "month": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": null
+  },
+  {
+   "Title": "ינואר",
+   "Value": "ינואר",
+   "Link": null
+  },
+  {
+   "Title": "פברואר",
+   "Value": "פברואר",
+   "Link": null
+  },
+  {
+   "Title": "מרץ",
+   "Value": "מרץ",
+   "Link": null
+  },
+  {
+   "Title": "אפריל",
+   "Value": "אפריל",
+   "Link": null
+  },
+  {
+   "Title": "מאי",
+   "Value": "מאי",
+   "Link": null
+  },
+  {
+   "Title": "יוני",
+   "Value": "יוני",
+   "Link": null
+  },
+  {
+   "Title": "יולי",
+   "Value": "יולי",
+   "Link": null
+  },
+  {
+   "Title": "אוגוסט",
+   "Value": "אוגוסט",
+   "Link": null
+  },
+  {
+   "Title": "ספטמבר",
+   "Value": "ספטמבר",
+   "Link": null
+  },
+  {
+   "Title": "אוקטובר",
+   "Value": "אוקטובר",
+   "Link": null
+  },
+  {
+   "Title": "נובמבר",
+   "Value": "נובמבר",
+   "Link": null
+  },
+  {
+   "Title": "דצמבר",
+   "Value": "דצמבר",
+   "Link": null
+  }
+ ],
+ "height": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": null
+  },
+  {
+   "Title": "פחות מ 1 ס\"מ",
+   "Value": "פחות מ 1 ס\"מ",
+   "Link": null
+  },
+  {
+   "Title": "1-15 ס\"מ",
+   "Value": "1-15 ס\"מ",
+   "Link": null
+  },
+  {
+   "Title": "15-30 ס\"מ",
+   "Value": "15-30 ס\"מ",
+   "Link": null
+  },
+  {
+   "Title": "30-60 ס\"מ",
+   "Value": "30-60 ס\"מ",
+   "Link": null
+  },
+  {
+   "Title": "60-150 ס\"מ",
+   "Value": "60-150 ס\"מ",
+   "Link": null
+  },
+  {
+   "Title": "מעל 1.5 מטר",
+   "Value": "מעל 1.5 מטר",
+   "Link": null
+  }
+ ],
+ "stemshape": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/stamShape/stalk1.svg"
+  },
+  {
+   "Title": "עגול",
+   "Value": "עגול",
+   "Link": "/wild-flower/files/properties/stamShape/stalk2.svg"
+  },
+  {
+   "Title": "מרובע",
+   "Value": "מרובע",
+   "Link": "/wild-flower/files/properties/stamShape/stalk4.svg"
+  },
+  {
+   "Title": "מצולע",
+   "Value": "מצולע",
+   "Link": "/wild-flower/files/properties/stamShape/stalk5.svg"
+  },
+  {
+   "Title": "משולש",
+   "Value": "משולש",
+   "Link": null
+  },
+  {
+   "Title": "חסר גבעול",
+   "Value": "חסר גבעול",
+   "Link": null
+  },
+  {
+   "Title": "לא נמסר מידע",
+   "Value": "לא נמסר מידע",
+   "Link": null
+  }
+ ],
+ "kasut": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/PlantMantle/mantle1.svg"
+  },
+  {
+   "Title": "קוצני",
+   "Value": "קוצני",
+   "Link": "/wild-flower/files/properties/PlantMantle/mantle2.svg"
+  },
+  {
+   "Title": "בעל זיפים קשים",
+   "Value": "בעל זיפים קשים",
+   "Link": "/wild-flower/files/properties/PlantMantle/mantle3.svg"
+  },
+  {
+   "Title": "מכוסה שערות רכות",
+   "Value": "מכוסה שערות רכות",
+   "Link": "/wild-flower/files/properties/PlantMantle/mantle4.svg"
+  },
+  {
+   "Title": "חלק",
+   "Value": "חלק",
+   "Link": "/wild-flower/files/properties/PlantMantle/mantle5.svg"
+  }
+ ],
+ "leaflang": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/LeafLang/rim5.jpg"
+  },
+  {
+   "Title": "תמים",
+   "Value": "תמים",
+   "Link": "/wild-flower/files/properties/LeafLang/rim2.jpg"
+  },
+  {
+   "Title": "משונן",
+   "Value": "משונן",
+   "Link": "/wild-flower/files/properties/LeafLang/rim3.jpg"
+  },
+  {
+   "Title": "מפורץ",
+   "Value": "מפורץ",
+   "Link": "/wild-flower/files/properties/LeafLang/rim4.jpg"
+  },
+  {
+   "Title": "אין עלים",
+   "Value": "אין עלים",
+   "Link": "/wild-flower/files/properties/LeafLang/rim5.jpg"
+  },
+  {
+   "Title": "לא נמסר מידע",
+   "Value": "לא נמסר מידע",
+   "Link": null
+  }
+ ],
+ "leafshape": [
+  {
+   "Title": "לא יודע",
+   "Value": "לא יודע",
+   "Link": "/wild-flower/files/properties/leafShape/leafType1.jpg"
+  },
+  {
+   "Title": "פשוט",
+   "Value": "פשוט",
+   "Link": "/wild-flower/files/properties/leafShape/leafType2.jpg"
+  },
+  {
+   "Title": "מנוצה",
+   "Value": "מנוצה",
+   "Link": "/wild-flower/files/properties/leafShape/leafType3.jpg"
+  },
+  {
+   "Title": "גזור",
+   "Value": "גזור",
+   "Link": "/wild-flower/files/properties/leafShape/leafType4.jpg"
+  },
+  {
+   "Title": "מחולק לאונות",
+   "Value": "מחולק לאונות",
+   "Link": "/wild-flower/files/properties/leafShape/leafType5.jpg"
+  },
+  {
+   "Title": "דמוי לב",
+   "Value": "דמוי לב",
+   "Link": "/wild-flower/files/properties/leafShape/leafType6.jpg"
+  },
+  {
+   "Title": "סרגלי",
+   "Value": "סרגלי",
+   "Link": "/wild-flower/files/properties/leafShape/leafType7.jpg"
+  },
+  {
+   "Title": "מחטני",
+   "Value": "מחטני",
+   "Link": "/wild-flower/files/properties/leafShape/leafType8.jpg"
+  },
+  {
+   "Title": "מורכב",
+   "Value": "מורכב",
+   "Link": "/wild-flower/files/properties/leafShape/leafType10.jpg"
+  },
+  {
+   "Title": "תלתני",
+   "Value": "תלתני",
+   "Link": "/wild-flower/files/properties/leafShape/leafType11.jpg"
+  },
+  {
+   "Title": "אין עלים",
+   "Value": "אין עלים",
+   "Link": "/wild-flower/files/properties/leafShape/leafType12.jpg"
+  },
+  {
+   "Title": "לא נמסר מידע",
+   "Value": "לא נמסר מידע",
+   "Link": null
+  }
+ ]
+}
