@@ -1,0 +1,114 @@
+# flower-anki
+
+Anki decks for learning Israeli wildflowers, built from the plant data on
+KKL's wildflower site, [kkl.org.il/wild-flower/plants](https://www.kkl.org.il/wild-flower/plants/).
+
+This project is a Python script that writes `.apkg` files, not a web app. It
+has no `dev` or `build` script, so the root build skips it.
+
+## Decks
+
+`out/israeli-wildflowers.apkg` holds one parent deck with two subdecks. Each plant is in exactly one:
+
+```
+צמחי בר בישראל
+├── פופולריים     981 plants: ones the site recorded a pronunciation for, or protected (no mosses/ferns)
+└── שאר הצמחים    the other 1,841, mosses and ferns included
+```
+
+Study `פופולריים` alone to start, or the parent deck for everything (popular cards come first).
+Each plant has a single learning history, whichever deck you study it from.
+
+Each plant gets two cards for learning its Hebrew name:
+
+- **Photo → Hebrew**: the photo on the front. The back shows the Hebrew name and plays its pronunciation.
+- **Hebrew → photo**: the Hebrew name on the front. The back shows the photo and plays the pronunciation.
+
+On both backs, a collapsed **פרטים נוספים** section holds the Latin, English and Arabic names, the family,
+flowering months, habitat, regions, leaf traits and status. The photo credit is below it.
+
+The Latin and English pronunciations are in the package too, in their own note fields (`AudioLatin`,
+`AudioEnglish`). No card shows them yet, but they're ready for Latin or English card types.
+
+**Recommended Anki setting:** for the parent deck, open Deck options → Burying and turn on
+**Bury new siblings**. Then a plant's Hebrew → photo card arrives a day after its photo card,
+not right behind it. The package can't set deck options itself.
+
+Rebuilding and re-importing updates the notes and keeps your review history.
+
+### Tags
+
+Notes are tagged so you can build filtered decks, e.g. `tag:wildflowers::month::03 tag:wildflowers::region::גליל`:
+
+- `wildflowers::family::<Latin family>`
+- `wildflowers::lifeform::{annual,perennial,shrub,geophyte,tree,climber,parasite,moss,fern}`
+- `wildflowers::color::<colour>`, `wildflowers::month::01`–`12`
+- `wildflowers::habitat::<Hebrew>`, `wildflowers::region::<Hebrew>`
+- `wildflowers::status::{endangered,protected,nectar,medicinal,edible,poisonous,allergenic,invasive,introduced}`
+- `wildflowers::popular`
+
+## Building
+
+Needs [uv](https://docs.astral.sh/uv/) (`brew install uv`). It reads `pyproject.toml`, creates
+`.venv/` and installs the pinned dependencies from `uv.lock` on the first run.
+
+```sh
+cd projects/flower-anki
+uv run scripts/build_decks.py        # or: pnpm --filter flower-anki decks
+```
+
+The first run downloads about 2,800 photos and 2,700 audio clips from kkl.org.il into
+`.media-cache/`, shrinking photos to 800px. Later runs reuse the cache.
+
+- If the site doesn't have a file, that's remembered (a `.missing` marker holding its URL) and
+  skipped; a plant whose photo is missing is left out of the deck. A marker for a different URL,
+  e.g. from before `MEDIA_BASE` changed, is ignored and the file is fetched again.
+- If any file fails to download (a network error, or the site still rate-limiting after retries),
+  the build stops before writing the package. Run it again: it only fetches what isn't cached
+  yet. If the site keeps rate-limiting, use fewer parallel downloads: `--workers 2`.
+- A photo that downloads but won't decode is left out of this build and retried on the next one.
+
+Before downloading, the build checks the first few photos: if none of them exists on the site,
+it stops and points at `MEDIA_BASE` in `scripts/flower_anki/config.py` rather than marking
+every file as missing.
+
+`uv run scripts/build_decks.py --remote-images` skips the downloads and writes `out/israeli-wildflowers-remote.apkg`.
+Cards then load photos from the site, so you need internet while studying, and they have no audio.
+This mode is mainly for a quick preview.
+
+Then in Anki: **File → Import** and pick `out/israeli-wildflowers.apkg`.
+
+## Code layout
+
+`scripts/build_decks.py` is the entry point. The rest is in `scripts/flower_anki/`:
+
+| File | What it does |
+|---|---|
+| `config.py` | Paths, the site URL, fixed Anki deck and note-type IDs |
+| `vocab.py` | The source's Hebrew values and the tag names they map to |
+| `plants.py` | Cleans a raw record into note fields; decides what counts as popular |
+| `tags.py` | Builds the `wildflowers::…` tags |
+| `media.py` | Downloads photos and audio into `.media-cache/`, shrinks photos |
+| `note_model.py` | The "Israeli Wildflower" note type: fields and card types |
+| `templates/` | Card HTML (front and back for each card type, shared details) and CSS |
+| `package.py` | Writes the `.apkg` with the two subdecks |
+
+To change how cards look, edit `templates/`; no Python changes needed.
+
+## Data
+
+- `data/flowers.json`: the plant list (2,822 entries).
+- `data/lookups.json`: the site's lookup tables (families, colours, months, regions, …). The decks don't use these yet.
+
+Both come from a single export file that holds two JSON documents back to back.
+`uv run scripts/split_source.py <export.json>` regenerates them from a new export.
+
+Field notes, because the source names are misleading:
+
+- `Hebrew_Name` is the **Arabic** name.
+- `Hebrew_Audio` / `English_Audio` / `Common_Audio` are the Hebrew, Latin and English name pronunciations.
+- `Leaf_Count` is the petal count, `Leaf_Lang` the leaf edge, `Kasut` the hairiness.
+- `Description` is always empty.
+
+The photos belong to their photographers (credited on each card). Keep the decks for personal
+use and don't share them publicly, e.g. on AnkiWeb.
