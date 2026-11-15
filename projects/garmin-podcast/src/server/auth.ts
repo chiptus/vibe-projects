@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 
@@ -19,5 +20,7 @@ export function createAuth(env: AuthEnv) {
     socialProviders: {
       google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
     },
+    // Must be the last plugin: lets server functions that call `auth.api.*` set session cookies.
+    plugins: [tanstackStartCookies()],
   });
 }
