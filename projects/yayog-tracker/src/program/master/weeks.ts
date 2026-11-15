@@ -6,7 +6,7 @@ import type { Day, StappersDay } from "../types";
 const STAPPERS_MASTER: StappersDay = {
   type: "stappers",
   focus: "Stappers",
-  exercises: ["12 Assisted Alternating 1-Legged Squats or Box Jumps", "6 Dive Bombers", "8 Let Me Ups"],
+  exercises: [["12 Assisted Alternating 1-Legged Squats", "Box Jumps"], "6 Dive Bombers", "8 Let Me Ups"],
 };
 
 const ASSISTED_DOOR_PULL_UPS = "Assisted Door Pull Ups (feet on chair, or jump and control the negative)";

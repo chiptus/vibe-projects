@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import type {
+  ExerciseItem,
   IntervalEntry,
   LadderEntry,
   StappersEntry,
@@ -25,7 +26,7 @@ type EntryFor<T extends WorkoutType> = T extends "ladder"
 
 export interface ExerciseCardProps<T extends WorkoutType = WorkoutType> {
   entry: EntryFor<T>;
-  exercises: string[];
+  exercises: T extends "stappers" ? ExerciseItem[] : string[];
   onChange: (patch: Partial<EntryFor<T>>) => void;
 }
 

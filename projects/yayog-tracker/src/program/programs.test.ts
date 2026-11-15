@@ -4,7 +4,7 @@ import { sequence } from "./basic/workout";
 import { PROGRAMS } from "./registry";
 import { LEVELS, type Day } from "./types";
 
-const exercisesOf = (day: Day): string[] => (day.type === "superset" ? day.pairs.flat() : day.exercises);
+const exercisesOf = (day: Day): string[] => (day.type === "superset" ? day.pairs.flat() : day.exercises.flat());
 
 describe.each(LEVELS)("%s program", (level) => {
   const program = PROGRAMS[level];
