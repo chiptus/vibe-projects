@@ -1,0 +1,7 @@
+{
+  "name": "garmin-podcast-test",
+  "main": "./test-worker.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [{ "binding": "DB", "database_name": "garmin-podcast-test", "database_id": "test" }]
+}

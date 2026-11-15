@@ -22,4 +22,12 @@ export const PROJECTS: ProjectLink[] = [
     description: "Interval-timer trainer for the Spanish rolled R (RR).",
     href: "/trilled-r-trainer/",
   },
+  {
+    name: "garmin-podcast",
+    title: "Garmin Podcast",
+    description: "Pick podcast episodes and sync them to a Garmin watch.",
+    // TODO: point at the deployed Worker URL (<name>.<account-subdomain>.workers.dev) once it exists.
+    href: "https://github.com/chiptus/vibe-projects/tree/main/projects/garmin-podcast",
+    external: true,
+  },
 ];

@@ -1,3 +1,6 @@
 packages:
   - "projects/*"
   - "packages/*"
+onlyBuiltDependencies:
+  - esbuild
+  - workerd
