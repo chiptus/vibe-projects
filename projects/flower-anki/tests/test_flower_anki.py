@@ -294,14 +294,17 @@ class PackageAndCommandTests(unittest.TestCase):
             omitted = build_plant(record(Id="44"), False)
             drop_missing_media(omitted, {"wf-44.jpg"})
             (root / "wf-42.jpg").write_bytes(b"synthetic photo")
+            (root / "wf-42-hebrew.mp3").write_bytes(b"synthetic audio")
             guids = []
             for index in range(2):
                 target = root / "out" / f"{index}.apkg"
                 write_package([popular, rest, omitted], root, target)
                 with zipfile.ZipFile(target) as archive:
                     manifest = json.loads(archive.read("media"))
-                    self.assertEqual(list(manifest.values()), ["wf-42.jpg"])
-                    self.assertEqual(archive.read(next(iter(manifest))), b"synthetic photo")
+                    self.assertEqual(sorted(manifest.values()), ["wf-42-hebrew.mp3", "wf-42.jpg"])
+                    contents = {name: archive.read(key) for key, name in manifest.items()}
+                    self.assertEqual(contents["wf-42.jpg"], b"synthetic photo")
+                    self.assertEqual(contents["wf-42-hebrew.mp3"], b"synthetic audio")
                     db_path = root / f"{index}.db"
                     db_path.write_bytes(archive.read("collection.anki2"))
                 with contextlib.closing(sqlite3.connect(db_path)) as db:
