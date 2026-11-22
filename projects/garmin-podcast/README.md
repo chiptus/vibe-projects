@@ -18,6 +18,10 @@ pnpm --filter garmin-podcast dev
 
 Other scripts: `test` (Vitest in the Workers runtime), `typecheck`, `lint`, `build`.
 
+## Styling
+
+Tailwind CSS (`src/styles.css`). Use utility classes; reserve the inline `style` prop for values only known at runtime.
+
 ## Tests
 
 Tests sit next to the code they cover (`src/server/me.test.ts` exercises `GET /api/me`'s handler, `src/server/me.ts`) against a real local D1 (Miniflare) with migrations from `drizzle/` applied (setup in `test/`) and Google sign-in stubbed (the signed-in person is named by a request header). No network needed.

@@ -20,7 +20,9 @@ export function createAuth(env: AuthEnv) {
     socialProviders: {
       google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
     },
-    // Must be the last plugin: lets server functions that call `auth.api.*` set session cookies.
-    plugins: [tanstackStartCookies()],
+    plugins: [
+      // Must be the last plugin: lets server functions that call `auth.api.*` set session cookies.
+      tanstackStartCookies(),
+    ],
   });
 }

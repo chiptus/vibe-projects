@@ -11,30 +11,6 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-async function startGoogleSignIn() {
-  const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/" });
-  if (error) throw new Error(error.message ?? "sign-in failed");
-}
-
-function MeError() {
-  const router = useRouter();
-  return (
-    <Page>
-      <p role="alert">Couldn't load your account.</p>
-      <button onClick={() => router.invalidate()}>Retry</button>
-    </Page>
-  );
-}
-
-function Page({ children }: { children: ReactNode }) {
-  return (
-    <main style={{ fontFamily: "system-ui", maxWidth: 480, margin: "2rem auto", padding: "0 1rem" }}>
-      <h1>Garmin Podcast</h1>
-      {children}
-    </main>
-  );
-}
-
 function Home() {
   const { data: me } = useSuspenseQuery(meQueryOptions);
   const signIn = useMutation({ mutationFn: startGoogleSignIn });
@@ -52,5 +28,29 @@ function Home() {
         </>
       )}
     </Page>
+  );
+}
+
+async function startGoogleSignIn() {
+  const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/" });
+  if (error) throw new Error(error.message ?? "sign-in failed");
+}
+
+function MeError() {
+  const router = useRouter();
+  return (
+    <Page>
+      <p role="alert">Couldn't load your account.</p>
+      <button onClick={() => router.invalidate()}>Retry</button>
+    </Page>
+  );
+}
+
+function Page({ children }: { children: ReactNode }) {
+  return (
+    <main className="mx-auto my-8 max-w-md px-4 font-sans">
+      <h1>Garmin Podcast</h1>
+      {children}
+    </main>
   );
 }

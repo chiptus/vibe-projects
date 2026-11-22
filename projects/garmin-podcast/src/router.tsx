@@ -4,7 +4,8 @@ import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
-  const queryClient = new QueryClient();
+  // staleTime keeps the server-hydrated data from being refetched as soon as the page mounts.
+  const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } });
   const router = createRouter({
     routeTree,
     scrollRestoration: true,
